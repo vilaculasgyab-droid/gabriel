@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Product, CartItem } from './types';
 import { PRODUCTS } from './data/products';
 import { CATEGORIES } from './data/categories';
+import { storeDb } from './services/storeDb';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { ProductCatalog } from './components/ProductCatalog';
@@ -15,10 +16,14 @@ import { Toast } from './components/Toast';
 import { AboutPage } from './pages/AboutPage';
 import { AdvantagesPage } from './pages/AdvantagesPage';
 import { ContactPage } from './pages/ContactPage';
+import { AdminPortal } from './pages/admin/AdminPortal';
 
 export default function App() {
   // Routing state
   const getValidPath = (pathname: string) => {
+    if (pathname.startsWith('/admin')) {
+      return '/admin';
+    }
     if (pathname === '/sobre-nos' || pathname === '/vantagens' || pathname === '/contactos') {
       return pathname;
     }
@@ -31,6 +36,16 @@ export default function App() {
     }
     return '/';
   });
+
+  // Dynamic Products state synchronized with storeDb
+  const [products, setProducts] = useState<Product[]>(() => storeDb.getProducts());
+
+  useEffect(() => {
+    const unsubscribe = storeDb.subscribe(() => {
+      setProducts(storeDb.getProducts());
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleNavigate = (path: string) => {
     const validPath = getValidPath(path);
@@ -171,6 +186,15 @@ export default function App() {
     }
   };
 
+  // If in Admin Portal route, render the isolated, protected Admin portal
+  if (currentPath === '/admin') {
+    return (
+      <AdminPortal
+        onNavigateToStore={() => handleNavigate('/')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Toast Notification */}
@@ -217,7 +241,7 @@ export default function App() {
 
             {/* Featured Products Section (Main Showcase) */}
             <ProductCatalog
-              products={PRODUCTS}
+              products={products}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
               searchQuery={searchQuery}
@@ -271,3 +295,4 @@ export default function App() {
     </div>
   );
 }
+

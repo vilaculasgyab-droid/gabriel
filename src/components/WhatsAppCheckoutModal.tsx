@@ -23,6 +23,7 @@ import {
   WHATSAPP_PHONE_DISPLAY, 
   WHATSAPP_PHONE_RAW 
 } from '../utils/whatsapp';
+import { storeDb } from '../services/storeDb';
 
 interface WhatsAppCheckoutModalProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
     phone: '',
     companyName: '',
     deliveryLocation: '',
-    cityProvince: 'Maputo',
+    cityProvince: 'Maputo Cidade',
     paymentMethod: 'mpesa',
     notes: '',
   });
@@ -81,6 +82,24 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
     if (!formData.deliveryLocation.trim()) {
       setErrorMsg('Por favor, indique o local ou endereço para entrega.');
       return;
+    }
+
+    // Persist order in storeDb so it immediately shows in the Admin Panel
+    try {
+      storeDb.createOrder({
+        customerName: formData.customerName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email,
+        companyName: formData.companyName?.trim(),
+        deliveryLocation: formData.deliveryLocation.trim(),
+        cityProvince: formData.cityProvince,
+        items,
+        totalAmount,
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes,
+      });
+    } catch (err) {
+      console.error('Failed to register order in store database', err);
     }
 
     const url = getWhatsAppOrderUrl(items, totalAmount, formData);

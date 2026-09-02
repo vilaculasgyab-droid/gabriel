@@ -147,6 +147,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
                   Contactos & Localização
                 </button>
               </li>
+              <li className="pt-1.5 border-t border-slate-900">
+                <button
+                  onClick={() => handleLinkClick('/admin')}
+                  className="text-slate-500 hover:text-amber-400 text-[11px] transition-colors text-left flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ShieldCheck className="w-3 h-3 text-amber-500/70" />
+                  <span>Área Administrativa</span>
+                </button>
+              </li>
             </ul>
           </div>
 
