@@ -2,165 +2,10 @@ import { Product, Order, Customer, DashboardMetrics, OrderStatus, PaymentStatus,
 import { PRODUCTS } from '../data/products';
 
 const PRODUCTS_KEY = 'proseguranca_db_products_v1';
-const ORDERS_KEY = 'proseguranca_db_orders_v1';
-const CUSTOMERS_KEY = 'proseguranca_db_customers_v1';
+const ORDERS_KEY = 'proseguranca_db_orders_v2';
 
-// Initial seed orders for Mozambique
-const INITIAL_SEED_ORDERS: Order[] = [
-  {
-    id: 'ord-1082',
-    orderNumber: 'PSG-2026-1082',
-    customerName: 'Manuel Chissano',
-    phone: '+258 84 312 9941',
-    email: 'm.chissano@mcel.co.mz',
-    companyName: 'Chissano Construções Lda',
-    deliveryLocation: 'Av. Vladimir Lenine nº 1420, Polana',
-    cityProvince: 'Maputo Cidade',
-    totalAmount: 18450,
-    paymentMethod: 'mpesa',
-    paymentStatus: 'paid',
-    orderStatus: 'delivered',
-    notes: 'Entregar na guarita principal da obra.',
-    createdAt: '2026-08-29T09:15:00.000Z',
-    updatedAt: '2026-08-30T14:30:00.000Z',
-    items: [
-      {
-        productId: 'prod-001',
-        productName: 'Capacete de Segurança com Catraca EN 397',
-        productImage: '/products/prod_capacete_amarelo_1788241366367.jpg',
-        price: 850,
-        quantity: 10,
-        selectedColor: 'Amarelo',
-        total: 8500,
-      },
-      {
-        productId: 'prod-004',
-        productName: 'Bota de Segurança Couro S3 c/ Biqueira de Aço',
-        productImage: '/products/prod_botas_s3_preta_1788241571160.jpg',
-        price: 2450,
-        quantity: 4,
-        selectedSize: '42',
-        total: 9800,
-      },
-      {
-        productId: 'prod-002',
-        productName: 'Colete Refletor de Alta Visibilidade EN 20471',
-        productImage: '/products/prod_colete_laranja_1788241390542.jpg',
-        price: 150,
-        quantity: 1,
-        selectedSize: 'L',
-        selectedColor: 'Laranja Refletivo',
-        total: 150,
-      },
-    ],
-  },
-  {
-    id: 'ord-1081',
-    orderNumber: 'PSG-2026-1081',
-    customerName: 'Engª. Amina Patel',
-    phone: '+258 82 554 1120',
-    email: 'amina.patel@mozind.co.mz',
-    companyName: 'Mozambique Industrial Services',
-    deliveryLocation: 'Estrada Nacional nº 4, Km 12, Parque Industrial de Beluluane',
-    cityProvince: 'Maputo Província (Matola)',
-    totalAmount: 32600,
-    paymentMethod: 'transfer',
-    paymentStatus: 'paid',
-    orderStatus: 'in_preparation',
-    notes: 'Faturação com NUIT 400892314.',
-    createdAt: '2026-08-31T11:40:00.000Z',
-    updatedAt: '2026-09-01T08:00:00.000Z',
-    items: [
-      {
-        productId: 'prod-007',
-        productName: 'Arnês de Segurança Paraquedista 4 Pontos',
-        productImage: '/products/prod_arnes_seguranca_1788241690396.jpg',
-        price: 3800,
-        quantity: 6,
-        total: 22800,
-      },
-      {
-        productId: 'prod-006',
-        productName: 'Abafador de Ruído Tipo Concha 27dB',
-        productImage: '/products/prod_abafador_concha_1788241666782.jpg',
-        price: 1400,
-        quantity: 7,
-        total: 9800,
-      },
-    ],
-  },
-  {
-    id: 'ord-1080',
-    orderNumber: 'PSG-2026-1080',
-    customerName: 'Alberto Cossa',
-    phone: '+258 87 900 2314',
-    email: 'cossa.alberto@gmail.com',
-    companyName: 'Mecânica Rápida do Porto',
-    deliveryLocation: 'Zona Portuária de Maputo, Terminal de Carga',
-    cityProvince: 'Maputo Cidade',
-    totalAmount: 6900,
-    paymentMethod: 'emola',
-    paymentStatus: 'pending',
-    orderStatus: 'awaiting_payment',
-    notes: 'Ligar 30 minutos antes da entrega.',
-    createdAt: '2026-09-01T15:20:00.000Z',
-    updatedAt: '2026-09-01T15:20:00.000Z',
-    items: [
-      {
-        productId: 'prod-003',
-        productName: 'Luvas de Proteção Anticorte Nível 5',
-        productImage: '/products/prod_luvas_pu_1788241516995.jpg',
-        price: 450,
-        quantity: 8,
-        selectedSize: 'L',
-        total: 3600,
-      },
-      {
-        productId: 'prod-005',
-        productName: 'Máscara Respiratória N95 com Válvula',
-        productImage: '/products/prod_mascara_n95_valvula_1788241626119.jpg',
-        price: 110,
-        quantity: 30,
-        total: 3300,
-      },
-    ],
-  },
-  {
-    id: 'ord-1079',
-    orderNumber: 'PSG-2026-1079',
-    customerName: 'Dr. Fernando Machava',
-    phone: '+258 84 991 4321',
-    email: 'machava.obras@beira-infra.mz',
-    companyName: 'Beira Infraestruturas',
-    deliveryLocation: 'Bairro do Estoril, Rua da Manga nº 45',
-    cityProvince: 'Sofala (Beira)',
-    totalAmount: 14750,
-    paymentMethod: 'mpesa',
-    paymentStatus: 'paid',
-    orderStatus: 'shipped',
-    notes: 'Envio via transportadora expresso para a Beira.',
-    createdAt: '2026-08-30T16:00:00.000Z',
-    updatedAt: '2026-08-31T17:10:00.000Z',
-    items: [
-      {
-        productId: 'prod-008',
-        productName: 'Cone de Sinalização Refletor 75cm',
-        productImage: '/products/prod_cone_sinalizacao_1788241721417.jpg',
-        price: 950,
-        quantity: 10,
-        total: 9500,
-      },
-      {
-        productId: 'prod-009',
-        productName: 'Óculos de Proteção Panorâmicos Anti-Embaciamento',
-        productImage: '/products/prod_oculos_transparente_1788241457094.jpg',
-        price: 350,
-        quantity: 15,
-        total: 5250,
-      },
-    ],
-  },
-];
+// Legacy keys to clean up old mock/demo data
+const LEGACY_ORDERS_KEY = 'proseguranca_db_orders_v1';
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -182,7 +27,7 @@ export const storeDb = {
   },
 
   // ----------------------------------------------------
-  // PRODUCTS
+  // PRODUCTS (Keeps the real catalog of PPEs intact)
   // ----------------------------------------------------
   getProducts(): Product[] {
     try {
@@ -197,7 +42,7 @@ export const storeDb = {
       // ignore
     }
 
-    // Initialize with default PRODUCTS
+    // Initialize with default real PRODUCTS catalog
     try {
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(PRODUCTS));
     } catch (e) {
@@ -301,27 +146,45 @@ export const storeDb = {
   },
 
   // ----------------------------------------------------
-  // ORDERS
+  // ORDERS (Strictly starts empty with 0 orders, no mock data)
   // ----------------------------------------------------
   getOrders(): Order[] {
+    // Purge legacy mock data if present
     try {
-      const raw = localStorage.getItem(ORDERS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
+      if (localStorage.getItem(LEGACY_ORDERS_KEY)) {
+        localStorage.removeItem(LEGACY_ORDERS_KEY);
       }
     } catch {
       // ignore
     }
 
     try {
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(INITIAL_SEED_ORDERS));
-    } catch (e) {
-      console.error('Failed to save initial orders', e);
+      const raw = localStorage.getItem(ORDERS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          // Filter out any leftover mock orders with IDs containing mock references
+          const realOrders = parsed.filter(
+            (o) =>
+              o &&
+              o.id !== 'ord-1082' &&
+              o.id !== 'ord-1081' &&
+              o.id !== 'ord-1080' &&
+              o.id !== 'ord-1079' &&
+              o.customerName !== 'Manuel Chissano' &&
+              o.customerName !== 'Engª. Amina Patel' &&
+              o.customerName !== 'Alberto Cossa' &&
+              o.customerName !== 'Dr. Fernando Machava'
+          );
+          return realOrders;
+        }
+      }
+    } catch {
+      // ignore
     }
-    return INITIAL_SEED_ORDERS;
+
+    // Default to empty array (0 orders)
+    return [];
   },
 
   getOrderById(id: string): Order | undefined {
@@ -342,7 +205,7 @@ export const storeDb = {
     notes?: string;
   }): Order {
     const orders = this.getOrders();
-    const orderNumSequence = 1083 + orders.length;
+    const orderNumSequence = 1001 + orders.length;
     const orderNumber = `PSG-2026-${orderNumSequence}`;
     const id = `ord-${Date.now()}`;
 
@@ -369,7 +232,7 @@ export const storeDb = {
       items: orderItems,
       totalAmount: data.totalAmount,
       paymentMethod: data.paymentMethod,
-      paymentStatus: data.paymentMethod === 'mpesa' || data.paymentMethod === 'emola' ? 'pending' : 'pending',
+      paymentStatus: 'pending',
       orderStatus: 'awaiting_payment',
       notes: data.notes || '',
       createdAt: new Date().toISOString(),
@@ -434,14 +297,20 @@ export const storeDb = {
   },
 
   // ----------------------------------------------------
-  // CUSTOMERS
+  // CUSTOMERS (Derived purely from real client orders)
   // ----------------------------------------------------
   getCustomers(): Customer[] {
     const orders = this.getOrders();
+    if (orders.length === 0) {
+      return [];
+    }
+
     const customerMap = new Map<string, Customer>();
 
     orders.forEach((order) => {
       const key = order.phone.replace(/\D/g, '') || order.customerName.toLowerCase().trim();
+      if (!key) return;
+
       const existing = customerMap.get(key);
 
       if (existing) {
@@ -520,7 +389,12 @@ export const storeDb = {
   // ----------------------------------------------------
   resetToDefaults(): void {
     localStorage.setItem(PRODUCTS_KEY, JSON.stringify(PRODUCTS));
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(INITIAL_SEED_ORDERS));
+    localStorage.setItem(ORDERS_KEY, JSON.stringify([]));
+    try {
+      localStorage.removeItem(LEGACY_ORDERS_KEY);
+    } catch {
+      // ignore
+    }
     notifyListeners();
   },
 

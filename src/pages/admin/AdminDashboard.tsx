@@ -289,8 +289,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <tbody className="divide-y divide-slate-800/60">
                 {metrics.recentOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-500">
-                      Nenhum pedido registado ainda.
+                    <td colSpan={6} className="py-12 text-center text-slate-500">
+                      <div className="max-w-sm mx-auto flex flex-col items-center gap-2">
+                        <ShoppingBag className="w-8 h-8 text-slate-600 stroke-[1.5]" />
+                        <div className="text-slate-300 font-bold text-xs">Nenhum pedido registado ainda</div>
+                        <div className="text-[11px] text-slate-500 leading-normal">
+                          Os pedidos dos seus clientes aparecerão aqui assim que forem realizados na loja ou via WhatsApp.
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 ) : (

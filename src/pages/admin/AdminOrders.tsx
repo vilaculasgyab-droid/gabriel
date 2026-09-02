@@ -294,8 +294,16 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
             <tbody className="divide-y divide-slate-800/60">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
-                    Nenhum pedido encontrado.
+                  <td colSpan={8} className="py-16 text-center text-slate-500">
+                    <div className="max-w-sm mx-auto flex flex-col items-center gap-2">
+                      <ShoppingBag className="w-10 h-10 text-slate-600 stroke-[1.5]" />
+                      <div className="text-slate-300 font-bold text-sm">Nenhum pedido registado ainda</div>
+                      <div className="text-xs text-slate-500 leading-normal">
+                        {searchQuery || statusFilter !== 'all'
+                          ? 'Nenhum pedido corresponde aos filtros ou pesquisa selecionada.'
+                          : 'Assim que um cliente realizar uma compra pelo WhatsApp ou checkout, o pedido aparecerá aqui automaticamente.'}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : (

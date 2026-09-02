@@ -147,8 +147,16 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ onViewOrderDetai
             <tbody className="divide-y divide-slate-800/60">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
-                    Nenhum cliente registado.
+                  <td colSpan={8} className="py-16 text-center text-slate-500">
+                    <div className="max-w-sm mx-auto flex flex-col items-center gap-2">
+                      <Users className="w-10 h-10 text-slate-600 stroke-[1.5]" />
+                      <div className="text-slate-300 font-bold text-sm">Nenhum cliente registado ainda</div>
+                      <div className="text-xs text-slate-500 leading-normal">
+                        {searchQuery
+                          ? 'Nenhum cliente corresponde aos critérios da pesquisa.'
+                          : 'Assim que os clientes realizarem compras, o histórico de contactos e pedidos ficará registado aqui automaticamente.'}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ) : (

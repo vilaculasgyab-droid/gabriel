@@ -4,11 +4,12 @@ import {
   MessageSquare, 
   Truck, 
   Award, 
-  Building2
+  Building2,
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
 import { getGeneralWhatsAppChatUrl } from '../utils/whatsapp';
-
-const HERO_EPI_IMAGE = '/hero-epi-catalog.jpg';
+import heroBgImage from '../assets/images/hero_bg_ppe_tabletop_1788332748531.jpg';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -19,26 +20,25 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
   return (
     <section 
       id="inicio" 
-      className="relative overflow-hidden bg-slate-950 text-white pt-8 pb-14 lg:pt-14 lg:pb-20 border-b border-slate-800 bg-cover bg-center bg-no-repeat min-h-[540px] lg:min-h-[600px] flex items-center"
+      className="relative overflow-hidden bg-slate-950 text-white pt-10 pb-16 lg:pt-16 lg:pb-24 border-b border-slate-800/80 bg-cover bg-center bg-no-repeat min-h-[580px] lg:min-h-[640px] flex items-center"
       style={{
-        backgroundImage: "url('/hero-bg-epi.jpg')",
+        backgroundImage: `url(${heroBgImage})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'center 40%',
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Light semi-transparent overlay to keep the background image crisp, vibrant and clearly visible while preserving text contrast */}
-      <div className="absolute inset-0 bg-slate-950/45 sm:bg-slate-950/40 lg:bg-gradient-to-r lg:from-slate-950/70 lg:via-slate-950/40 lg:to-slate-950/20 pointer-events-none" />
+      {/* Very soft, ultra-subtle transparent overlay so all background PPE equipment remains fully crisp, vibrant and clearly visible */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/35 to-transparent pointer-events-none" />
       
-      {/* Ambient decorative lighting */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Soft atmospheric ambient glow */}
+      <div className="absolute top-1/4 -left-32 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Left Column: Copywriting, CTAs & Highlights */}
-          <div className="lg:col-span-6 xl:col-span-7 flex flex-col items-start text-left drop-shadow-sm">
+          <div className="lg:col-span-7 xl:col-span-7 flex flex-col items-start text-left">
             {/* Slogan pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/40 text-amber-400 text-xs sm:text-sm font-bold tracking-wide mb-5 shadow-lg">
               <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-ping" />
@@ -48,7 +48,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-4 sm:mb-5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-4 sm:mb-5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
               PROTEJA O QUE <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500">
                 MAIS IMPORTA
@@ -56,7 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             </h1>
 
             {/* Subtitle */}
-            <p className="text-sm sm:text-base md:text-lg text-slate-100 max-w-2xl leading-relaxed mb-6 sm:mb-8 font-normal drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+            <p className="text-sm sm:text-base md:text-lg text-slate-100 max-w-2xl leading-relaxed mb-6 sm:mb-8 font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
               Equipamentos de Proteção Individual de qualidade para profissionais, empresas, construção civil, indústrias e instituições em Moçambique.
             </p>
 
@@ -93,7 +93,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
 
             {/* Key Assurance Highlights */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-slate-800/80 w-full text-slate-200 text-xs sm:text-sm">
-              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/60 backdrop-blur-sm border border-slate-800/50">
+              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/70 backdrop-blur-sm border border-slate-800/60 shadow-md">
                 <div className="w-8 h-8 rounded-lg bg-amber-400/15 flex items-center justify-center text-amber-400 flex-shrink-0">
                   <Award className="w-4 h-4" />
                 </div>
@@ -103,7 +103,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/60 backdrop-blur-sm border border-slate-800/50">
+              <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-950/70 backdrop-blur-sm border border-slate-800/60 shadow-md">
                 <div className="w-8 h-8 rounded-lg bg-emerald-400/15 flex items-center justify-center text-emerald-400 flex-shrink-0">
                   <Truck className="w-4 h-4" />
                 </div>
@@ -113,7 +113,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 col-span-2 sm:col-span-1 p-2 rounded-lg bg-slate-950/60 backdrop-blur-sm border border-slate-800/50">
+              <div className="flex items-center gap-2.5 col-span-2 sm:col-span-1 p-2 rounded-lg bg-slate-950/70 backdrop-blur-sm border border-slate-800/60 shadow-md">
                 <div className="w-8 h-8 rounded-lg bg-blue-400/15 flex items-center justify-center text-blue-400 flex-shrink-0">
                   <Building2 className="w-4 h-4" />
                 </div>
@@ -125,29 +125,21 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             </div>
           </div>
 
-          {/* Right Column: EPI Showcase Image with Frame and Badges */}
-          <div className="lg:col-span-6 xl:col-span-5 relative w-full mt-4 lg:mt-0">
-            <div className="relative mx-auto max-w-lg lg:max-w-none">
-              
-              {/* Outer decorative ambient glow */}
-              <div className="absolute -inset-1.5 rounded-3xl bg-gradient-to-tr from-amber-500/25 via-blue-500/20 to-amber-400/30 blur-xl opacity-75 pointer-events-none" />
-
-              {/* Main Image Container Card */}
-              <div className="relative rounded-2xl sm:rounded-3xl bg-slate-900 border border-slate-700/80 p-2 sm:p-2.5 shadow-2xl overflow-hidden group">
-                
-                {/* Image frame */}
-                <div className="relative w-full rounded-xl sm:rounded-2xl overflow-hidden bg-white flex items-center justify-center">
-                  <img
-                    src={HERO_EPI_IMAGE}
-                    alt="Equipamentos de Proteção Individual (EPIs) - Catálogo ProSegurança Moçambique"
-                    className="w-full h-auto max-h-[480px] object-contain transition-transform duration-300 group-hover:scale-[1.01]"
-                    referrerPolicy="no-referrer"
-                    loading="eager"
-                  />
-                </div>
-
+          {/* Right Column: Transparent floating glass badges showcasing certifications without blocking background */}
+          <div className="lg:col-span-5 xl:col-span-5 hidden lg:flex flex-col items-end justify-end space-y-3 pointer-events-none">
+            <div className="p-3.5 rounded-2xl bg-slate-950/75 backdrop-blur-md border border-white/10 shadow-2xl text-left max-w-xs animate-in fade-in duration-500">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs mb-1">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Equipamento Certificado</span>
               </div>
+              <p className="text-[11px] text-slate-300 leading-snug">
+                Proteção para cabeça, olhos, ouvidos, vias respiratórias, mãos e pés em conformidade com as normas internacionais.
+              </p>
+            </div>
 
+            <div className="p-3 rounded-xl bg-slate-950/75 backdrop-blur-md border border-white/10 shadow-xl flex items-center gap-2.5 text-xs text-white">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <span className="font-semibold text-[11px]">Stock Pronta Entrega em Moçambique</span>
             </div>
           </div>
 
@@ -156,4 +148,5 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
     </section>
   );
 };
+
 
