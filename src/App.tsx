@@ -21,11 +21,20 @@ import { AdminPortal } from './pages/admin/AdminPortal';
 export default function App() {
   // Routing state
   const getValidPath = (pathname: string) => {
-    if (pathname.startsWith('/admin')) {
+    if (!pathname) return '/';
+    // Normalize path by stripping query parameters and trailing slashes
+    const normalized = pathname.split('?')[0].split('#')[0].replace(/\/+$/, '') || '/';
+    if (normalized === '/admin' || normalized.startsWith('/admin/')) {
       return '/admin';
     }
-    if (pathname === '/sobre-nos' || pathname === '/vantagens' || pathname === '/contactos') {
-      return pathname;
+    if (
+      normalized === '/sobre-nos' ||
+      normalized === '/vantagens' ||
+      normalized === '/contactos' ||
+      normalized === '/produtos' ||
+      normalized === '/categorias'
+    ) {
+      return normalized;
     }
     return '/';
   };
