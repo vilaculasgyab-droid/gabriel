@@ -1,7 +1,9 @@
 import { CartItem, CheckoutFormData, Product, QuoteFormData } from '../types';
 
-export const WHATSAPP_PHONE_RAW = '258856450275';
-export const WHATSAPP_PHONE_DISPLAY = '+258 85 645 0275';
+export const WHATSAPP_PHONE_RAW = '258846159254';
+export const WHATSAPP_PHONE_DISPLAY = '+258 84 615 9254';
+export const PHONE_CALL_TEL = 'tel:+258846159254';
+export const PHONE_CALL_RAW = '+258846159254';
 export const EMAIL_DISPLAY = 'comercial@proseguranca.co.mz';
 export const ADDRESS_DISPLAY = 'Mozal, Boane, Moçambique';
 

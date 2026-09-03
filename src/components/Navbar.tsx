@@ -13,6 +13,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { ProSegurancaLogo } from './CategoryIcon';
+import { PWAInstallButton } from './PWAInstallButton';
 import { CATEGORIES } from '../data/categories';
 import { WHATSAPP_PHONE_DISPLAY, WHATSAPP_PHONE_RAW, formatCurrency, getGeneralWhatsAppChatUrl } from '../utils/whatsapp';
 
@@ -72,7 +73,11 @@ export const Navbar: React.FC<NavbarProps> = ({
     onSelectCategory(categoryId);
     setCategoriesDropdownOpen(false);
     setMobileMenuOpen(false);
-    onNavigate('/');
+    if (categoryId === 'all') {
+      onNavigate('/produtos');
+    } else {
+      onNavigate(`/categoria/${categoryId}`);
+    }
     setTimeout(() => {
       const catalogElement = document.getElementById('catalogo-produtos');
       if (catalogElement) {
@@ -105,6 +110,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Contacts */}
           <div className="flex items-center gap-4">
+            <a
+              href="tel:+258846159254"
+              className="hidden md:flex items-center gap-1.5 text-slate-300 hover:text-amber-400 font-semibold transition-colors text-xs"
+              title="Ligar para +258 84 615 9254"
+            >
+              <Phone className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ligar: {WHATSAPP_PHONE_DISPLAY}</span>
+            </a>
             <a
               href={`https://wa.me/${WHATSAPP_PHONE_RAW}`}
               target="_blank"
@@ -149,8 +162,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center gap-1 xl:gap-2 text-sm font-semibold text-slate-200">
-              <button
-                onClick={() => handleLinkClick('/')}
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/');
+                }}
                 className={`px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   currentPath === '/'
                     ? 'bg-amber-400/15 text-amber-400 font-bold'
@@ -159,15 +176,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="nav-link-inicio"
               >
                 Início
-              </button>
+              </a>
 
-              <button
-                onClick={() => handleLinkClick('/', true)}
-                className="px-3 py-2 rounded-lg hover:text-amber-400 hover:bg-slate-800/60 transition-colors cursor-pointer text-slate-200"
+              <a
+                href="/produtos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/produtos', true);
+                }}
+                className={`px-3 py-2 rounded-lg transition-colors cursor-pointer text-slate-200 ${
+                  currentPath === '/produtos'
+                    ? 'bg-amber-400/15 text-amber-400 font-bold'
+                    : 'hover:text-amber-400 hover:bg-slate-800/60'
+                }`}
                 id="nav-link-produtos"
               >
                 Produtos
-              </button>
+              </a>
 
               {/* Categorias Dropdown */}
               <div className="relative">
@@ -191,8 +216,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       Categorias de EPIs
                     </div>
                     <div className="max-h-80 overflow-y-auto py-1 space-y-0.5">
-                      <button
-                        onClick={() => handleCategoryClick('all')}
+                      <a
+                        href="/produtos"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCategoryClick('all');
+                        }}
                         className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between hover:bg-slate-800 transition-colors cursor-pointer ${
                           selectedCategory === 'all'
                             ? 'bg-amber-400/10 text-amber-400 font-bold'
@@ -203,11 +232,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
                           Ver Tudo
                         </span>
-                      </button>
+                      </a>
                       {CATEGORIES.map((cat) => (
-                        <button
+                        <a
                           key={cat.id}
-                          onClick={() => handleCategoryClick(cat.id)}
+                          href={`/categoria/${cat.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleCategoryClick(cat.id);
+                          }}
                           className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between hover:bg-slate-800 transition-colors cursor-pointer ${
                             selectedCategory === cat.id
                               ? 'bg-amber-400/10 text-amber-400 font-bold'
@@ -216,15 +249,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                         >
                           <span className="truncate">{cat.name}</span>
                           <span className="text-[10px] text-slate-500">{cat.productCount}</span>
-                        </button>
+                        </a>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              <button
-                onClick={() => handleLinkClick('/sobre-nos')}
+              <a
+                href="/sobre-nos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/sobre-nos');
+                }}
                 className={`px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   currentPath === '/sobre-nos'
                     ? 'bg-amber-400/15 text-amber-400 font-bold'
@@ -233,10 +270,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="nav-link-sobre"
               >
                 Sobre Nós
-              </button>
+              </a>
 
-              <button
-                onClick={() => handleLinkClick('/vantagens')}
+              <a
+                href="/vantagens"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/vantagens');
+                }}
                 className={`px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   currentPath === '/vantagens'
                     ? 'bg-amber-400/15 text-amber-400 font-bold'
@@ -245,10 +286,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="nav-link-vantagens"
               >
                 Vantagens
-              </button>
+              </a>
 
-              <button
-                onClick={() => handleLinkClick('/contactos')}
+              <a
+                href="/contactos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/contactos');
+                }}
                 className={`px-3 py-2 rounded-lg transition-colors cursor-pointer ${
                   currentPath === '/contactos'
                     ? 'bg-amber-400/15 text-amber-400 font-bold'
@@ -257,7 +302,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="nav-link-contactos"
               >
                 Contactos
-              </button>
+              </a>
             </div>
 
             {/* Search Input */}
@@ -317,6 +362,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                 </div>
               </button>
+
+              {/* PWA Install Button (desktop) */}
+              <PWAInstallButton variant="navbar" />
 
               {/* Direct WhatsApp CTA Button */}
               <a
@@ -380,8 +428,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         {mobileMenuOpen && (
           <div className="lg:hidden bg-slate-950 border-t border-slate-800 px-4 pt-3 pb-6 space-y-3 mt-3 animate-in slide-in-from-top-4 duration-200">
             <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-300">
-              <button
-                onClick={() => handleLinkClick('/')}
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/');
+                }}
                 className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
                   currentPath === '/'
                     ? 'bg-amber-400 text-slate-950 font-bold border-amber-400'
@@ -390,16 +442,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-inicio"
               >
                 Início
-              </button>
-              <button
-                onClick={() => handleLinkClick('/', true)}
-                className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-left hover:text-amber-400 text-slate-200 cursor-pointer"
+              </a>
+              <a
+                href="/produtos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/produtos', true);
+                }}
+                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
+                  currentPath === '/produtos'
+                    ? 'bg-amber-400 text-slate-950 font-bold border-amber-400'
+                    : 'bg-slate-900 border-slate-800 text-slate-200 hover:text-amber-400'
+                }`}
                 id="mobile-nav-produtos"
               >
                 Ver Produtos
-              </button>
-              <button
-                onClick={() => handleLinkClick('/sobre-nos')}
+              </a>
+              <a
+                href="/sobre-nos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/sobre-nos');
+                }}
                 className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
                   currentPath === '/sobre-nos'
                     ? 'bg-amber-400 text-slate-950 font-bold border-amber-400'
@@ -408,9 +472,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-sobre"
               >
                 Sobre a ProSegurança
-              </button>
-              <button
-                onClick={() => handleLinkClick('/vantagens')}
+              </a>
+              <a
+                href="/vantagens"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/vantagens');
+                }}
                 className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
                   currentPath === '/vantagens'
                     ? 'bg-amber-400 text-slate-950 font-bold border-amber-400'
@@ -419,9 +487,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-vantagens"
               >
                 Vantagens
-              </button>
-              <button
-                onClick={() => handleLinkClick('/contactos')}
+              </a>
+              <a
+                href="/contactos"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('/contactos');
+                }}
                 className={`p-2.5 rounded-lg border text-left transition-colors col-span-2 cursor-pointer ${
                   currentPath === '/contactos'
                     ? 'bg-amber-400 text-slate-950 font-bold border-amber-400'
@@ -430,7 +502,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="mobile-nav-contactos"
               >
                 Contactos & Localização
-              </button>
+              </a>
             </div>
 
             {/* Mobile Categories Accordion */}
@@ -439,8 +511,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Filtrar por Categoria:
               </div>
               <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                <button
-                  onClick={() => handleCategoryClick('all')}
+                <a
+                  href="/produtos"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleCategoryClick('all');
+                  }}
                   className={`p-2 rounded-lg text-left text-xs ${
                     selectedCategory === 'all'
                       ? 'bg-amber-400 text-slate-950 font-bold'
@@ -448,11 +524,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   Todos os Produtos
-                </button>
+                </a>
                 {CATEGORIES.map((cat) => (
-                  <button
+                  <a
                     key={cat.id}
-                    onClick={() => handleCategoryClick(cat.id)}
+                    href={`/categoria/${cat.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleCategoryClick(cat.id);
+                    }}
                     className={`p-2 rounded-lg text-left text-xs truncate ${
                       selectedCategory === cat.id
                         ? 'bg-amber-400 text-slate-950 font-bold'
@@ -460,13 +540,24 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }`}
                   >
                     {cat.name}
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>
 
             {/* Mobile CTA buttons */}
             <div className="pt-2 flex flex-col gap-2">
+              <PWAInstallButton variant="mobile" />
+
+              <a
+                href="tel:+258846159254"
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+                id="mobile-nav-call-btn"
+              >
+                <Phone className="w-4 h-4 text-amber-400" />
+                <span>Ligar Agora ({WHATSAPP_PHONE_DISPLAY})</span>
+              </a>
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);

@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://proseguranca.co.mz</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produtos</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categorias</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/sobre-nos</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/vantagens</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/contactos</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/cabeca</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_capacete_amarelo_1788241366367.jpg</image:loc>
+      <image:title>Proteção da Cabeça</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/olhos-face</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_oculos_transparente_1788241457094.jpg</image:loc>
+      <image:title>Proteção dos Olhos e Face</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/maos</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_pu_1788241516995.jpg</image:loc>
+      <image:title>Proteção das Mãos</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/pes</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_botas_s3_preta_1788241571160.jpg</image:loc>
+      <image:title>Proteção dos Pés</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/respiratoria</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_mascara_n95_valvula_1788241626119.jpg</image:loc>
+      <image:title>Proteção Respiratória</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/auditiva</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_abafador_concha_1788241666782.jpg</image:loc>
+      <image:title>Proteção Auditiva</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/quedas</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_arnes_seguranca_1788241690396.jpg</image:loc>
+      <image:title>Proteção contra Quedas</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/vestuario</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_colete_laranja_1788241390542.jpg</image:loc>
+      <image:title>Vestuário de Segurança</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/calor-fogo</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_ignifugo.jpg</image:loc>
+      <image:title>Proteção contra Calor e Fogo</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/categoria/sinalizacao</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_cone_sinalizacao_1788241721417.jpg</image:loc>
+      <image:title>Sinalização e Acessórios</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ref-01</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_colete_laranja_1788241390542.jpg</image:loc>
+      <image:title>Colete Refletor Laranja de Alta Visibilidade Classe 2</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ref-02</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_colete_amarelo_1788241403016.jpg</image:loc>
+      <image:title>Colete Refletor Amarelo Limão com Faixas Duplas</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ref-03</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_casaco_refletor_1788241781453.jpg</image:loc>
+      <image:title>Casaco de Alta Visibilidade Amarelo Fluorescente Impermeável</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ref-04</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_casaco_bicolor_1788241793686.jpg</image:loc>
+      <image:title>Casaco Refletor Bicolor Amarelo e Laranja Bomber</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/mac-01</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_macaco_azul_1788241417786.jpg</image:loc>
+      <image:title>Fato-Macaco de Trabalho Azul Royal 100% Algodão</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/mac-02</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_macaco_marinho.jpg</image:loc>
+      <image:title>Fato-Macaco Industrial Azul Marinho Reforçado</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/cap-amarelo</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_capacete_amarelo_1788241366367.jpg</image:loc>
+      <image:title>Capacete de Segurança Amarelo com Catraca e Jugular</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/cap-azul</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_capacete_azul_1788241445075.jpg</image:loc>
+      <image:title>Capacete de Segurança Azul Industrial com Carneira Regulável</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/cap-branco</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_capacete_branco_1788241429696.jpg</image:loc>
+      <image:title>Capacete de Segurança Branco para Engenharia e Supervisão</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/cap-verde</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_capacete_verde_1788241502637.jpg</image:loc>
+      <image:title>Capacete de Segurança Verde Florestal e Obras</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ocu-transparente</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_oculos_transparente_1788241457094.jpg</image:loc>
+      <image:title>Óculos de Proteção Transparente Anti-Risco e Anti-Fog</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/ocu-fumado</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_oculos_escuros_1788241470450.jpg</image:loc>
+      <image:title>Óculos de Segurança Fumados Escuros com Proteção Solar UV</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/vis-01</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_viseira_facial_1788241483921.jpg</image:loc>
+      <image:title>Viseira Facial de Policarbonato com Suporte de Cabeça</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/luv-pu</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_pu_1788241516995.jpg</image:loc>
+      <image:title>Luvas de Proteção em PU Cinza e Branco para Precisão</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/luv-latex</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_latex_1788241528663.jpg</image:loc>
+      <image:title>Luvas com Palma Látex Antiderrapante Vermelho e Preto</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/luv-couro</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_couro_1788241541568.jpg</image:loc>
+      <image:title>Luvas de Couro / Raspa Amarelo para Carga e Obras</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/luv-nitrilo-verde</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_quimica_1788241556835.jpg</image:loc>
+      <image:title>Luvas de Nitrilo Verde para Proteção Química e Solventes</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/bot-s3-preta</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_botas_s3_preta_1788241571160.jpg</image:loc>
+      <image:title>Botas de Segurança em Pele Preta Cano Médio S3 Biqueira de Aço</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/sap-baixo-aco</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_sapatos_seguranca_1788241585151.jpg</image:loc>
+      <image:title>Sapatos de Segurança Cano Baixo com Biqueira de Aço S1P</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/bot-chelsea-marrom</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_botas_chelsea_marrom_1788241598320.jpg</image:loc>
+      <image:title>Botinas de Segurança Chelsea em Couro Castanho Elásticas</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/bot-chelsea-preta</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_botas_chelsea_preta_1788241612859.jpg</image:loc>
+      <image:title>Botinas de Segurança Chelsea em Couro Preto com Sola Antiderrapante</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/masc-valvula</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_mascara_n95_valvula_1788241626119.jpg</image:loc>
+      <image:title>Máscara Respiratória FFP2 / N95 com Válvula Cónica</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/masc-dobravel-cinza</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_mascara_cinza_dobravel_1788241640503.jpg</image:loc>
+      <image:title>Máscara Respiratória Dobrável Carvão Ativado Cinzenta</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/masc-caixa-20</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_mascara_caixa_20_1788241653834.jpg</image:loc>
+      <image:title>Caixa de Máscaras Respiratórias FFP2 / N95 (20 Unidades)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/abaf-concha</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_abafador_concha_1788241666782.jpg</image:loc>
+      <image:title>Abafador de Ruídos Tipo Concha Acolchoado SNR 32dB</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/tamp-silicone</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_tampoes_silicone_1788241676798.jpg</image:loc>
+      <image:title>Tampões Auriculares de Silicone com Cordão e Estojo</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/arn-01</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_arnes_seguranca_1788241690396.jpg</image:loc>
+      <image:title>Arnês de Segurança Paraquedista 4 Pontos para Trabalho em Altura</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/tal-duplo</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_talabarte_duplo_1788241705081.jpg</image:loc>
+      <image:title>Talabarte Duplo com Absorvedor de Energia e Ganchos 55mm</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/cone-75cm</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_cone_sinalizacao_1788241721417.jpg</image:loc>
+      <image:title>Cone de Sinalização Flexível Laranja com Faixas Refletivas 75cm</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/fita-caution</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fita_caution_1788241733756.jpg</image:loc>
+      <image:title>Fita de Isolamento Zebrada Amarela e Preta CAUTION (200m)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/fita-refletora-viaria</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fita_refletora.jpg</image:loc>
+      <image:title>Fita Adesiva Refletora Prismática para Segurança Viária</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/triangulo-emergencia</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_triangulo_emergencia_1788241748343.jpg</image:loc>
+      <image:title>Triângulo de Sinalização de Emergência Refletor com Base</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/chuva-amarelo</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_chuva_amarelo_1788241762588.jpg</image:loc>
+      <image:title>Fato de Chuva Impermeável Amarelo (Casaco com Capuz e Calça)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/chuva-azul</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_chuva_azul.jpg</image:loc>
+      <image:title>Fato de Chuva Impermeável Azul Marinho Reforçado</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/frio-casaco</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_casaco_frio.jpg</image:loc>
+      <image:title>Casaco Térmico para Câmaras Frigoríficas (-30°C) com Faixas Refletoras</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/avental-pvc-branco</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_avental_branco.jpg</image:loc>
+      <image:title>Avental de Proteção Impermeável Branco em PVC / Vinil</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/mangas-protecao-brancas</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_mangas_brancas.jpg</image:loc>
+      <image:title>Mangas de Proteção Impermeáveis Brancas com Elástico (Par)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/fato-ignifugo-fogo</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_ignifugo.jpg</image:loc>
+      <image:title>Roupa Resistente ao Fogo e Calor / Fato Ignífugo Casaco e Calça</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/fato-descartavel-branco</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_fato_descartavel_branco.jpg</image:loc>
+      <image:title>Fato-Macaco Descartável com Capuz Tipo 5/6 Microporoso Branco</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/luvas-nitrilo-descartaveis</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_luvas_descartaveis.jpg</image:loc>
+      <image:title>Luvas Descartáveis de Nitrilo Azul Sem Pó (Caixa 100 un)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://proseguranca.co.mz/produto/toucas-descartaveis-100</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://proseguranca.co.mz/products/prod_toucas_descartaveis.jpg</image:loc>
+      <image:title>Toucas Descartáveis Plissadas de Proteção (Pacote 100 un)</image:title>
+    </image:image>
+  </url>
+</urlset>

@@ -26,6 +26,7 @@ import {
   ADDRESS_DISPLAY, 
   getGeneralWhatsAppChatUrl 
 } from '../utils/whatsapp';
+import { useSEO } from '../hooks/useSEO';
 
 interface AboutPageProps {
   onNavigate: (path: string) => void;
@@ -33,6 +34,16 @@ interface AboutPageProps {
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
+  useSEO({
+    title: 'Sobre a ProSegurança | Fornecedor de EPIs em Moçambique',
+    description: 'Conheça a ProSegurança, distribuidora de Equipamentos de Proteção Individual (EPIs) e segurança no trabalho para indústrias, construtoras e profissionais em Moçambique.',
+    canonicalPath: '/sobre-nos',
+    breadcrumbs: [
+      { name: 'Início', path: '/' },
+      { name: 'Sobre Nós', path: '/sobre-nos' },
+    ],
+  });
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
@@ -233,17 +244,21 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 flex items-center gap-3">
-                  <PhoneCall className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <a
+                  href="tel:+258846159254"
+                  className="p-4 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700 flex items-center gap-3 transition-colors group cursor-pointer"
+                  title="Ligar para +258 84 615 9254"
+                >
+                  <PhoneCall className="w-5 h-5 text-emerald-400 group-hover:text-amber-400 flex-shrink-0 transition-colors" />
                   <div>
                     <div className="text-[10px] text-slate-400 uppercase font-semibold">
-                      Linha Direta de Atendimento
+                      Linha Direta de Atendimento (Chamadas ou WhatsApp)
                     </div>
-                    <div className="text-sm font-bold text-white">
+                    <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
                       {WHATSAPP_PHONE_DISPLAY}
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
           </div>

@@ -301,8 +301,12 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         {/* Category Pills Bar (Horizontal scrollable) */}
         <div className="mb-5 overflow-x-auto pb-2 scrollbar-thin">
           <div className="flex items-center gap-2 min-w-max">
-            <button
-              onClick={() => onSelectCategory('all')}
+            <a
+              href="/produtos"
+              onClick={(e) => {
+                e.preventDefault();
+                onSelectCategory('all');
+              }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedCategory === 'all'
                   ? 'bg-slate-900 text-amber-400 shadow-md shadow-slate-900/20'
@@ -311,16 +315,20 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               id="filter-cat-all"
             >
               Todos ({products.length})
-            </button>
+            </a>
 
             {CATEGORIES.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               const count = products.filter((p) => p.categoryId === cat.id).length;
 
               return (
-                <button
+                <a
                   key={cat.id}
-                  onClick={() => onSelectCategory(cat.id)}
+                  href={`/categoria/${cat.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onSelectCategory(cat.id);
+                  }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                     isSelected
                       ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
@@ -336,7 +344,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   >
                     {count}
                   </span>
-                </button>
+                </a>
               );
             })}
           </div>
@@ -569,25 +577,35 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         </button>
 
                         {/* Quick View Overlay Button */}
-                        <button
-                          onClick={() => onViewProductDetails(product)}
+                        <a
+                          href={`/produto/${product.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onViewProductDetails(product);
+                          }}
                           className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-slate-900/80 text-white hover:bg-amber-500 hover:text-slate-950 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center shadow-md scale-75 group-hover:scale-100 cursor-pointer"
-                          title="Ver Detalhes do Produto"
+                          title={`Ver Detalhes de ${product.name}`}
                           aria-label={`Ver detalhes de ${product.name}`}
                         >
                           <Eye className="w-3.5 h-3.5" />
-                        </button>
+                        </a>
                       </div>
 
                       {/* Card Middle Info */}
                       <div className="p-2.5 sm:p-3 flex flex-col flex-1">
                         {/* 3. Product Name */}
-                        <h3
-                          onClick={() => onViewProductDetails(product)}
-                          className="text-xs sm:text-[13px] font-semibold text-slate-800 group-hover:text-amber-600 transition-colors leading-snug line-clamp-2 h-8 sm:h-9 cursor-pointer mb-1"
-                          title={product.name}
-                        >
-                          {product.name}
+                        <h3 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-snug line-clamp-2 h-8 sm:h-9 mb-1">
+                          <a
+                            href={`/produto/${product.id}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onViewProductDetails(product);
+                            }}
+                            className="hover:text-amber-600 transition-colors block"
+                            title={product.name}
+                          >
+                            {product.name}
+                          </a>
                         </h3>
 
                         {/* 4. Price in MZN */}

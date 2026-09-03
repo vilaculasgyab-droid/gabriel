@@ -20,6 +20,7 @@ import {
   ADDRESS_DISPLAY, 
   getGeneralWhatsAppChatUrl 
 } from '../utils/whatsapp';
+import { useSEO } from '../hooks/useSEO';
 
 interface ContactPageProps {
   onNavigate: (path: string) => void;
@@ -27,6 +28,16 @@ interface ContactPageProps {
 }
 
 export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
+  useSEO({
+    title: 'Contacte a ProSegurança | Atendimento e Cotações Moçambique',
+    description: `Fale connosco pelo WhatsApp (${WHATSAPP_PHONE_DISPLAY}) ou email (${EMAIL_DISPLAY}). Localização em Mozal, Boane. Cotações formais para empresas e obras em Moçambique.`,
+    canonicalPath: '/contactos',
+    breadcrumbs: [
+      { name: 'Início', path: '/' },
+      { name: 'Contactos', path: '/contactos' },
+    ],
+  });
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
@@ -130,14 +141,38 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
                 </div>
                 <div className="flex-1">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600">
-                    WhatsApp & Chamadas (Atendimento Imediato)
+                    WhatsApp Oficial (Atendimento Imediato)
                   </div>
                   <div className="text-lg font-black text-slate-900 mt-0.5">
                     {WHATSAPP_PHONE_DISPLAY}
                   </div>
                   <div className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-semibold text-emerald-600">
-                    <span>Conversar agora pelo WhatsApp</span>
+                    <span>Abrir conversa no WhatsApp</span>
                     <ExternalLink className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
+            </a>
+
+            {/* Direct Phone Call Card */}
+            <a
+              href="tel:+258846159254"
+              className="block p-6 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
+                    Chamada Telefónica Direta
+                  </div>
+                  <div className="text-lg font-black text-slate-900 mt-0.5">
+                    {WHATSAPP_PHONE_DISPLAY}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-semibold text-amber-600">
+                    <span>Ligar agora (+258 84 615 9254)</span>
+                    <Phone className="w-3.5 h-3.5" />
                   </div>
                 </div>
               </div>

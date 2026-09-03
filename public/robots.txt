@@ -1,0 +1,48 @@
+# robots.txt para ProSegurança (https://proseguranca.co.mz)
+# Rastreamento público liberado para mecanismos de pesquisa
+User-agent: *
+Allow: /
+Allow: /produtos
+Allow: /produto/
+Allow: /categoria/
+Allow: /categorias
+Allow: /sobre-nos
+Allow: /vantagens
+Allow: /contactos
+Allow: /assets/
+Allow: /products/
+Allow: /manifest.webmanifest
+Allow: /favicon.svg
+Allow: /favicon.png
+Allow: /pwa-192x192.png
+Allow: /pwa-512x512.png
+
+# Bloqueio estrito de áreas privadas e administrativas
+Disallow: /admin
+Disallow: /admin/
+Disallow: /carrinho
+Disallow: /checkout
+Disallow: /pedidos
+Disallow: /login
+Disallow: /dashboard
+
+# Googlebot específico
+User-agent: Googlebot
+Allow: /
+Allow: /produtos
+Allow: /produto/
+Allow: /categoria/
+Allow: /categorias
+Allow: /sobre-nos
+Allow: /vantagens
+Allow: /contactos
+Allow: /assets/
+Allow: /products/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /carrinho
+Disallow: /checkout
+Disallow: /pedidos
+
+# Localização oficial do Sitemap
+Sitemap: https://proseguranca.co.mz/sitemap.xml

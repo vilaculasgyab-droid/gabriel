@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProSegurança - Sem Ligação à Internet</title>
+    <meta name="theme-color" content="#020617" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: #020617;
+        color: #f8fafc;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .card {
+        max-width: 480px;
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 20px;
+        padding: 40px 28px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(245, 158, 11, 0.12);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .icon-container {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #1e293b, #090d16);
+        border: 1px solid #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+      .pulse-dot {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 16px;
+        height: 16px;
+        background-color: #ef4444;
+        border: 3px solid #0f172a;
+        border-radius: 50%;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+      }
+      p {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #94a3b8;
+        margin-bottom: 28px;
+      }
+      .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #020617;
+        border: none;
+        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #fcd34d, #fbbf24);
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: #1e293b;
+        color: #e2e8f0;
+        border: 1px solid #334155;
+      }
+      .btn-secondary:hover {
+        background: #334155;
+      }
+      .brand-footer {
+        margin-top: 32px;
+        font-size: 12px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .brand-name {
+        color: #fbbf24;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="badge">
+        <span>Sem Sinal de Rede</span>
+      </div>
+
+      <div class="icon-container">
+        <!-- SVG Wi-Fi Off Icon -->
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+        <span class="pulse-dot"></span>
+      </div>
+
+      <h1>Você está offline</h1>
+      <p>
+        Verifique a sua ligação à internet (dados móveis ou Wi-Fi) e tente novamente. Os conteúdos previamente consultados da ProSegurança continuam protegidos na memória da aplicação.
+      </p>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="window.location.reload();">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Tentar novamente
+        </button>
+
+        <a href="tel:+258846159254" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          Ligar Linha Direta (+258 84 615 9254)
+        </a>
+      </div>
+
+      <div class="brand-footer">
+        <span class="brand-name">ProSegurança</span> • EPIs & Proteção em Moçambique
+      </div>
+    </div>
+  </body>
+</html>

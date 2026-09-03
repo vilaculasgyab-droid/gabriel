@@ -71,6 +71,11 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
   const handleSendWhatsApp = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setErrorMsg('Sem ligação à internet no momento. Por favor verifique a sua rede móvel ou Wi-Fi antes de concluir o envio do pedido para o WhatsApp.');
+      return;
+    }
+
     if (!formData.customerName.trim()) {
       setErrorMsg('Por favor, indique o seu nome completo.');
       return;
@@ -341,7 +346,7 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
                 id="btn-final-whatsapp-submit"
               >
                 <MessageSquare className="w-5 h-5 fill-white/20" />
-                <span>Enviar Pedido para +258 85 645 0275</span>
+                <span>Enviar Pedido para {WHATSAPP_PHONE_DISPLAY}</span>
               </button>
 
               <button

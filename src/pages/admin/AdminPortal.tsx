@@ -10,6 +10,7 @@ import { AdminOrders } from './AdminOrders';
 import { AdminCustomers } from './AdminCustomers';
 import { AdminSettings } from './AdminSettings';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { useSEO } from '../../hooks/useSEO';
 
 interface AdminPortalProps {
   onNavigateToStore: () => void;
@@ -20,6 +21,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   onNavigateToStore,
   initialTab = 'dashboard',
 }) => {
+  // Admin route MUST have strict noindex, nofollow to protect administrative areas
+  useSEO({
+    title: 'Portal Administrativo | ProSegurança',
+    description: 'Área de administração restrita e gestão de encomendas da ProSegurança.',
+    canonicalPath: '/admin',
+    noindex: true,
+  });
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => authService.isAuthenticated());
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => authService.getAdminUser());
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);

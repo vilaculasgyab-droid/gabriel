@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
+import { useSEO } from '../hooks/useSEO';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -29,6 +30,21 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onOpenQuoteModal,
 }) => {
   if (!product) return null;
+
+  useSEO({
+    title: `${product.name} | ProSegurança`,
+    description: `${product.shortDescription || product.description} Preço: ${product.price} MZN. Disponibilidade: ${product.inStock ? 'Em Stock' : 'Sob Encomenda'}. Encomende via WhatsApp com entrega em Moçambique.`,
+    canonicalPath: `/produto/${product.id}`,
+    ogType: 'product',
+    ogImage: product.image,
+    product,
+    breadcrumbs: [
+      { name: 'Início', path: '/' },
+      { name: 'Produtos', path: '/produtos' },
+      { name: product.categoryName, path: `/categoria/${product.categoryId}` },
+      { name: product.name, path: `/produto/${product.id}` },
+    ],
+  });
 
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(
@@ -132,6 +148,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           {/* Right Column: Information & Options */}
           <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
             <div>
+              {/* Semantic Breadcrumbs */}
+              <nav aria-label="Navegação estrutural do produto" className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-3">
+                <span>Início</span>
+                <span className="text-slate-300">/</span>
+                <span>Produtos</span>
+                <span className="text-slate-300">/</span>
+                <span className="text-amber-600 font-semibold">{product.categoryName}</span>
+              </nav>
+
               {/* Category & Stock Availability */}
               <div className="flex items-center justify-between text-xs font-bold mb-2">
                 <span className="text-amber-600 uppercase tracking-wider">{product.categoryName}</span>

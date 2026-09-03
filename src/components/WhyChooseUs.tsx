@@ -59,7 +59,7 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
       icon: MessageSquare,
       title: 'Compra Fácil pelo WhatsApp',
       description:
-        'Sem burocracias: monte o seu carrinho, envie a sua lista de EPIs e receba atendimento imediato no telemóvel (+258 85 645 0275).',
+        `Sem burocracias: monte o seu carrinho, envie a sua lista de EPIs e receba atendimento imediato no telemóvel (${WHATSAPP_PHONE_DISPLAY}).`,
       tag: 'Sem Burocracia',
       color: 'emerald',
     },

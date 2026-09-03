@@ -32,7 +32,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
 
   const handleCategoryClick = (categoryId: string) => {
     onSelectCategory(categoryId);
-    onNavigate('/');
+    onNavigate(`/categoria/${categoryId}`);
     setTimeout(() => {
       const elem = document.getElementById('catalogo-produtos');
       if (elem) {
@@ -60,9 +60,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-slate-800">
           {/* Col 1: Brand & Bio (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
-            <div onClick={() => onNavigate('/')} className="cursor-pointer inline-block">
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('/');
+              }}
+              className="cursor-pointer inline-block"
+            >
               <ProSegurancaLogo inverted={true} />
-            </div>
+            </a>
 
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-400 font-semibold italic">
               “Proteção e Segurança para o seu Trabalho”
@@ -72,20 +79,30 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
               Loja e distribuidora especializada no fornecimento de Equipamentos de Proteção Individual (EPIs) e segurança industrial em Moçambique. Atendimento a trabalhadores, empresas, construção civil e indústrias.
             </p>
 
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-2 flex flex-wrap items-center gap-2.5">
               <a
                 href={getGeneralWhatsAppChatUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                title="Conversar pelo WhatsApp"
               >
                 <MessageSquare className="w-4 h-4 fill-white/20" />
-                <span>{WHATSAPP_PHONE_DISPLAY}</span>
+                <span>WhatsApp: {WHATSAPP_PHONE_DISPLAY}</span>
+              </a>
+
+              <a
+                href="tel:+258846159254"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white hover:text-amber-400 font-bold text-xs border border-slate-700 transition-all"
+                title="Ligar para +258 84 615 9254"
+              >
+                <Phone className="w-3.5 h-3.5 text-amber-400" />
+                <span>Ligar Agora</span>
               </a>
 
               <button
                 onClick={onOpenQuoteModal}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-slate-700 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-slate-700/80 transition-all cursor-pointer"
               >
                 <Building2 className="w-3.5 h-3.5" />
                 <span>Cotações B2B</span>
@@ -100,61 +117,90 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <button
-                  onClick={() => handleLinkClick('/')}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/');
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Página Inicial
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => handleLinkClick('/', true)}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/produtos"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/produtos', true);
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Catálogo de Produtos
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => handleLinkClick('/', true)}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/produtos"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/produtos', true);
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Categorias de EPIs
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => handleLinkClick('/sobre-nos')}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/sobre-nos"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/sobre-nos');
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Sobre Nós
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => handleLinkClick('/vantagens')}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/vantagens"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/vantagens');
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Vantagens
-                </button>
+                </a>
               </li>
               <li>
-                <button
-                  onClick={() => handleLinkClick('/contactos')}
-                  className="hover:text-amber-400 transition-colors text-left cursor-pointer"
+                <a
+                  href="/contactos"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/contactos');
+                  }}
+                  className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
                   Contactos & Localização
-                </button>
+                </a>
               </li>
               <li className="pt-1.5 border-t border-slate-900">
-                <button
-                  onClick={() => handleLinkClick('/admin')}
+                <a
+                  href="/admin"
+                  rel="nofollow"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLinkClick('/admin');
+                  }}
                   className="text-slate-500 hover:text-amber-400 text-[11px] transition-colors text-left flex items-center gap-1.5 cursor-pointer"
                 >
                   <ShieldCheck className="w-3 h-3 text-amber-500/70" />
                   <span>Área Administrativa</span>
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -167,8 +213,12 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
             <ul className="grid grid-cols-1 gap-1.5 text-xs">
               {CATEGORIES.map((cat) => (
                 <li key={cat.id}>
-                  <button
-                    onClick={() => handleCategoryClick(cat.id)}
+                  <a
+                    href={`/categoria/${cat.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleCategoryClick(cat.id);
+                    }}
                     className="hover:text-amber-400 transition-colors text-left flex items-center justify-between w-full group cursor-pointer"
                   >
                     <span className="truncate group-hover:translate-x-0.5 transition-transform">
@@ -177,7 +227,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
                     <span className="text-[10px] text-slate-600 font-mono">
                       {cat.productCount}
                     </span>
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -193,8 +243,14 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
               <div className="flex items-start gap-2">
                 <Phone className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <div className="text-white font-bold">{WHATSAPP_PHONE_DISPLAY}</div>
-                  <div className="text-[11px]">Linha de Apoio e Pedidos</div>
+                  <a
+                    href="tel:+258846159254"
+                    className="text-white font-bold hover:text-amber-400 transition-colors block"
+                    title="Ligar para +258 84 615 9254"
+                  >
+                    {WHATSAPP_PHONE_DISPLAY}
+                  </a>
+                  <div className="text-[11px] text-slate-400">Linha de Apoio e Pedidos (Chamadas ou WhatsApp)</div>
                 </div>
               </div>
 

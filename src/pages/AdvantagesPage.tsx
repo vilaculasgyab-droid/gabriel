@@ -13,12 +13,14 @@ import {
   Clock,
   Sparkles,
   Layers,
-  Check
+  Check,
+  Phone
 } from 'lucide-react';
 import { 
   WHATSAPP_PHONE_DISPLAY, 
   getGeneralWhatsAppChatUrl 
 } from '../utils/whatsapp';
+import { useSEO } from '../hooks/useSEO';
 
 interface AdvantagesPageProps {
   onNavigate: (path: string) => void;
@@ -26,6 +28,16 @@ interface AdvantagesPageProps {
 }
 
 export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
+  useSEO({
+    title: 'Vantagens ProSegurança | Qualidade e Segurança Garantida',
+    description: 'Descubra porque as principais empresas e profissionais em Moçambique confiam na ProSegurança para fornecimento de EPIs certificados e suporte especializado.',
+    canonicalPath: '/vantagens',
+    breadcrumbs: [
+      { name: 'Início', path: '/' },
+      { name: 'Vantagens', path: '/vantagens' },
+    ],
+  });
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
@@ -101,7 +113,7 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
       badge: 'Sem Burocracia',
       title: 'Compra Fácil pelo WhatsApp',
       description:
-        'Compre ou solicite orçamentos diretamente pelo WhatsApp (+258 85 645 0275). Você escolhe os produtos na loja, envia o pedido ou lista de requisição e recebe atendimento imediato.',
+        `Compre ou solicite orçamentos diretamente pelo WhatsApp (${WHATSAPP_PHONE_DISPLAY}). Você escolhe os produtos na loja, envia o pedido ou lista de requisição e recebe atendimento imediato.`,
       highlights: [
         'Atendimento direto e humano no telemóvel',
         'Envio de fotos, tamanhos e quantidades pelo chat',
@@ -235,10 +247,10 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
               </p>
             </div>
 
-            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3">
+            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-2.5">
               <button
                 onClick={onOpenQuoteModal}
-                className="w-full py-3.5 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm text-center shadow-md transition-all cursor-pointer"
+                className="w-full py-3 px-5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm text-center shadow-md transition-all cursor-pointer"
               >
                 Solicitar Cotação Formal
               </button>
@@ -246,10 +258,17 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
                 href={getGeneralWhatsAppChatUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm text-center shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm text-center shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>WhatsApp: {WHATSAPP_PHONE_DISPLAY}</span>
+              </a>
+              <a
+                href="tel:+258846159254"
+                className="w-full py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white hover:text-amber-400 font-bold text-xs sm:text-sm text-center shadow-md border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Phone className="w-3.5 h-3.5 text-amber-400" />
+                <span>Ligar Agora ({WHATSAPP_PHONE_DISPLAY})</span>
               </a>
             </div>
           </div>
