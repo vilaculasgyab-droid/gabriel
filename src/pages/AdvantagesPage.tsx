@@ -14,10 +14,12 @@ import {
   Sparkles,
   Layers,
   Check,
-  Phone
+  Phone,
+  Mail
 } from 'lucide-react';
 import { 
   WHATSAPP_PHONE_DISPLAY, 
+  EMAIL_DISPLAY,
   getGeneralWhatsAppChatUrl 
 } from '../utils/whatsapp';
 import { useSEO } from '../hooks/useSEO';
@@ -266,9 +268,18 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
               <a
                 href="tel:+258846159254"
                 className="w-full py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white hover:text-amber-400 font-bold text-xs sm:text-sm text-center shadow-md border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2"
+                title="Ligar para +258 84 615 9254"
               >
                 <Phone className="w-3.5 h-3.5 text-amber-400" />
                 <span>Ligar Agora ({WHATSAPP_PHONE_DISPLAY})</span>
+              </a>
+              <a
+                href={`mailto:${EMAIL_DISPLAY}`}
+                className="w-full py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white hover:text-amber-400 font-bold text-xs sm:text-sm text-center shadow-md border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2"
+                title={`Enviar e-mail para ${EMAIL_DISPLAY}`}
+              >
+                <Mail className="w-3.5 h-3.5 text-amber-400" />
+                <span>E-mail: {EMAIL_DISPLAY}</span>
               </a>
             </div>
           </div>

@@ -100,6 +100,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
                 <span>Ligar Agora</span>
               </a>
 
+              <a
+                href={`mailto:${EMAIL_DISPLAY}`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white hover:text-amber-400 font-bold text-xs border border-slate-700 transition-all"
+                title={`Enviar e-mail para ${EMAIL_DISPLAY}`}
+              >
+                <Mail className="w-3.5 h-3.5 text-amber-400" />
+                <span>E-mail</span>
+              </a>
+
               <button
                 onClick={onOpenQuoteModal}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-slate-700/80 transition-all cursor-pointer"
@@ -256,7 +265,13 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
 
               <div className="flex items-start gap-2">
                 <Mail className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-slate-300">{EMAIL_DISPLAY}</div>
+                <a 
+                  href={`mailto:${EMAIL_DISPLAY}`}
+                  className="text-slate-300 hover:text-amber-400 font-medium transition-colors"
+                  title={`Enviar e-mail para ${EMAIL_DISPLAY}`}
+                >
+                  {EMAIL_DISPLAY}
+                </a>
               </div>
 
               <div className="flex items-start gap-2">

@@ -18,7 +18,8 @@ import {
   WHATSAPP_PHONE_RAW, 
   EMAIL_DISPLAY, 
   ADDRESS_DISPLAY, 
-  getGeneralWhatsAppChatUrl 
+  getGeneralWhatsAppChatUrl,
+  getContactEmailUrl
 } from '../utils/whatsapp';
 import { useSEO } from '../hooks/useSEO';
 
@@ -51,18 +52,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
     message: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedMethod, setSubmittedMethod] = useState<'whatsapp' | 'email' | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.message) {
-      return;
-    }
+  const validateContact = (): boolean => {
+    return Boolean(formData.name.trim() && formData.phone.trim() && formData.message.trim());
+  };
+
+  const handleSendWhatsApp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateContact()) return;
 
     const messageText =
       `Olá, ProSegurança! Mensagem enviada pela Página de Contactos:\n\n` +
@@ -75,7 +78,16 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
 
     const url = `https://wa.me/${WHATSAPP_PHONE_RAW}?text=${encodeURIComponent(messageText)}`;
     window.open(url, '_blank');
-    setSubmitted(true);
+    setSubmittedMethod('whatsapp');
+  };
+
+  const handleSendEmail = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateContact()) return;
+
+    const url = getContactEmailUrl(formData);
+    window.location.href = url;
+    setSubmittedMethod('email');
   };
 
   return (
@@ -279,11 +291,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
                   Envie a sua Mensagem
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  Preencha o formulário abaixo. A mensagem será encaminhada diretamente para a nossa equipa via WhatsApp.
+                  Preencha o formulário abaixo. Envie diretamente pelo nosso WhatsApp oficial ({WHATSAPP_PHONE_DISPLAY}) ou por E-mail ({EMAIL_DISPLAY}).
                 </p>
               </div>
 
-              {submitted ? (
+              {submittedMethod ? (
                 <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4">
                   <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-md">
                     <CheckCircle2 className="w-7 h-7" />
@@ -292,20 +304,26 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
                     Mensagem Preparada com Sucesso!
                   </h3>
                   <p className="text-xs sm:text-sm text-emerald-800 max-w-md mx-auto leading-relaxed">
-                    Sua mensagem foi direcionada para a nossa equipa no WhatsApp ({WHATSAPP_PHONE_DISPLAY}). Responderemos o mais breve possível.
+                    {submittedMethod === 'whatsapp' ? (
+                      <>A sua mensagem foi direcionada para a nossa equipa no WhatsApp oficial (<strong>{WHATSAPP_PHONE_DISPLAY}</strong>). Responderemos o mais breve possível.</>
+                    ) : (
+                      <>A sua mensagem foi formatada e aberta no seu e-mail para envio a <strong>{EMAIL_DISPLAY}</strong>.</>
+                    )}
                   </p>
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <a
-                      href={getGeneralWhatsAppChatUrl()}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-500 flex items-center gap-2 shadow-sm"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span>Abrir WhatsApp Novamente</span>
-                    </a>
+                    {submittedMethod === 'whatsapp' && (
+                      <a
+                        href={getGeneralWhatsAppChatUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-500 flex items-center gap-2 shadow-sm"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Abrir WhatsApp Novamente</span>
+                      </a>
+                    )}
                     <button
-                      onClick={() => setSubmitted(false)}
+                      onClick={() => setSubmittedMethod(null)}
                       className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-50 cursor-pointer"
                     >
                       Enviar Outra Mensagem
@@ -313,7 +331,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSendWhatsApp} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -415,14 +433,27 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
                     />
                   </div>
 
-                  <div className="pt-2">
+                  <div className="pt-2 flex flex-col sm:flex-row gap-3">
                     <button
-                      type="submit"
-                      className="w-full py-4 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 transition-all cursor-pointer"
-                      id="contact-page-submit-btn"
+                      type="button"
+                      onClick={handleSendWhatsApp}
+                      className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/20 transition-all cursor-pointer"
+                      id="contact-page-whatsapp-btn"
+                      title={`Enviar mensagem pelo WhatsApp ${WHATSAPP_PHONE_DISPLAY}`}
                     >
-                      <Send className="w-4 h-4" />
-                      <span>Enviar Mensagem para o WhatsApp</span>
+                      <MessageSquare className="w-4 h-4 fill-white/20" />
+                      <span>Enviar via WhatsApp ({WHATSAPP_PHONE_DISPLAY})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSendEmail}
+                      className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 transition-all cursor-pointer border border-slate-700"
+                      id="contact-page-email-btn"
+                      title={`Enviar mensagem por e-mail para ${EMAIL_DISPLAY}`}
+                    >
+                      <Mail className="w-4 h-4 text-amber-400" />
+                      <span>Enviar por E-mail ({EMAIL_DISPLAY})</span>
                     </button>
                   </div>
                 </form>

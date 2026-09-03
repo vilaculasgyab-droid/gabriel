@@ -18,11 +18,13 @@ import {
   MapPin,
   Sparkles,
   Eye,
-  HeartHandshake
+  HeartHandshake,
+  Mail
 } from 'lucide-react';
 import { ProSegurancaLogo } from '../components/CategoryIcon';
 import { 
   WHATSAPP_PHONE_DISPLAY, 
+  EMAIL_DISPLAY,
   ADDRESS_DISPLAY, 
   getGeneralWhatsAppChatUrl 
 } from '../utils/whatsapp';
@@ -256,6 +258,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
                     </div>
                     <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
                       {WHATSAPP_PHONE_DISPLAY}
+                    </div>
+                  </div>
+                </a>
+
+                <a
+                  href={`mailto:${EMAIL_DISPLAY}`}
+                  className="p-4 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700 flex items-center gap-3 transition-colors group cursor-pointer"
+                  title={`Enviar e-mail para ${EMAIL_DISPLAY}`}
+                >
+                  <Mail className="w-5 h-5 text-blue-400 group-hover:text-amber-400 flex-shrink-0 transition-colors" />
+                  <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-semibold">
+                      E-mail Institucional & Cotações
+                    </div>
+                    <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
+                      {EMAIL_DISPLAY}
                     </div>
                   </div>
                 </a>

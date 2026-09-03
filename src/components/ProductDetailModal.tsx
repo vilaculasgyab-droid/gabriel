@@ -4,6 +4,7 @@ import {
   X, 
   ShoppingCart, 
   MessageSquare, 
+  Mail,
   Check, 
   Truck, 
   Building2, 
@@ -13,7 +14,13 @@ import {
   Layers,
   AlertCircle
 } from 'lucide-react';
-import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
+import { 
+  formatCurrency, 
+  getProductWhatsAppInquiryUrl,
+  getProductEmailInquiryUrl,
+  WHATSAPP_PHONE_DISPLAY,
+  EMAIL_DISPLAY
+} from '../utils/whatsapp';
 import { useSEO } from '../hooks/useSEO';
 
 interface ProductDetailModalProps {
@@ -316,43 +323,56 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </div>
 
               {/* Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <button
-                  onClick={handleAddToCart}
-                  disabled={!isAvailable}
-                  className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
-                    !isAvailable
-                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                      : addedSuccess
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-900 hover:bg-slate-800 text-amber-400'
-                  }`}
-                  id="modal-btn-add-cart"
-                >
-                  {!isAvailable ? (
-                    <span>Produto Esgotado</span>
-                  ) : addedSuccess ? (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>Adicionado ao Carrinho!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-4 h-4" />
-                      <span>Adicionar ao Carrinho</span>
-                    </>
-                  )}
-                </button>
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!isAvailable}
+                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${
+                      !isAvailable
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        : addedSuccess
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-900 hover:bg-slate-800 text-amber-400'
+                    }`}
+                    id="modal-btn-add-cart"
+                  >
+                    {!isAvailable ? (
+                      <span>Produto Esgotado</span>
+                    ) : addedSuccess ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        <span>Adicionado ao Carrinho!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Adicionar ao Carrinho</span>
+                      </>
+                    )}
+                  </button>
+
+                  <a
+                    href={getProductWhatsAppInquiryUrl(product, quantity, selectedSize)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 shadow-md shadow-emerald-700/30 transition-all cursor-pointer"
+                    id="modal-btn-whatsapp-buy"
+                    title={`Comprar ou pedir cotação pelo WhatsApp ${WHATSAPP_PHONE_DISPLAY}`}
+                  >
+                    <MessageSquare className="w-4 h-4 fill-white/20" />
+                    <span>Comprar pelo WhatsApp ({WHATSAPP_PHONE_DISPLAY})</span>
+                  </a>
+                </div>
 
                 <a
-                  href={getProductWhatsAppInquiryUrl(product, quantity, selectedSize)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 shadow-md shadow-emerald-700/30 transition-all cursor-pointer"
-                  id="modal-btn-whatsapp-buy"
+                  href={getProductEmailInquiryUrl(product, quantity, selectedSize)}
+                  className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center gap-2 border border-slate-300 transition-colors cursor-pointer"
+                  id="modal-btn-email-buy"
+                  title={`Enviar pedido ou cotação por e-mail para ${EMAIL_DISPLAY}`}
                 >
-                  <MessageSquare className="w-4 h-4 fill-white/20" />
-                  <span>Comprar pelo WhatsApp</span>
+                  <Mail className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Pedir Cotação por E-mail ({EMAIL_DISPLAY})</span>
                 </a>
               </div>
             </div>

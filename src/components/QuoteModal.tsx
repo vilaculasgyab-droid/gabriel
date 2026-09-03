@@ -4,9 +4,15 @@ import {
   X, 
   Building2, 
   MessageSquare, 
+  Mail,
   CheckCircle2
 } from 'lucide-react';
-import { getQuoteWhatsAppUrl, WHATSAPP_PHONE_DISPLAY } from '../utils/whatsapp';
+import { 
+  getQuoteWhatsAppUrl, 
+  getQuoteEmailUrl,
+  WHATSAPP_PHONE_DISPLAY,
+  EMAIL_DISPLAY
+} from '../utils/whatsapp';
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -28,7 +34,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose }) => {
     message: '',
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedMethod, setSubmittedMethod] = useState<'whatsapp' | 'email' | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -37,15 +43,31 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.companyName || !formData.contactName || !formData.phone || !formData.itemsNeeded) {
-      return;
-    }
+  const validateQuote = (): boolean => {
+    return Boolean(
+      formData.companyName.trim() &&
+      formData.contactName.trim() &&
+      formData.phone.trim() &&
+      formData.itemsNeeded.trim()
+    );
+  };
+
+  const handleSendWhatsApp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateQuote()) return;
 
     const url = getQuoteWhatsAppUrl(formData);
     window.open(url, '_blank');
-    setSubmitted(true);
+    setSubmittedMethod('whatsapp');
+  };
+
+  const handleSendEmail = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateQuote()) return;
+
+    const url = getQuoteEmailUrl(formData);
+    window.location.href = url;
+    setSubmittedMethod('email');
   };
 
   return (
@@ -80,7 +102,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="p-5 sm:p-7 max-h-[78vh] overflow-y-auto">
-          {submitted ? (
+          {submittedMethod ? (
             <div className="text-center py-8 space-y-4">
               <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8" />
@@ -88,18 +110,30 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose }) => {
               <h4 className="text-lg font-bold text-slate-900">
                 Solicitação de Cotação Encaminhada!
               </h4>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                A sua solicitação foi organizada e aberta no WhatsApp do departamento comercial ({WHATSAPP_PHONE_DISPLAY}).
+              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                {submittedMethod === 'whatsapp' ? (
+                  <>A sua solicitação foi organizada e aberta para envio direto no WhatsApp comercial (<strong>{WHATSAPP_PHONE_DISPLAY}</strong>).</>
+                ) : (
+                  <>A sua solicitação foi formatada e aberta no seu cliente de e-mail para envio a <strong>{EMAIL_DISPLAY}</strong>.</>
+                )}
               </p>
-              <button
-                onClick={onClose}
-                className="px-6 py-2.5 rounded-xl bg-slate-900 text-amber-400 font-bold text-xs hover:bg-slate-800 cursor-pointer"
-              >
-                Fechar
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setSubmittedMethod(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+                >
+                  Voltar ao Formulário
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2.5 rounded-xl bg-slate-900 text-amber-400 font-bold text-xs hover:bg-slate-800 cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSendWhatsApp} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -241,18 +275,33 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose }) => {
                 />
               </div>
 
-              <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
                 <button
-                  type="submit"
-                  className="w-full sm:flex-1 py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/20 cursor-pointer transition-colors"
+                  type="button"
+                  onClick={handleSendWhatsApp}
+                  className="w-full sm:flex-1 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/20 cursor-pointer transition-colors"
+                  id="quote-btn-whatsapp"
+                  title={`Solicitar cotação via WhatsApp ${WHATSAPP_PHONE_DISPLAY}`}
                 >
                   <MessageSquare className="w-4 h-4 fill-white/20" />
-                  <span>Solicitar Cotação</span>
+                  <span>Solicitar via WhatsApp ({WHATSAPP_PHONE_DISPLAY})</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleSendEmail}
+                  className="w-full sm:flex-1 py-3.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 cursor-pointer transition-colors border border-slate-700"
+                  id="quote-btn-email"
+                  title={`Solicitar cotação via E-mail para ${EMAIL_DISPLAY}`}
+                >
+                  <Mail className="w-4 h-4 text-amber-400" />
+                  <span>Solicitar por E-mail ({EMAIL_DISPLAY})</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+                  className="w-full sm:w-auto py-3.5 px-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 cursor-pointer"
                 >
                   Cancelar
                 </button>

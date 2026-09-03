@@ -3,6 +3,7 @@ import { CartItem, CheckoutFormData } from '../types';
 import { 
   X, 
   MessageSquare, 
+  Mail,
   Check, 
   Copy, 
   Truck, 
@@ -20,8 +21,10 @@ import {
   formatCurrency, 
   buildWhatsAppOrderMessage, 
   getWhatsAppOrderUrl, 
+  getOrderEmailUrl,
   WHATSAPP_PHONE_DISPLAY, 
-  WHATSAPP_PHONE_RAW 
+  WHATSAPP_PHONE_RAW,
+  EMAIL_DISPLAY
 } from '../utils/whatsapp';
 import { storeDb } from '../services/storeDb';
 
@@ -68,25 +71,25 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
 
   const previewMessage = buildWhatsAppOrderMessage(items, totalAmount, formData);
 
-  const handleSendWhatsApp = (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateOrderForm = (): boolean => {
+    setErrorMsg(null);
 
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      setErrorMsg('Sem ligação à internet no momento. Por favor verifique a sua rede móvel ou Wi-Fi antes de concluir o envio do pedido para o WhatsApp.');
-      return;
+      setErrorMsg('Sem ligação à internet no momento. Por favor verifique a sua ligação antes de concluir o envio do pedido.');
+      return false;
     }
 
     if (!formData.customerName.trim()) {
       setErrorMsg('Por favor, indique o seu nome completo.');
-      return;
+      return false;
     }
     if (!formData.phone.trim()) {
       setErrorMsg('Por favor, informe o seu número de telefone/WhatsApp.');
-      return;
+      return false;
     }
     if (!formData.deliveryLocation.trim()) {
       setErrorMsg('Por favor, indique o local ou endereço para entrega.');
-      return;
+      return false;
     }
 
     // Persist order in storeDb so it immediately shows in the Admin Panel
@@ -107,8 +110,26 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
       console.error('Failed to register order in store database', err);
     }
 
+    return true;
+  };
+
+  const handleSubmitWhatsApp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateOrderForm()) return;
+
     const url = getWhatsAppOrderUrl(items, totalAmount, formData);
     window.open(url, '_blank');
+    if (onOrderCompleted) {
+      onOrderCompleted();
+    }
+  };
+
+  const handleSubmitEmail = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateOrderForm()) return;
+
+    const url = getOrderEmailUrl(items, totalAmount, formData);
+    window.location.href = url;
     if (onOrderCompleted) {
       onOrderCompleted();
     }
@@ -133,9 +154,9 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
               <MessageSquare className="w-5 h-5 fill-white/20" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">Finalização do Pedido via WhatsApp</h3>
+              <h3 className="text-lg font-bold text-white">Finalização do Pedido (WhatsApp ou E-mail)</h3>
               <p className="text-xs text-slate-300">
-                Atendimento direto com a equipa da ProSegurança ({WHATSAPP_PHONE_DISPLAY})
+                Atendimento direto via WhatsApp ({WHATSAPP_PHONE_DISPLAY}) ou por E-mail ({EMAIL_DISPLAY})
               </p>
             </div>
           </div>
@@ -156,7 +177,7 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
             </div>
           )}
 
-          <form onSubmit={handleSendWhatsApp} className="space-y-6">
+          <form onSubmit={handleSubmitWhatsApp} className="space-y-6">
             {/* Step 1: Customer & Delivery Details */}
             <div>
               <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
@@ -339,20 +360,33 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
               <button
-                type="submit"
-                className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-700/30 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                type="button"
+                onClick={handleSubmitWhatsApp}
+                className="w-full sm:flex-1 py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/25 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 id="btn-final-whatsapp-submit"
+                title={`Enviar pedido para o WhatsApp ${WHATSAPP_PHONE_DISPLAY}`}
               >
-                <MessageSquare className="w-5 h-5 fill-white/20" />
-                <span>Enviar Pedido para {WHATSAPP_PHONE_DISPLAY}</span>
+                <MessageSquare className="w-4 h-4 fill-white/20" />
+                <span>Enviar via WhatsApp ({WHATSAPP_PHONE_DISPLAY})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSubmitEmail}
+                className="w-full sm:flex-1 py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer border border-slate-700"
+                id="btn-final-email-submit"
+                title={`Enviar pedido para o email ${EMAIL_DISPLAY}`}
+              >
+                <Mail className="w-4 h-4 text-amber-400" />
+                <span>Enviar por E-mail ({EMAIL_DISPLAY})</span>
               </button>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full sm:w-auto py-3.5 px-5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
+                className="w-full sm:w-auto py-3.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
               >
                 Voltar
               </button>

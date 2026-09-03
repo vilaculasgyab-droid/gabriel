@@ -10,12 +10,19 @@ import {
   ShieldCheck, 
   ChevronDown,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Mail
 } from 'lucide-react';
 import { ProSegurancaLogo } from './CategoryIcon';
 import { PWAInstallButton } from './PWAInstallButton';
 import { CATEGORIES } from '../data/categories';
-import { WHATSAPP_PHONE_DISPLAY, WHATSAPP_PHONE_RAW, formatCurrency, getGeneralWhatsAppChatUrl } from '../utils/whatsapp';
+import { 
+  WHATSAPP_PHONE_DISPLAY, 
+  WHATSAPP_PHONE_RAW, 
+  EMAIL_DISPLAY,
+  formatCurrency, 
+  getGeneralWhatsAppChatUrl 
+} from '../utils/whatsapp';
 
 interface NavbarProps {
   cartCount: number;
@@ -117,6 +124,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Phone className="w-3.5 h-3.5 text-amber-400" />
               <span>Ligar: {WHATSAPP_PHONE_DISPLAY}</span>
+            </a>
+            <a
+              href={`mailto:${EMAIL_DISPLAY}`}
+              className="hidden xl:flex items-center gap-1.5 text-slate-300 hover:text-amber-400 font-semibold transition-colors text-xs"
+              title={`Enviar e-mail para ${EMAIL_DISPLAY}`}
+            >
+              <Mail className="w-3.5 h-3.5 text-amber-400" />
+              <span>E-mail: {EMAIL_DISPLAY}</span>
             </a>
             <a
               href={`https://wa.me/${WHATSAPP_PHONE_RAW}`}
@@ -556,6 +571,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Phone className="w-4 h-4 text-amber-400" />
                 <span>Ligar Agora ({WHATSAPP_PHONE_DISPLAY})</span>
+              </a>
+
+              <a
+                href={`mailto:${EMAIL_DISPLAY}`}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+                id="mobile-nav-email-btn"
+              >
+                <Mail className="w-4 h-4 text-amber-400" />
+                <span>E-mail: {EMAIL_DISPLAY}</span>
               </a>
 
               <button
