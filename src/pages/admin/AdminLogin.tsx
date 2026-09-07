@@ -13,7 +13,7 @@ import {
   HardHat
 } from 'lucide-react';
 import { authService } from '../../services/authService';
-import { ProSegurancaLogo } from '../../components/CategoryIcon';
+import { FortiMozLogo } from '../../components/CategoryIcon';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -75,14 +75,14 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
         {/* Brand Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl mb-4">
-            <ProSegurancaLogo inverted={true} />
+            <FortiMozLogo inverted={true} />
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
             <Lock className="w-3.5 h-3.5" />
             <span>Área Administrativa Privada</span>
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">
-            Acesso à Gestão ProSegurança
+            Acesso à Gestão FortiMoz
           </h1>
           <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             Introduza as suas credenciais de administrador para gerir produtos, stock, pedidos e clientes.
@@ -110,7 +110,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@proseguranca.co.mz"
+                  placeholder="admin@fortimoz.co.mz"
                   className="w-full text-xs sm:text-sm pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
                 />
               </div>
@@ -178,8 +178,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                 </button>
               </div>
               <div className="font-mono text-left bg-slate-900 p-2 rounded-lg text-[10px] text-slate-300 select-all">
-                <div>E-mail: <strong>admin@proseguranca.co.mz</strong></div>
-                <div>Senha: <strong>ProSeguranca@2026</strong></div>
+                <div>E-mail: <strong>admin@fortimoz.co.mz</strong></div>
+                <div>Senha: <strong>FortiMoz@2026</strong></div>
               </div>
             </div>
           </div>

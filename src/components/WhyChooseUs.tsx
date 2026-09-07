@@ -76,10 +76,10 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-1.5 rounded-full mb-3">
             <ShieldCheck className="w-4 h-4" />
-            <span>Diferenciais ProSegurança</span>
+            <span>Diferenciais FortiMoz</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Por que escolher a ProSegurança?
+            Por que escolher a FortiMoz?
           </h2>
           <p className="text-sm sm:text-base text-slate-300 mt-3 leading-relaxed">
             Mais do que vender equipamentos de proteção, garantimos que a sua equipa trabalhe com máxima segurança, conformidade legal e tranquilidade.
@@ -117,7 +117,7 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
 
                 <div className="mt-6 pt-4 border-t border-slate-700/60 flex items-center gap-2 text-xs font-semibold text-amber-400">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Padrão de Excelência ProSegurança</span>
+                  <span>Padrão de Excelência FortiMoz</span>
                 </div>
               </div>
             );

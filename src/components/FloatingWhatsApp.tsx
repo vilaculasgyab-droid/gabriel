@@ -21,7 +21,7 @@ export const FloatingWhatsApp: React.FC<FloatingWhatsAppProps> = ({ onOpenQuoteM
                 <MessageSquare className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">Atendimento ProSegurança</h4>
+                <h4 className="text-xs font-bold text-white">Atendimento FortiMoz</h4>
                 <p className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Online • {WHATSAPP_PHONE_DISPLAY}

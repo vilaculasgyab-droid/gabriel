@@ -47,7 +47,7 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({ name, className = 'w
   }
 };
 
-export const ProSegurancaLogo: React.FC<{ className?: string; inverted?: boolean }> = ({ 
+export const FortiMozLogo: React.FC<{ className?: string; inverted?: boolean }> = ({ 
   className = '', 
   inverted = false 
 }) => {
@@ -62,8 +62,8 @@ export const ProSegurancaLogo: React.FC<{ className?: string; inverted?: boolean
       {/* Brand Text */}
       <div className="flex flex-col">
         <div className="flex items-center tracking-tight font-extrabold text-xl leading-none">
-          <span className={inverted ? 'text-white' : 'text-slate-950'}>PRO</span>
-          <span className="text-amber-500">SEGURANÇA</span>
+          <span className={inverted ? 'text-white' : 'text-slate-950'}>FORTI</span>
+          <span className="text-amber-500">MOZ</span>
         </div>
         <span className={`text-[10px] tracking-wider uppercase font-semibold mt-0.5 ${
           inverted ? 'text-slate-400' : 'text-slate-500'
@@ -74,3 +74,6 @@ export const ProSegurancaLogo: React.FC<{ className?: string; inverted?: boolean
     </div>
   );
 };
+
+// Aliased for seamless backwards compatibility
+export const ProSegurancaLogo = FortiMozLogo;

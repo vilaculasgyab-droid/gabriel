@@ -187,7 +187,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
     const phoneWithCountry = cleanPhone.startsWith('258') ? cleanPhone : `258${cleanPhone}`;
     const statusText = getStatusLabel(order.orderStatus);
     const msg = encodeURIComponent(
-      `Olá ${order.customerName},\n\nInformamos que o seu pedido *${order.orderNumber}* na *ProSegurança* foi atualizado para o estado: *${statusText}*.\n\nValor total: *${formatCurrency(order.totalAmount)}*\n\nEstamos à disposição para qualquer esclarecimento!\nProSegurança Moçambique`
+      `Olá ${order.customerName},\n\nInformamos que o seu pedido *${order.orderNumber}* na *FortiMoz* foi atualizado para o estado: *${statusText}*.\n\nValor total: *${formatCurrency(order.totalAmount)}*\n\nEstamos à disposição para qualquer esclarecimento!\nFortiMoz Moçambique`
     );
     window.open(`https://wa.me/${phoneWithCountry}?text=${msg}`, '_blank');
   };

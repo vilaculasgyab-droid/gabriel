@@ -23,8 +23,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 }) => {
   // Admin route MUST have strict noindex, nofollow to protect administrative areas
   useSEO({
-    title: 'Portal Administrativo | ProSegurança',
-    description: 'Área de administração restrita e gestão de encomendas da ProSegurança.',
+    title: 'Portal Administrativo | FortiMoz',
+    description: 'Área de administração restrita e gestão de encomendas da FortiMoz.',
     canonicalPath: '/admin',
     noindex: true,
   });

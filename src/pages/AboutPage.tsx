@@ -21,7 +21,7 @@ import {
   HeartHandshake,
   Mail
 } from 'lucide-react';
-import { ProSegurancaLogo } from '../components/CategoryIcon';
+import { FortiMozLogo } from '../components/CategoryIcon';
 import { 
   WHATSAPP_PHONE_DISPLAY, 
   EMAIL_DISPLAY,
@@ -37,8 +37,8 @@ interface AboutPageProps {
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
   useSEO({
-    title: 'Sobre a ProSegurança | Fornecedor de EPIs em Moçambique',
-    description: 'Conheça a ProSegurança, distribuidora de Equipamentos de Proteção Individual (EPIs) e segurança no trabalho para indústrias, construtoras e profissionais em Moçambique.',
+    title: 'Sobre a FortiMoz | Fornecedor de EPIs em Moçambique',
+    description: 'Conheça a FortiMoz, distribuidora de Equipamentos de Proteção Individual (EPIs) e segurança no trabalho para indústrias, construtoras e profissionais em Moçambique.',
     canonicalPath: '/sobre-nos',
     breadcrumbs: [
       { name: 'Início', path: '/' },
@@ -116,13 +116,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
           <div className="relative z-10 max-w-3xl">
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-1.5 rounded-full mb-4">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>Conheça a ProSegurança</span>
+              <span>Conheça a FortiMoz</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
               Proteção e Segurança para o seu Trabalho em Moçambique
             </h1>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-6">
-              A <strong>ProSegurança</strong> é referência no fornecimento de Equipamentos de Proteção Individual (EPIs) e soluções de segurança ocupacional, atendendo profissionais, construtoras e indústrias em todo o território moçambicano.
+              A <strong>FortiMoz</strong> é referência no fornecimento de Equipamentos de Proteção Individual (EPIs) e soluções de segurança ocupacional, atendendo profissionais, construtoras e indústrias em todo o território moçambicano.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <a

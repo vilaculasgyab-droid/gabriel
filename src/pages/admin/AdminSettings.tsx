@@ -32,8 +32,8 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   showToast,
 }) => {
   // Profile State
-  const [name, setName] = useState(adminUser?.name || 'Administrador ProSegurança');
-  const [email, setEmail] = useState(adminUser?.email || 'admin@proseguranca.co.mz');
+  const [name, setName] = useState(adminUser?.name || 'Administrador FortiMoz');
+  const [email, setEmail] = useState(adminUser?.email || 'admin@fortimoz.co.mz');
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Password State
@@ -47,7 +47,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   // Payment Gateway Settings (Mock/Config state for M-Pesa, e-Mola, Visa)
   const [mpesaShortcode, setMpesaShortcode] = useState('171717');
   const [mpesaEnv, setMpesaEnv] = useState<'sandbox' | 'production'>('sandbox');
-  const [emolaMerchantId, setEmolaMerchantId] = useState('EMOLA-PROSE-001');
+  const [emolaMerchantId, setEmolaMerchantId] = useState('EMOLA-FORTIMOZ-001');
   const [visaEnabled, setVisaEnabled] = useState(true);
 
   const handleSaveProfile = (e: React.FormEvent) => {
@@ -99,7 +99,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `proseguranca_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `fortimoz_backup_${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -1,5 +1,6 @@
 import { Product, Order, Customer, DashboardMetrics, OrderStatus, PaymentStatus, PaymentMethod, CartItem } from '../types';
 import { PRODUCTS } from '../data/products';
+import { imageStorage } from './imageStorage';
 
 const PRODUCTS_KEY = 'proseguranca_db_products_v1';
 const ORDERS_KEY = 'proseguranca_db_orders_v2';
@@ -73,7 +74,17 @@ export const storeDb = {
     };
 
     const updated = [newProduct, ...products];
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updated));
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Aviso: erro ao persistir no localStorage:', e);
+    }
+
+    // Backup custom image to IndexedDB
+    if (newProduct.image && newProduct.image.startsWith('data:')) {
+      imageStorage.saveImage(id, newProduct.image);
+    }
+
     notifyListeners();
     return newProduct;
   },
@@ -103,8 +114,18 @@ export const storeDb = {
       }
     }
 
+    // Persist custom image to IndexedDB
+    if (updates.image && updates.image.startsWith('data:')) {
+      imageStorage.saveImage(id, updates.image);
+    }
+
     products[index] = updatedProduct;
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    } catch (e) {
+      console.warn('Aviso: erro ao gravar produto atualizado no localStorage:', e);
+    }
+
     notifyListeners();
     return updatedProduct;
   },

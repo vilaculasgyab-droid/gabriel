@@ -42,7 +42,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             {/* Slogan pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/40 text-amber-400 text-xs sm:text-sm font-bold tracking-wide mb-5 shadow-lg">
               <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              <span>PROSEGURANÇA</span>
+              <span>FORTIMOZ</span>
               <span className="text-slate-500">•</span>
               <span className="text-slate-200">“Proteção e Segurança para o seu Trabalho”</span>
             </div>

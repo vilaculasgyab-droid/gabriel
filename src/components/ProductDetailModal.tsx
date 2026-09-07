@@ -22,6 +22,7 @@ import {
   EMAIL_DISPLAY
 } from '../utils/whatsapp';
 import { useSEO } from '../hooks/useSEO';
+import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -39,7 +40,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   if (!product) return null;
 
   useSEO({
-    title: `${product.name} | ProSegurança`,
+    title: `${product.name} | FortiMoz`,
     description: `${product.shortDescription || product.description} Preço: ${product.price} MZN. Disponibilidade: ${product.inStock ? 'Em Stock' : 'Sob Encomenda'}. Encomende via WhatsApp com entrega em Moçambique.`,
     canonicalPath: `/produto/${product.id}`,
     ogType: 'product',
@@ -98,6 +99,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   alt={product.name}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = DEFAULT_EPI_PLACEHOLDER;
+                  }}
                 />
                 {product.badge && (
                   <span className="absolute top-3 left-3 text-xs font-extrabold uppercase px-3 py-1 rounded-lg bg-amber-500 text-slate-950 shadow-md">

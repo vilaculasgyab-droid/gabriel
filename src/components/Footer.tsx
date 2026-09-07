@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProSegurancaLogo } from './CategoryIcon';
+import { FortiMozLogo } from './CategoryIcon';
 import { CATEGORIES } from '../data/categories';
 import { 
   Phone, 
@@ -68,7 +68,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
               }}
               className="cursor-pointer inline-block"
             >
-              <ProSegurancaLogo inverted={true} />
+              <FortiMozLogo inverted={true} />
             </a>
 
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-400 font-semibold italic">
@@ -306,7 +306,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © {new Date().getFullYear()} <strong>PROSEGURANÇA</strong>. Todos os direitos reservados.
+            © {new Date().getFullYear()} <strong>FORTIMOZ</strong>. Todos os direitos reservados.
             <span className="hidden sm:inline"> | Moçambique</span>
           </div>
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" fill="none">
+  <rect width="600" height="600" rx="32" fill="#0f172a"/>
+  <rect x="20" y="20" width="560" height="560" rx="24" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+  <circle cx="300" cy="270" r="90" fill="#334155" opacity="0.5"/>
+  <path d="M300 200C255 200 220 235 220 270H380C380 235 345 200 300 200Z" fill="#fbbf24"/>
+  <rect x="200" y="270" width="200" height="20" rx="6" fill="#f59e0b"/>
+  <path d="M290 200V185C290 182 295 180 300 180C305 180 310 182 310 185V200" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M300 320L340 345V390C340 415 320 435 300 445C280 435 260 415 260 390V345L300 320Z" fill="#0284c7" stroke="#38bdf8" stroke-width="4"/>
+  <path d="M285 380L295 390L318 365" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="300" y="495" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="22" font-weight="800" letter-spacing="1">FORTIMOZ EPI</text>
+  <text x="300" y="525" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="14" font-weight="600">Sem imagem definida para este produto</text>
+</svg>

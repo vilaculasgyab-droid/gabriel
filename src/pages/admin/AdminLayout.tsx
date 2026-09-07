@@ -18,7 +18,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { AdminUser, DashboardMetrics } from '../../types';
-import { ProSegurancaLogo } from '../../components/CategoryIcon';
+import { FortiMozLogo } from '../../components/CategoryIcon';
 
 export type AdminTab = 'dashboard' | 'products' | 'orders' | 'customers' | 'settings';
 
@@ -99,7 +99,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </button>
 
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleSelectTab('dashboard')}>
-              <ProSegurancaLogo inverted={true} />
+              <FortiMozLogo inverted={true} />
               <div className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/30 text-amber-400 text-[10px] font-black uppercase tracking-wider">
                 ADMIN
               </div>
@@ -129,7 +129,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   {adminUser?.name || 'Administrador'}
                 </div>
                 <div className="text-[10px] text-amber-400 font-medium">
-                  {adminUser?.email || 'admin@proseguranca.co.mz'}
+                  {adminUser?.email || 'admin@fortimoz.co.mz'}
                 </div>
               </div>
             </div>
@@ -214,7 +214,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           <div className="pt-4 border-t border-slate-800/80 text-[11px] text-slate-500">
             <div className="flex items-center gap-1.5 text-slate-400 font-semibold mb-1">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>ProSegurança v2.4</span>
+              <span>FortiMoz v2.4</span>
             </div>
             <div>Gestão de EPIs e Cotações</div>
           </div>
@@ -227,7 +227,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ProSegurancaLogo inverted={true} />
+                    <FortiMozLogo inverted={true} />
                   </div>
                   <button
                     onClick={() => setMobileSidebarOpen(false)}

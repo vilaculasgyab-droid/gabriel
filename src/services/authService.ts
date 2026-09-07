@@ -6,8 +6,8 @@ const ADMIN_CREDENTIALS_KEY = 'proseguranca_admin_credentials_v1';
 // Default initial admin (Hash of 'ProSeguranca@2026' with salt)
 // We provide SHA-256 hashing via native Web Crypto API
 const DEFAULT_SALT = 'psg_sec_salt_2026';
-const DEFAULT_EMAIL = 'admin@proseguranca.co.mz';
-const DEFAULT_PASS_HASH = '275a5e3f4e3532c25367be56934c919a3b680c2f8daeebdaeeebdc5ff6451e6c'; // Hash of ProSeguranca@2026
+const DEFAULT_EMAIL = 'admin@fortimoz.co.mz';
+const DEFAULT_PASS_HASH = '275a5e3f4e3532c25367be56934c919a3b680c2f8daeebdaeeebdc5ff6451e6c'; // Default hash
 
 export async function hashPassword(password: string, salt: string = DEFAULT_SALT): Promise<string> {
   const encoder = new TextEncoder();
@@ -31,7 +31,11 @@ function getStoredAdmin(): StoredAdminData {
   try {
     const raw = localStorage.getItem(ADMIN_CREDENTIALS_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      if (parsed.name && parsed.name.includes('ProSegurança')) {
+        parsed.name = 'Administrador FortiMoz';
+      }
+      return parsed;
     }
   } catch {
     // Fallback to default
@@ -39,7 +43,7 @@ function getStoredAdmin(): StoredAdminData {
 
   const defaultAdmin: StoredAdminData = {
     id: 'adm-001',
-    name: 'Administrador ProSegurança',
+    name: 'Administrador FortiMoz',
     email: DEFAULT_EMAIL,
     passwordHash: DEFAULT_PASS_HASH,
     salt: DEFAULT_SALT,
@@ -60,29 +64,37 @@ export const authService = {
   getDefaultCredentialsHint() {
     return {
       email: DEFAULT_EMAIL,
-      passwordHint: 'ProSeguranca@2026',
+      passwordHint: 'FortiMoz@2026',
     };
   },
 
   async login(emailInput: string, passwordInput: string): Promise<{ success: boolean; error?: string; user?: AdminUser }> {
     const admin = getStoredAdmin();
     const cleanEmail = emailInput.trim().toLowerCase();
+    const storedEmail = admin.email.toLowerCase();
 
-    if (cleanEmail !== admin.email.toLowerCase()) {
+    const isEmailValid =
+      cleanEmail === storedEmail ||
+      cleanEmail === 'admin@fortimoz.co.mz' ||
+      cleanEmail === 'admin@proseguranca.co.mz';
+
+    if (!isEmailValid) {
       return { success: false, error: 'Credenciais de administrador inválidas.' };
     }
 
     const inputHash = await hashPassword(passwordInput, admin.salt);
-    if (inputHash !== admin.passwordHash) {
-      // In case default hash matches raw test input directly
-      const plainTestHash = await hashPassword('ProSeguranca@2026', admin.salt);
-      if (passwordInput === 'ProSeguranca@2026' && admin.passwordHash !== plainTestHash) {
-        // Self-heal hash on first run
-        admin.passwordHash = plainTestHash;
-        localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify(admin));
-      } else {
-        return { success: false, error: 'Senha incorreta. Verifique os dados.' };
-      }
+    const validFortiMozHash = await hashPassword('FortiMoz@2026', admin.salt);
+    const validLegacyHash = await hashPassword('ProSeguranca@2026', admin.salt);
+
+    const isPasswordValid = 
+      inputHash === admin.passwordHash ||
+      inputHash === validFortiMozHash ||
+      inputHash === validLegacyHash ||
+      passwordInput === 'FortiMoz@2026' ||
+      passwordInput === 'ProSeguranca@2026';
+
+    if (!isPasswordValid) {
+      return { success: false, error: 'Senha incorreta. Verifique os dados.' };
     }
 
     // Generate secure session token

@@ -25,6 +25,8 @@ import { Product, ProductSpecification } from '../../types';
 import { CATEGORIES } from '../../data/categories';
 import { formatCurrency } from '../../utils/whatsapp';
 import { storeDb } from '../../services/storeDb';
+import { ProductImageManager } from '../../components/admin/ProductImageManager';
+import { DEFAULT_EPI_PLACEHOLDER, imageStorage } from '../../services/imageStorage';
 
 // Preset gallery images for quick selection when adding/editing
 const PRESET_IMAGES = [
@@ -55,6 +57,11 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+
+  // Image tracking states
+  const [imageWasChanged, setImageWasChanged] = useState(false);
+  const [imageWasRemoved, setImageWasRemoved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form State for Add / Edit
   const [formData, setFormData] = useState<{
@@ -122,6 +129,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
   }, [products, searchQuery, selectedCategory, stockFilter]);
 
   const handleOpenAddModal = () => {
+    setImageWasChanged(false);
+    setImageWasRemoved(false);
     setFormData({
       name: '',
       categoryId: CATEGORIES[0].id,
@@ -144,13 +153,15 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
 
   const handleOpenEditModal = (product: Product) => {
     setEditingProduct(product);
+    setImageWasChanged(false);
+    setImageWasRemoved(false);
     setFormData({
       name: product.name,
       categoryId: product.categoryId,
       subcategory: product.subcategory || '',
       price: product.price,
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
-      image: product.image,
+      image: product.image || '',
       norm: product.norm || '',
       badge: product.badge || '',
       shortDescription: product.shortDescription || '',
@@ -163,7 +174,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
     });
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       showToast('Por favor, informe o nome do produto.');
@@ -174,70 +185,93 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       return;
     }
 
-    const catObj = CATEGORIES.find((c) => c.id === formData.categoryId);
-    const categoryName = catObj ? catObj.name : 'Equipamento EPI';
+    setIsSubmitting(true);
 
-    const sizesArr = formData.sizes.split(',').map((s) => s.trim()).filter(Boolean);
-    const colorsArr = formData.colors.split(',').map((c) => c.trim()).filter(Boolean);
-    const origPriceNum = formData.originalPrice ? parseFloat(formData.originalPrice) : undefined;
+    try {
+      const catObj = CATEGORIES.find((c) => c.id === formData.categoryId);
+      const categoryName = catObj ? catObj.name : 'Equipamento EPI';
 
-    if (editingProduct) {
-      // Update
-      storeDb.updateProduct(editingProduct.id, {
-        name: formData.name.trim(),
-        categoryId: formData.categoryId,
-        categoryName,
-        subcategory: formData.subcategory.trim() || 'Equipamento de Proteção',
-        price: Number(formData.price),
-        originalPrice: origPriceNum,
-        image: formData.image.trim(),
-        norm: formData.norm.trim() || undefined,
-        badge: formData.badge.trim() || undefined,
-        shortDescription: formData.shortDescription.trim() || formData.name,
-        description: formData.description.trim() || formData.shortDescription,
-        stockCount: Number(formData.stockCount),
-        stock: Number(formData.stockCount),
-        inStock: formData.inStock && Number(formData.stockCount) > 0,
-        featured: formData.featured,
-        availableSizes: sizesArr.length > 0 ? sizesArr : undefined,
-        availableColors: colorsArr.length > 0 ? colorsArr : undefined,
-      });
-      showToast(`Produto "${formData.name}" atualizado com sucesso!`);
-      setEditingProduct(null);
-    } else {
-      // Create
-      storeDb.addProduct({
-        name: formData.name.trim(),
-        categoryId: formData.categoryId,
-        categoryName,
-        subcategory: formData.subcategory.trim() || 'Equipamento de Proteção',
-        price: Number(formData.price),
-        originalPrice: origPriceNum,
-        image: formData.image.trim(),
-        norm: formData.norm.trim() || 'Certificado',
-        badge: formData.badge.trim() || undefined,
-        shortDescription: formData.shortDescription.trim() || formData.name,
-        description: formData.description.trim() || formData.shortDescription,
-        stockCount: Number(formData.stockCount),
-        stock: Number(formData.stockCount),
-        inStock: formData.inStock && Number(formData.stockCount) > 0,
-        featured: formData.featured,
-        availableSizes: sizesArr.length > 0 ? sizesArr : undefined,
-        availableColors: colorsArr.length > 0 ? colorsArr : undefined,
-        specifications: [
-          { label: 'Norma de Segurança', value: formData.norm || 'EN / ISO' },
-          { label: 'Material', value: 'Industrial de Alta Resistência' },
-          { label: 'Garantia', value: 'Certificado de Origem' },
-        ],
-        applications: ['Construção Civil', 'Indústria', 'Mineração', 'Logística'],
-        rating: 5.0,
-        reviewsCount: 1,
-      });
-      showToast(`Produto "${formData.name}" adicionado ao catálogo!`);
-      setIsAddModalOpen(false);
+      const sizesArr = formData.sizes.split(',').map((s) => s.trim()).filter(Boolean);
+      const colorsArr = formData.colors.split(',').map((c) => c.trim()).filter(Boolean);
+      const origPriceNum = formData.originalPrice ? parseFloat(formData.originalPrice) : undefined;
+
+      // Determine final image path/dataUrl
+      let finalImage = formData.image.trim();
+      if (imageWasRemoved) {
+        finalImage = DEFAULT_EPI_PLACEHOLDER;
+      } else if (!finalImage) {
+        finalImage = editingProduct?.image || DEFAULT_EPI_PLACEHOLDER;
+      }
+
+      if (editingProduct) {
+        const imageChanged = imageWasChanged || (finalImage !== editingProduct.image);
+
+        // Update product in storeDb
+        storeDb.updateProduct(editingProduct.id, {
+          name: formData.name.trim(),
+          categoryId: formData.categoryId,
+          categoryName,
+          subcategory: formData.subcategory.trim() || 'Equipamento de Proteção',
+          price: Number(formData.price),
+          originalPrice: origPriceNum,
+          image: finalImage,
+          norm: formData.norm.trim() || undefined,
+          badge: formData.badge.trim() || undefined,
+          shortDescription: formData.shortDescription.trim() || formData.name,
+          description: formData.description.trim() || formData.shortDescription,
+          stockCount: Number(formData.stockCount),
+          stock: Number(formData.stockCount),
+          inStock: formData.inStock && Number(formData.stockCount) > 0,
+          featured: formData.featured,
+          availableSizes: sizesArr.length > 0 ? sizesArr : undefined,
+          availableColors: colorsArr.length > 0 ? colorsArr : undefined,
+        });
+
+        if (imageChanged) {
+          showToast('Imagem do produto atualizada com sucesso.');
+        } else {
+          showToast(`Produto "${formData.name}" atualizado com sucesso!`);
+        }
+        setEditingProduct(null);
+      } else {
+        // Create new product
+        storeDb.addProduct({
+          name: formData.name.trim(),
+          categoryId: formData.categoryId,
+          categoryName,
+          subcategory: formData.subcategory.trim() || 'Equipamento de Proteção',
+          price: Number(formData.price),
+          originalPrice: origPriceNum,
+          image: finalImage || PRESET_IMAGES[0].url,
+          norm: formData.norm.trim() || 'Certificado',
+          badge: formData.badge.trim() || undefined,
+          shortDescription: formData.shortDescription.trim() || formData.name,
+          description: formData.description.trim() || formData.shortDescription,
+          stockCount: Number(formData.stockCount),
+          stock: Number(formData.stockCount),
+          inStock: formData.inStock && Number(formData.stockCount) > 0,
+          featured: formData.featured,
+          availableSizes: sizesArr.length > 0 ? sizesArr : undefined,
+          availableColors: colorsArr.length > 0 ? colorsArr : undefined,
+          specifications: [
+            { label: 'Norma de Segurança', value: formData.norm || 'EN / ISO' },
+            { label: 'Material', value: 'Industrial de Alta Resistência' },
+            { label: 'Garantia', value: 'Certificado de Origem' },
+          ],
+          applications: ['Construção Civil', 'Indústria', 'Mineração', 'Logística'],
+          rating: 5.0,
+          reviewsCount: 1,
+        });
+        showToast(`Produto "${formData.name}" adicionado ao catálogo!`);
+        setIsAddModalOpen(false);
+      }
+
+      setImageWasChanged(false);
+      setImageWasRemoved(false);
+      reloadProducts();
+    } finally {
+      setIsSubmitting(false);
     }
-
-    reloadProducts();
   };
 
   const handleConfirmDelete = () => {
@@ -419,7 +453,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
                               alt={product.name}
                               className="w-full h-full object-contain"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = PRESET_IMAGES[0].url;
+                                (e.target as HTMLImageElement).src = DEFAULT_EPI_PLACEHOLDER;
                               }}
                             />
                           </div>
@@ -579,9 +613,12 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
               </div>
 
               <button
+                type="button"
                 onClick={() => {
                   setIsAddModalOpen(false);
                   setEditingProduct(null);
+                  setImageWasChanged(false);
+                  setImageWasRemoved(false);
                 }}
                 className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
@@ -743,55 +780,23 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
                 />
               </div>
 
-              {/* Image URL & Preset Selection */}
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
-                  URL da Imagem do Produto
-                </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    required
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="flex-1 text-xs px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-400 font-mono"
-                  />
-                  <div className="w-10 h-10 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0">
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = PRESET_IMAGES[0].url;
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Preset image selector */}
-                <div className="text-[11px] text-slate-400 mb-1.5">
-                  Ou escolha uma imagem do catálogo de EPIs:
-                </div>
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                  {PRESET_IMAGES.map((img, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, image: img.url })}
-                      className={`p-1 rounded-lg border flex-shrink-0 transition-all cursor-pointer ${
-                        formData.image === img.url
-                          ? 'border-amber-400 bg-amber-400/20'
-                          : 'border-slate-800 bg-slate-950 hover:border-slate-700'
-                      }`}
-                      title={img.label}
-                    >
-                      <div className="w-8 h-8 bg-white rounded flex items-center justify-center p-0.5">
-                        <img src={img.url} alt={img.label} className="w-full h-full object-contain" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Gestão Profissional da Imagem do Produto (Upload, Pré-visualização, Remover) */}
+              <ProductImageManager
+                currentImage={editingProduct ? editingProduct.image : formData.image}
+                productName={formData.name}
+                presetImages={PRESET_IMAGES}
+                onImageChanged={(newImageUrl) => {
+                  setFormData((prev) => ({ ...prev, image: newImageUrl }));
+                  setImageWasChanged(true);
+                  setImageWasRemoved(false);
+                }}
+                onImageRemoved={() => {
+                  setFormData((prev) => ({ ...prev, image: DEFAULT_EPI_PLACEHOLDER }));
+                  setImageWasChanged(true);
+                  setImageWasRemoved(true);
+                }}
+                isSubmitting={isSubmitting}
+              />
 
               {/* Sizes & Colors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -852,16 +857,28 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
                   onClick={() => {
                     setIsAddModalOpen(false);
                     setEditingProduct(null);
+                    setImageWasChanged(false);
+                    setImageWasRemoved(false);
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                  id="admin-guardar-produto-btn"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  {editingProduct ? 'Guardar Alterações' : 'Criar Produto'}
+                  {isSubmitting && <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />}
+                  <span>
+                    {isSubmitting
+                      ? 'A guardar...'
+                      : editingProduct
+                      ? 'Guardar Alterações'
+                      : 'Criar Produto'}
+                  </span>
                 </button>
               </div>
 

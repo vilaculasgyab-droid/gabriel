@@ -48,14 +48,14 @@ export const PWAInstallBanner: React.FC = () => {
             <div className="flex flex-col text-left">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-extrabold text-amber-400 tracking-wide uppercase">
-                  App ProSegurança
+                  App FortiMoz
                 </span>
                 <span className="hidden xs:inline-block text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-medium border border-slate-700">
                   Acesso Direto
                 </span>
               </div>
               <p className="text-xs sm:text-sm font-medium text-slate-200 line-clamp-1 sm:line-clamp-none">
-                <strong>Tenha a ProSegurança sempre consigo.</strong> Instale a nossa loja no seu telemóvel para acesso rápido.
+                <strong>Tenha a FortiMoz sempre consigo.</strong> Instale a nossa loja no seu telemóvel para acesso rápido.
               </p>
             </div>
           </div>
@@ -69,7 +69,7 @@ export const PWAInstallBanner: React.FC = () => {
               id="btn-install-pwa-banner"
             >
               <Download className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>{installing ? 'A instalar...' : 'Instalar ProSegurança'}</span>
+              <span>{installing ? 'A instalar...' : 'Instalar FortiMoz'}</span>
             </button>
 
             <button
@@ -107,7 +107,7 @@ export const PWAInstallBanner: React.FC = () => {
                 <ShieldCheck className="w-7 h-7 stroke-[2.2]" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Instalar ProSegurança no iPhone / iPad</h3>
+                <h3 className="text-base font-bold text-white">Instalar FortiMoz no iPhone / iPad</h3>
                 <p className="text-xs text-slate-400">Instalação direta no Safari em 2 passos simples:</p>
               </div>
             </div>

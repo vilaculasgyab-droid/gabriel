@@ -20,6 +20,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
+import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -54,7 +55,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   // Favorites state persisted in localStorage
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('proseguranca_favorites');
+      const saved = localStorage.getItem('fortimoz_favorites') || localStorage.getItem('proseguranca_favorites');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -68,6 +69,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         ? prev.filter((id) => id !== productId)
         : [...prev, productId];
       try {
+        localStorage.setItem('fortimoz_favorites', JSON.stringify(next));
         localStorage.setItem('proseguranca_favorites', JSON.stringify(next));
       } catch (err) {
         console.error(err);
@@ -548,6 +550,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = DEFAULT_EPI_PLACEHOLDER;
+                          }}
                         />
 
                         {/* Top Left Badge (e.g. Mais Vendido / Norm) */}

@@ -3,11 +3,11 @@ import { ADDRESS_DISPLAY, EMAIL_DISPLAY, WHATSAPP_PHONE_DISPLAY } from './whatsa
 
 /**
  * Production Site URL configuration
- * Defaults to the official ProSegurança domain or can be customized via VITE_SITE_URL.
+ * Defaults to the official FortiMoz domain or can be customized via VITE_SITE_URL.
  * In browser environments, if VITE_SITE_URL is not provided and the app is running on a live host,
  * it can adapt to window.location.origin while avoiding localhost in production.
  */
-export const DEFAULT_PRODUCTION_URL = 'https://proseguranca.co.mz';
+export const DEFAULT_PRODUCTION_URL = 'https://fortimoz.co.mz';
 
 export function getSiteUrl(): string {
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SITE_URL) {
@@ -70,8 +70,8 @@ export function buildStoreSchema(baseUrl: string) {
     '@context': 'https://schema.org',
     '@type': 'Store',
     '@id': `${baseUrl}/#store`,
-    name: 'ProSegurança',
-    alternateName: 'ProSegurança Moçambique - EPIs e Segurança no Trabalho',
+    name: 'FortiMoz',
+    alternateName: 'FortiMoz Moçambique - EPIs e Segurança no Trabalho',
     url: baseUrl,
     logo: `${baseUrl}/pwa-512x512.png`,
     image: `${baseUrl}/pwa-512x512.png`,
@@ -131,7 +131,7 @@ export function buildWebSiteSchema(baseUrl: string) {
     '@type': 'WebSite',
     '@id': `${baseUrl}/#website`,
     url: baseUrl,
-    name: 'ProSegurança',
+    name: 'FortiMoz',
     description: 'Equipamentos de Proteção Individual e Segurança no Trabalho em Moçambique',
     potentialAction: {
       '@type': 'SearchAction',
@@ -161,7 +161,7 @@ export function buildProductSchema(product: Product, baseUrl: string) {
     mpn: product.id,
     brand: {
       '@type': 'Brand',
-      name: 'ProSegurança',
+      name: 'FortiMoz',
     },
     category: product.categoryName,
     offers: {
@@ -175,7 +175,7 @@ export function buildProductSchema(product: Product, baseUrl: string) {
         product.inStock !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Store',
-        name: 'ProSegurança',
+        name: 'FortiMoz',
       },
       areaServed: 'Moçambique',
     },
@@ -271,7 +271,7 @@ export function updateDocumentSEO(props: SEOProps) {
   const canonicalUrl = getCanonicalUrl(canonicalPath);
 
   // 1. Title
-  const title = props.title || 'ProSegurança | Equipamentos de Segurança e EPI em Moçambique';
+  const title = props.title || 'FortiMoz | Equipamentos de Segurança e EPI em Moçambique';
   document.title = title;
 
   // 2. Meta Description
@@ -296,7 +296,7 @@ export function updateDocumentSEO(props: SEOProps) {
   setMetaTag('property', 'og:description', description);
   setMetaTag('property', 'og:url', canonicalUrl);
   setMetaTag('property', 'og:type', ogType);
-  setMetaTag('property', 'og:site_name', 'ProSegurança');
+  setMetaTag('property', 'og:site_name', 'FortiMoz');
   setMetaTag('property', 'og:locale', 'pt_MZ');
   setMetaTag('property', 'og:image', ogImage);
 
@@ -406,7 +406,7 @@ export function generateSitemapXml(
  * Generates Robots.txt content
  */
 export function generateRobotsTxt(baseUrl = DEFAULT_PRODUCTION_URL): string {
-  return `# robots.txt para ProSegurança (https://proseguranca.co.mz)
+  return `# robots.txt para FortiMoz (${baseUrl})
 # Permitir rastreamento das páginas e produtos públicos
 User-agent: *
 Allow: /

@@ -24,8 +24,8 @@ export default defineConfig(() => {
         ],
         manifest: {
           id: '/',
-          name: 'ProSegurança - EPIs e Segurança no Trabalho',
-          short_name: 'ProSegurança',
+          name: 'FortiMoz - EPIs e Segurança no Trabalho',
+          short_name: 'FortiMoz',
           description: 'Equipamentos de Proteção Individual (EPIs), calçado de segurança, capacetes, proteção respiratória e vestuário profissional em Moçambique.',
           theme_color: '#020617',
           background_color: '#020617',

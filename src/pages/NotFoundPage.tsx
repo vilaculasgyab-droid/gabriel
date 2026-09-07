@@ -30,8 +30,8 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
 
   // SEO: 404 must strictly have noindex, nofollow
   useSEO({
-    title: 'Página Não Encontrada (404) | ProSegurança',
-    description: 'A página solicitada não foi encontrada ou foi movida. Explore o catálogo oficial de EPIs e equipamentos de segurança da ProSegurança.',
+    title: 'Página Não Encontrada (404) | FortiMoz',
+    description: 'A página solicitada não foi encontrada ou foi movida. Explore o catálogo oficial de EPIs e equipamentos de segurança da FortiMoz.',
     canonicalPath: '/404',
     noindex: true,
   });
@@ -115,7 +115,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
             <ArrowRight className="w-4 h-4 text-slate-500" />
           </button>
           <a
-            href={getGeneralWhatsAppChatUrl('Olá, ProSegurança! Encontrei um link indisponível e gostaria de pedir informações sobre produtos.')}
+            href={getGeneralWhatsAppChatUrl('Olá, FortiMoz! Encontrei um link indisponível e gostaria de pedir informações sobre produtos.')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition-all hover:scale-105"
@@ -173,7 +173,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
         <div className="mt-8 text-xs text-slate-500 flex items-center justify-center gap-1.5">
           <HelpCircle className="w-4 h-4 text-slate-400" />
           <span>
-            Linha de Apoio ao Cliente ProSegurança:{' '}
+            Linha de Apoio ao Cliente FortiMoz:{' '}
             <a href="tel:+258846159254" className="font-bold text-slate-700 hover:text-amber-600 underline transition-colors">
               {WHATSAPP_PHONE_DISPLAY}
             </a>

@@ -91,7 +91,7 @@ const createSvgIcon = (size = 512, isMaskable = false) => {
                stroke-width="2"/>
     </g>
 
-    <!-- Typography "PRO" "SEGURANÇA" subtle monogram band -->
+    <!-- Typography "FORTIMOZ" subtle monogram band -->
     <text x="256" y="340" 
           text-anchor="middle" 
           font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" 
@@ -99,7 +99,7 @@ const createSvgIcon = (size = 512, isMaskable = false) => {
           font-weight="900" 
           letter-spacing="5" 
           fill="#fef3c7">
-      PROSEGURANÇA
+      FORTIMOZ
     </text>
     <text x="256" y="370" 
           text-anchor="middle" 
@@ -116,7 +116,7 @@ const createSvgIcon = (size = 512, isMaskable = false) => {
 };
 
 async function generateAllIcons() {
-  console.log('Generating PWA icons for ProSegurança...');
+  console.log('Generating PWA icons for FortiMoz...');
 
   const svgStandard = createSvgIcon(512, false);
   const svgMaskable = createSvgIcon(512, true);

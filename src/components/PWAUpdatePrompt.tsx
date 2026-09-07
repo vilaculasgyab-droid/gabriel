@@ -9,7 +9,7 @@ export const PWAUpdatePrompt: React.FC = () => {
   } = useRegisterSW({
     onRegistered(r) {
       if (r) {
-        console.log('Service Worker registered successfully for ProSegurança PWA');
+        console.log('Service Worker registered successfully for FortiMoz PWA');
       }
     },
     onRegisterError(error) {
@@ -46,7 +46,7 @@ export const PWAUpdatePrompt: React.FC = () => {
           </div>
 
           <p className="text-xs text-slate-200 mt-1 leading-snug">
-            Uma nova versão da ProSegurança com novidades no catálogo está disponível.
+            Uma nova versão da FortiMoz com novidades no catálogo está disponível.
           </p>
 
           <div className="mt-3 flex items-center gap-2">

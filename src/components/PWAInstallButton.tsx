@@ -53,7 +53,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
               <Download className="w-4 h-4 stroke-[2.5]" />
             </div>
             <div className="text-left">
-              <div className="text-white text-xs font-bold">Instalar ProSegurança</div>
+              <div className="text-white text-xs font-bold">Instalar FortiMoz</div>
               <div className="text-[10px] text-amber-400/80">Adicionar à tela inicial</div>
             </div>
           </div>
@@ -83,7 +83,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={installing}
-        title="Instalar loja ProSegurança no seu dispositivo"
+        title="Instalar loja FortiMoz no seu dispositivo"
         className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 hover:text-amber-300 text-xs font-bold border border-amber-400/30 transition-all cursor-pointer ${className}`}
         id="btn-install-pwa-navbar"
       >
@@ -119,7 +119,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
                 <ShieldCheck className="w-7 h-7 stroke-[2.2]" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Instalar ProSegurança no iOS</h3>
+                <h3 className="text-base font-bold text-white">Instalar FortiMoz no iOS</h3>
                 <p className="text-xs text-slate-400">Acesso instantâneo a partir da sua tela inicial:</p>
               </div>
             </div>

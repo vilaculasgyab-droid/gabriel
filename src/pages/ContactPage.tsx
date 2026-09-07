@@ -30,7 +30,7 @@ interface ContactPageProps {
 
 export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
   useSEO({
-    title: 'Contacte a ProSegurança | Atendimento e Cotações Moçambique',
+    title: 'Contacte a FortiMoz | Atendimento e Cotações Moçambique',
     description: `Fale connosco pelo WhatsApp (${WHATSAPP_PHONE_DISPLAY}) ou email (${EMAIL_DISPLAY}). Localização em Mozal, Boane. Cotações formais para empresas e obras em Moçambique.`,
     canonicalPath: '/contactos',
     breadcrumbs: [
@@ -68,7 +68,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenQuot
     if (!validateContact()) return;
 
     const messageText =
-      `Olá, ProSegurança! Mensagem enviada pela Página de Contactos:\n\n` +
+      `Olá, FortiMoz! Mensagem enviada pela Página de Contactos:\n\n` +
       `👤 Nome: ${formData.name}\n` +
       `📱 Telefone: ${formData.phone}\n` +
       `🏢 Empresa: ${formData.company || 'Não informada'}\n` +

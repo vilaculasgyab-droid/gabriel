@@ -1,4 +1,4 @@
-# robots.txt para ProSegurança (https://proseguranca.co.mz)
+# robots.txt para FortiMoz (https://fortimoz.co.mz)
 # Rastreamento público liberado para mecanismos de pesquisa
 User-agent: *
 Allow: /
@@ -45,4 +45,4 @@ Disallow: /checkout
 Disallow: /pedidos
 
 # Localização oficial do Sitemap
-Sitemap: https://proseguranca.co.mz/sitemap.xml
+Sitemap: https://fortimoz.co.mz/sitemap.xml

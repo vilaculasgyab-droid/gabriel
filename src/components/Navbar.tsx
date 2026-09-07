@@ -13,7 +13,7 @@ import {
   ExternalLink,
   Mail
 } from 'lucide-react';
-import { ProSegurancaLogo } from './CategoryIcon';
+import { FortiMozLogo } from './CategoryIcon';
 import { PWAInstallButton } from './PWAInstallButton';
 import { CATEGORIES } from '../data/categories';
 import { 
@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="cursor-pointer flex-shrink-0"
               id="nav-logo"
             >
-              <ProSegurancaLogo inverted={true} />
+              <FortiMozLogo inverted={true} />
             </a>
 
             {/* Desktop Navigation Links */}
@@ -486,7 +486,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 id="mobile-nav-sobre"
               >
-                Sobre a ProSegurança
+                Sobre a FortiMoz
               </a>
               <a
                 href="/vantagens"

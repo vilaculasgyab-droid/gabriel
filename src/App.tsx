@@ -95,7 +95,7 @@ export default function App() {
   // Cart state persisted to localStorage
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
-      const saved = localStorage.getItem('proseguranca_cart');
+      const saved = localStorage.getItem('fortimoz_cart') || localStorage.getItem('proseguranca_cart');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -212,7 +212,7 @@ export default function App() {
 
     if (currentPath.startsWith('/categoria/') && currentCategory) {
       return {
-        title: `${currentCategory.name} | ProSegurança Moçambique`,
+        title: `${currentCategory.name} | FortiMoz Moçambique`,
         description: `Comprar ${currentCategory.name.toLowerCase()} em Moçambique com qualidade certificada e pronta entrega. ${currentCategory.description}`,
         canonicalPath: `/categoria/${currentCategory.id}`,
         category: currentCategory,
@@ -226,7 +226,7 @@ export default function App() {
 
     if (currentPath === '/produtos') {
       return {
-        title: 'Catálogo de EPIs e Equipamentos de Segurança | ProSegurança',
+        title: 'Catálogo de EPIs e Equipamentos de Segurança | FortiMoz',
         description: 'Consulte o catálogo completo de Equipamentos de Proteção Individual (EPIs) em Moçambique. Capacetes, luvas, calçado de segurança e vestuário de proteção.',
         canonicalPath: '/produtos',
         breadcrumbs: [
@@ -238,7 +238,7 @@ export default function App() {
 
     // Default Home ('/')
     return {
-      title: 'ProSegurança | Equipamentos de Segurança e EPI em Moçambique',
+      title: 'FortiMoz | Equipamentos de Segurança e EPI em Moçambique',
       description: 'Loja online de Equipamentos de Proteção Individual (EPI) em Moçambique. Calçado de segurança, capacetes, proteção respiratória, luvas e vestuário profissional.',
       canonicalPath: '/',
       breadcrumbs: [
@@ -252,6 +252,7 @@ export default function App() {
   // Sync cart to localStorage
   useEffect(() => {
     try {
+      localStorage.setItem('fortimoz_cart', JSON.stringify(cartItems));
       localStorage.setItem('proseguranca_cart', JSON.stringify(cartItems));
     } catch (e) {
       console.error('Failed to save cart to localStorage', e);
