@@ -20,17 +20,31 @@ function getEnv(name: string): string {
   return '';
 }
 
-const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
-const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
+// Safe public keys for client-side queries (Never includes service_role)
+export function getClientSupabaseUrl(): string {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) {
+    return String(import.meta.env.VITE_SUPABASE_URL).trim();
+  }
+  return (getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL')).trim();
+}
+
+export function getClientSupabaseAnonKey(): string {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) {
+    return String(import.meta.env.VITE_SUPABASE_ANON_KEY).trim();
+  }
+  return (getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY')).trim();
+}
 
 let supabaseInstance: SupabaseClient | null = null;
 
 export function isSupabaseConfigured(): boolean {
+  const url = getClientSupabaseUrl();
+  const key = getClientSupabaseAnonKey();
   return Boolean(
-    supabaseUrl &&
-    supabaseAnonKey &&
-    supabaseUrl.startsWith('http') &&
-    supabaseAnonKey.length > 20
+    url &&
+    key &&
+    url.startsWith('http') &&
+    key.length > 20
   );
 }
 
@@ -39,7 +53,9 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
   if (!supabaseInstance) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+    const url = getClientSupabaseUrl();
+    const key = getClientSupabaseAnonKey();
+    supabaseInstance = createClient(url, key, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,

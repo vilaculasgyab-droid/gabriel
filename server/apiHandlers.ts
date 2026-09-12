@@ -11,6 +11,7 @@ import {
 } from './storeData';
 import {
   isSupabaseServerConfigured,
+  fetchProductsFromSupabaseDetailed,
   fetchProductsFromSupabase,
   fetchProductByIdFromSupabase,
   upsertProductInSupabaseDetailed,
@@ -33,46 +34,51 @@ export function setApiNoCacheHeaders(res: Response) {
 }
 
 // GET /api/products
+// Supabase é a ÚNICA fonte de verdade dos produtos. Sem fallback silencioso local.
 export async function handleGetProducts(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   try {
-    if (isSupabaseServerConfigured()) {
-      const supabaseProducts = await fetchProductsFromSupabase();
-      if (supabaseProducts && supabaseProducts.length > 0) {
-        return res.json({
-          success: true,
-          source: 'supabase',
-          count: supabaseProducts.length,
-          timestamp: new Date().toISOString(),
-          products: supabaseProducts,
-        });
-      }
+    const queryResult = await fetchProductsFromSupabaseDetailed();
 
-      // Se o Supabase estiver configurado mas falhar na consulta, reportar o erro explicitamente
-      if (supabaseProducts === null) {
-        return res.status(403).json({
-          success: false,
-          source: 'supabase_permission_error',
-          supabaseStatus: 'permission_denied',
-          products: [],
-          error: 'Acesso à tabela public.products bloqueado por permissões do PostgreSQL no Supabase (permission denied for table products).',
-          hint: 'Execute o script fix-supabase-permissions.sql no SQL Editor do Supabase para conceder GRANT SELECT ON public.products TO anon, service_role;',
-        });
-      }
+    if (queryResult.success && queryResult.data) {
+      return res.status(200).json({
+        success: true,
+        source: 'supabase',
+        count: queryResult.data.length,
+        timestamp: new Date().toISOString(),
+        products: queryResult.data,
+      });
     }
 
-    // Fallback gracioso para dados locais quando o Supabase ainda não estiver configurado
-    const products = getStoredProducts();
-    return res.json({
-      success: true,
-      source: 'local_fallback',
-      count: products.length,
-      timestamp: new Date().toISOString(),
-      products,
+    // Se o Supabase retornou erro ou não está configurado, logar detalhadamente e responder com o erro real
+    const supaError = queryResult.error;
+    console.error('[API /api/products] Falha ao consultar Supabase:', {
+      code: supaError?.code,
+      message: supaError?.message,
+      details: supaError?.details,
+      hint: supaError?.hint,
+    });
+
+    const statusCode = supaError?.code === '42501' ? 403 : supaError?.code === 'MISSING_ENV_VARS' ? 503 : 500;
+
+    return res.status(statusCode).json({
+      success: false,
+      source: 'supabase_error',
+      products: [],
+      error: supaError?.message || 'Falha ao consultar produtos no Supabase.',
+      code: supaError?.code,
+      details: supaError?.details,
+      hint: supaError?.hint,
     });
   } catch (err: any) {
-    console.error('[API] Erro ao obter produtos:', err);
-    return res.status(500).json({ success: false, error: 'Falha ao obter catálogo de produtos.' });
+    console.error('[API /api/products] Exceção inesperada no servidor:', err);
+    return res.status(500).json({
+      success: false,
+      source: 'server_exception',
+      products: [],
+      error: err?.message || 'Erro inesperado no servidor ao processar produtos.',
+      details: String(err?.stack || err),
+    });
   }
 }
 

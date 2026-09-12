@@ -11,19 +11,22 @@ const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
 const UPLOADS_DIR = path.resolve(process.cwd(), 'public', 'uploads', 'products');
 const DIST_UPLOADS_DIR = path.resolve(process.cwd(), 'dist', 'uploads', 'products');
 
-// Ensure directories exist
+// Ensure directories exist safely (handles read-only serverless filesystems like Vercel)
 function ensureDirs() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  }
-  // If dist exists, also ensure dist uploads directory
-  if (fs.existsSync(path.resolve(process.cwd(), 'dist'))) {
-    if (!fs.existsSync(DIST_UPLOADS_DIR)) {
-      fs.mkdirSync(DIST_UPLOADS_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    }
+    if (fs.existsSync(path.resolve(process.cwd(), 'dist'))) {
+      if (!fs.existsSync(DIST_UPLOADS_DIR)) {
+        fs.mkdirSync(DIST_UPLOADS_DIR, { recursive: true });
+      }
+    }
+  } catch {
+    // Read-only filesystem (e.g. Vercel / AWS Lambda), ignore directory creation error
   }
 }
 

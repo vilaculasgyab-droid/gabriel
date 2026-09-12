@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { handleHealthCheck } from '../server/apiHandlers';
+import { handleSupabaseStatus } from '../../server/apiHandlers';
 
-export default function handler(req: Request, res: Response) {
+export default async function handler(req: Request, res: Response) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
@@ -11,6 +11,10 @@ export default function handler(req: Request, res: Response) {
     return res.status(200).end();
   }
 
-  return handleHealthCheck(req, res);
+  if (req.method === 'GET') {
+    return await handleSupabaseStatus(req, res);
+  } else {
+    res.setHeader('Allow', ['GET']);
+    return res.status(405).json({ error: `Método ${req.method} não permitido.` });
+  }
 }
-

@@ -1002,7 +1002,9 @@
     "stockCount": 130,
     "featured": true,
     "rating": 4.9,
-    "reviewsCount": 46
+    "reviewsCount": 46,
+    "notes": "Test update verification",
+    "updatedAt": "2026-09-12T19:03:03.486Z"
   },
   {
     "id": "tamp-silicone",

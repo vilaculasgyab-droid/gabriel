@@ -7,6 +7,7 @@ import { mapDbRowToProduct, mapProductToDbRow, mapDbRowToOrder, mapOrderToDbRow 
 const BUCKET_NAME = 'product-images';
 
 let adminClient: SupabaseClient | null = null;
+let readClient: SupabaseClient | null = null;
 
 export function getSupabaseUrl(): string {
   return (
@@ -16,12 +17,27 @@ export function getSupabaseUrl(): string {
   ).trim();
 }
 
-export function getSupabaseKey(): string {
+export function getSupabaseServiceRoleKey(): string {
   return (
+    process.env.SUPABASE_SERVICE_ROLE ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY ||
+    ''
+  ).trim();
+}
+
+export function getSupabaseAnonKey(): string {
+  return (
     process.env.SUPABASE_ANON_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY ||
     ''
+  ).trim();
+}
+
+export function getSupabaseKey(): string {
+  return (
+    getSupabaseServiceRoleKey() ||
+    getSupabaseAnonKey()
   ).trim();
 }
 
@@ -31,14 +47,44 @@ export function isSupabaseServerConfigured(): boolean {
   return Boolean(url && key && url.startsWith('http') && key.length > 20);
 }
 
+/**
+ * Cliente para leitura pública (pode utilizar SUPABASE_SERVICE_ROLE ou SUPABASE_ANON_KEY).
+ */
+export function getSupabaseReadClient(): SupabaseClient | null {
+  const url = getSupabaseUrl();
+  const key = getSupabaseKey();
+  if (!url || !key) return null;
+
+  if (!readClient) {
+    readClient = createClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  }
+  return readClient;
+}
+
+/**
+ * Cliente administrativo do Supabase (prioriza SUPABASE_SERVICE_ROLE para operações protegidas).
+ */
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (!isSupabaseServerConfigured()) {
     return null;
   }
   if (!adminClient) {
     const url = getSupabaseUrl();
-    const key = getSupabaseKey();
-    adminClient = createClient(url, key, {
+    const serviceRoleKey = getSupabaseServiceRoleKey();
+    const keyToUse = serviceRoleKey || getSupabaseAnonKey();
+
+    if (serviceRoleKey) {
+      console.log('[Supabase Admin] Inicializado com chave de serviço protegida (SUPABASE_SERVICE_ROLE).');
+    } else {
+      console.warn('[Supabase Admin] SUPABASE_SERVICE_ROLE não encontrada; utilizando chave anônima para o backend.');
+    }
+
+    adminClient = createClient(url, keyToUse, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -46,6 +92,19 @@ export function getSupabaseAdmin(): SupabaseClient | null {
     });
   }
   return adminClient;
+}
+
+export interface SupabaseDetailedError {
+  code?: string;
+  message: string;
+  details?: string;
+  hint?: string;
+}
+
+export interface SupabaseQueryResult<T> {
+  success: boolean;
+  data?: T;
+  error?: SupabaseDetailedError;
 }
 
 /**
@@ -82,11 +141,39 @@ export async function ensureProductStorageBucket(): Promise<boolean> {
 }
 
 /**
- * Busca todos os produtos do Supabase (public.products).
+ * Busca todos os produtos do Supabase (public.products) com diagnóstico completo de erro.
  */
-export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
-  const client = getSupabaseAdmin();
-  if (!client) return null;
+export async function fetchProductsFromSupabaseDetailed(): Promise<SupabaseQueryResult<Product[]>> {
+  const url = getSupabaseUrl();
+  const key = getSupabaseKey();
+
+  if (!url || !key) {
+    const missing: string[] = [];
+    if (!url) missing.push('SUPABASE_URL');
+    if (!key) missing.push('SUPABASE_ANON_KEY ou SUPABASE_SERVICE_ROLE');
+    const msg = `Variáveis de ambiente do Supabase não configuradas no servidor: ${missing.join(', ')}`;
+    console.error('[Supabase DB Config Error]', msg);
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_ENV_VARS',
+        message: msg,
+        details: 'Adicione SUPABASE_URL e SUPABASE_ANON_KEY (ou SUPABASE_SERVICE_ROLE) no painel de ambiente da Vercel ou do servidor.',
+        hint: 'Defina as variáveis de ambiente e realize novo deploy.',
+      },
+    };
+  }
+
+  const client = getSupabaseReadClient();
+  if (!client) {
+    return {
+      success: false,
+      error: {
+        code: 'CLIENT_INIT_FAILED',
+        message: 'Falha ao inicializar o cliente Supabase no backend.',
+      },
+    };
+  }
 
   try {
     const { data, error } = await client
@@ -95,20 +182,46 @@ export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
       .order('id', { ascending: true });
 
     if (error) {
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
-        console.warn('[Supabase DB] Permissão pendente na tabela public.products (42501). Execute o script fix-supabase-permissions.sql no SQL Editor do Supabase.');
-      } else {
-        console.error('[Supabase DB] Erro na consulta de produtos:', error.message);
-      }
-      return null;
+      console.error('[Supabase DB Error] Código:', error.code);
+      console.error('[Supabase DB Error] Mensagem:', error.message);
+      if (error.details) console.error('[Supabase DB Error] Detalhes:', error.details);
+      if (error.hint) console.error('[Supabase DB Error] Hint:', error.hint);
+
+      return {
+        success: false,
+        error: {
+          code: error.code || 'DB_ERROR',
+          message: error.message || 'Erro ao consultar tabela public.products.',
+          details: error.details,
+          hint: error.hint || (error.code === '42501' ? 'Execute fix-supabase-permissions.sql no SQL Editor do Supabase.' : undefined),
+        },
+      };
     }
 
-    if (!data) return [];
-    return data.map(mapDbRowToProduct);
-  } catch (err) {
-    console.error('[Supabase DB] Exceção ao buscar produtos:', err);
-    return null;
+    const mapped = (data || []).map(mapDbRowToProduct);
+    return {
+      success: true,
+      data: mapped,
+    };
+  } catch (err: any) {
+    console.error('[Supabase DB Exception] Exceção ao buscar produtos:', err);
+    return {
+      success: false,
+      error: {
+        code: 'EXCEPTION',
+        message: err?.message || 'Exceção não tratada ao consultar o Supabase.',
+        details: String(err?.stack || err),
+      },
+    };
   }
+}
+
+/**
+ * Busca todos os produtos do Supabase (public.products).
+ */
+export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
+  const result = await fetchProductsFromSupabaseDetailed();
+  return result.success && result.data ? result.data : null;
 }
 
 /**

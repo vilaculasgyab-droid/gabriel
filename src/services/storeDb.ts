@@ -134,7 +134,17 @@ export const storeDb = {
       } else {
         try {
           const errData = await res.json();
-          lastSupabaseError = errData?.error || `Erro HTTP ${res.status} ao consultar Supabase.`;
+          const mainError = typeof errData?.error === 'string' ? errData.error : (errData?.error?.message || errData?.message);
+          const hint = errData?.hint || errData?.error?.hint;
+          const details = errData?.details || errData?.error?.details;
+          const code = errData?.code || errData?.error?.code;
+
+          let formatted = mainError || `Erro HTTP ${res.status} ao consultar Supabase.`;
+          if (code) formatted += ` [Código: ${code}]`;
+          if (details && details !== mainError) formatted += ` - ${details}`;
+          if (hint) formatted += ` (${hint})`;
+
+          lastSupabaseError = formatted;
         } catch {
           lastSupabaseError = `Erro HTTP ${res.status} ao consultar Supabase.`;
         }
