@@ -31,6 +31,9 @@ interface ProductCatalogProps {
   onSearchChange: (query: string) => void;
   onAddToCart: (product: Product, quantity: number, selectedSize?: string, selectedColor?: string) => void;
   onViewProductDetails: (product: Product) => void;
+  isLoading?: boolean;
+  errorMessage?: string | null;
+  onRetry?: () => void;
 }
 
 type SortOption = 'featured' | 'newest' | 'price-asc' | 'price-desc' | 'rating-desc' | 'name-asc';
@@ -45,6 +48,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   onSearchChange,
   onAddToCart,
   onViewProductDetails,
+  isLoading = false,
+  errorMessage = null,
+  onRetry,
 }) => {
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [availability, setAvailability] = useState<AvailabilityFilter>('all');
@@ -452,8 +458,43 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           </div>
         </div>
 
+        {/* Loading state from Supabase */}
+        {isLoading && products.length === 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-3.5 pt-1">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-200 p-3.5 flex flex-col animate-pulse">
+                <div className="w-full aspect-square bg-slate-200 rounded-xl mb-3"></div>
+                <div className="h-3 bg-slate-200 rounded w-1/3 mb-2"></div>
+                <div className="h-4 bg-slate-200 rounded w-4/5 mb-3"></div>
+                <div className="h-5 bg-slate-200 rounded w-1/2 mt-auto"></div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Supabase Error state */}
+        {!isLoading && errorMessage && products.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-2xl border border-rose-200 p-8 max-w-md mx-auto">
+            <div className="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <SlidersHorizontal className="w-7 h-7" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Não foi possível carregar os produtos</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mb-6">
+              {errorMessage}
+            </p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="inline-flex items-center gap-2 bg-slate-900 text-amber-400 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer shadow"
+              >
+                <span>Tentar Novamente</span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Empty state when no products match */}
-        {filteredProducts.length === 0 && (
+        {!isLoading && !errorMessage && filteredProducts.length === 0 && (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 max-w-md mx-auto">
             <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Search className="w-7 h-7" />

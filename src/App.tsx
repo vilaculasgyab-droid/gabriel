@@ -81,26 +81,55 @@ export default function App() {
 
   const currentRoute = useMemo(() => parseRoute(currentPath), [currentPath]);
 
-  // Dynamic Products state synchronized with storeDb
+  // Dynamic Products state synchronized exclusively with Supabase
   const [products, setProducts] = useState<Product[]>(() => storeDb.getProducts());
+  const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(() => !storeDb.hasLoadedFromSupabase());
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  const refreshProductsFromSupabase = async (force = true) => {
+    try {
+      setProductsError(null);
+      const ok = await storeDb.syncWithServer(force);
+      const current = storeDb.getProducts();
+      if (current.length > 0) {
+        setProducts(current);
+        setProductsError(null);
+      } else if (!ok) {
+        setProductsError(storeDb.getLastError() || 'Não foi possível carregar os produtos do Supabase.');
+      }
+    } catch (err: any) {
+      setProductsError(err?.message || 'Falha ao conectar com o Supabase.');
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
 
   useEffect(() => {
-    // Initial sync with remote server database to load fresh product catalog
-    storeDb.syncWithServer(true);
+    // Initial sync with remote Supabase database to load fresh product catalog
+    refreshProductsFromSupabase(true);
 
     const unsubscribe = storeDb.subscribe(() => {
       setProducts(storeDb.getProducts());
+      setIsLoadingProducts(false);
     });
 
     // Re-check for new images or products when user returns to window/tab
     const handleFocus = () => {
-      storeDb.syncWithServer(false);
+      refreshProductsFromSupabase(false);
     };
     window.addEventListener('focus', handleFocus);
     window.addEventListener('online', handleFocus);
 
+    // Polling suave a cada 20 segundos em primeiro plano para refletir alterações de outros dispositivos
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        storeDb.syncWithServer(false);
+      }
+    }, 20000);
+
     return () => {
       unsubscribe();
+      clearInterval(pollInterval);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('online', handleFocus);
     };
@@ -449,6 +478,12 @@ export default function App() {
             {/* Featured Products Section (Main Showcase) */}
             <ProductCatalog
               products={products}
+              isLoading={isLoadingProducts}
+              errorMessage={productsError}
+              onRetry={() => {
+                setIsLoadingProducts(true);
+                refreshProductsFromSupabase(true);
+              }}
               selectedCategory={selectedCategory}
               onSelectCategory={(catId) => {
                 setSelectedCategory(catId);

@@ -7,7 +7,7 @@
     "subcategory": "Coletes refletores",
     "price": 290,
     "originalPrice": 380,
-    "image": "/products/prod_colete_laranja_1788241390542.jpg",
+    "image": "https://ixubqdyqjxqpmnbwfhhi.supabase.co/storage/v1/object/public/product-images/prod_colete_laranja_1788241390542.jpg?v=1789235833975",
     "badge": "Mais Vendido",
     "norm": "EN ISO 20471 Classe 2",
     "shortDescription": "Colete fluorescente laranja com faixas retrorrefletivas de 50mm, fecho central e bolsos funcionais.",
@@ -46,7 +46,8 @@
       "XXL"
     ],
     "rating": 4.9,
-    "reviewsCount": 48
+    "reviewsCount": 48,
+    "updatedAt": "2026-09-12T18:50:48.732Z"
   },
   {
     "id": "ref-02",

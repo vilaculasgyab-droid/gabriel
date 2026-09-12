@@ -89,14 +89,19 @@ export default defineConfig(() => {
               handler: 'NetworkOnly',
             },
             {
+              // Supabase REST data queries must ALWAYS be NetworkOnly (source of truth)
+              urlPattern: /.*supabase\.co\/rest\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
               // Supabase Storage images must prefer the network with NetworkFirst
               urlPattern: /.*supabase\.co\/storage\/v1\/object\/public\/product-images\/.*/i,
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'fortimoz-supabase-images',
-                networkTimeoutSeconds: 3,
+                networkTimeoutSeconds: 2,
                 expiration: {
-                  maxEntries: 100,
+                  maxEntries: 120,
                   maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days fallback
                 },
                 cacheableResponse: {

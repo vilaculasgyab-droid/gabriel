@@ -27,6 +27,7 @@ import { formatCurrency } from '../../utils/whatsapp';
 import { storeDb } from '../../services/storeDb';
 import { ProductImageManager } from '../../components/admin/ProductImageManager';
 import { DEFAULT_EPI_PLACEHOLDER, imageStorage } from '../../services/imageStorage';
+import { resolveProductImageUrl } from '../../utils/imageUtils';
 
 // Preset gallery images for quick selection when adding/editing
 const PRESET_IMAGES = [
@@ -527,7 +528,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl bg-white p-1 border border-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             <img
-                              src={product.image}
+                              src={resolveProductImageUrl(product.image, product.updatedAt)}
                               alt={product.name}
                               className="w-full h-full object-contain"
                               onError={(e) => {

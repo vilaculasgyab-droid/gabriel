@@ -126,11 +126,39 @@ export async function handleCreateProduct(req: Request, res: Response) {
   }
 }
 
+// GET /api/products/:id
+export async function handleGetProductById(req: Request, res: Response) {
+  setApiNoCacheHeaders(res);
+  try {
+    const id = (req.params?.id || (req.query?.id as string)) as string;
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
+    }
+
+    if (isSupabaseServerConfigured()) {
+      const product = await fetchProductByIdFromSupabase(id);
+      if (product) {
+        return res.json({ success: true, source: 'supabase', product });
+      }
+      return res.status(404).json({ success: false, error: `Produto com ID ${id} não encontrado no Supabase.` });
+    }
+
+    const localProduct = getStoredProducts().find((p) => p.id === id);
+    if (localProduct) {
+      return res.json({ success: true, source: 'local_fallback', product: localProduct });
+    }
+    return res.status(404).json({ success: false, error: 'Produto não encontrado.' });
+  } catch (err: any) {
+    console.error('[API] Erro ao buscar produto por ID:', err);
+    return res.status(500).json({ success: false, error: 'Falha ao buscar produto.' });
+  }
+}
+
 // PUT /api/products/:id
 export async function handleUpdateProduct(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   try {
-    const { id } = req.params;
+    const id = (req.params?.id || (req.query?.id as string) || req.body?.id) as string;
     const updates = req.body;
     if (!id) {
       return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
@@ -192,7 +220,7 @@ export async function handleUpdateProduct(req: Request, res: Response) {
 export async function handleDeleteProduct(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   try {
-    const { id } = req.params;
+    const id = (req.params?.id || (req.query?.id as string) || req.body?.id) as string;
     if (!id) {
       return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
     }

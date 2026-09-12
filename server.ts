@@ -14,6 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import {
   handleGetProducts,
+  handleGetProductById,
   handleCreateProduct,
   handleUpdateProduct,
   handleDeleteProduct,
@@ -82,6 +83,7 @@ async function startServer() {
   // ----------------------------------------------------
   app.get('/api/health', handleHealthCheck);
   app.get('/api/products', handleGetProducts);
+  app.get('/api/products/:id', handleGetProductById);
   app.post('/api/products', handleCreateProduct);
   app.put('/api/products/:id', handleUpdateProduct);
   app.delete('/api/products/:id', handleDeleteProduct);

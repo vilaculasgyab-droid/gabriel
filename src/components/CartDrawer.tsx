@@ -13,6 +13,7 @@ import {
   Truck
 } from 'lucide-react';
 import { formatCurrency, WHATSAPP_PHONE_DISPLAY } from '../utils/whatsapp';
+import { resolveProductImageUrl } from '../utils/imageUtils';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -112,7 +113,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       {/* Thumbnail */}
                       <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 overflow-hidden flex-shrink-0">
                         <img
-                          src={item.product.image}
+                          src={resolveProductImageUrl(item.product.image, item.product.updatedAt)}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"

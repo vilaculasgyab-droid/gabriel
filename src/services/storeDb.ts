@@ -26,6 +26,7 @@ let inMemoryProducts: Product[] | null = null;
 let inMemoryOrders: Order[] | null = null;
 let isSyncingProducts = false;
 let isSyncingOrders = false;
+let hasLoadedFromSupabase = false;
 let lastProductSyncTimestamp = 0;
 let lastOrderSyncTimestamp = 0;
 let lastProductSyncSource: 'supabase_direct' | 'server_api' | 'cache' | 'none' = 'none';
@@ -37,12 +38,30 @@ export const storeDb = {
     return () => listeners.delete(listener);
   },
 
+  hasLoadedFromSupabase(): boolean {
+    return hasLoadedFromSupabase;
+  },
+
+  isSyncing(): boolean {
+    return isSyncingProducts;
+  },
+
+  getLastError(): string | null {
+    return lastSupabaseError;
+  },
+
+  invalidateCache(): void {
+    lastProductSyncTimestamp = 0;
+    try {
+      localStorage.removeItem(PRODUCTS_KEY);
+    } catch {}
+  },
+
   /**
-   * Sincroniza o catálogo de produtos com o Supabase.
-   * Prioridade:
+   * Sincroniza o catálogo de produtos exclusivamente com o Supabase.
+   * O Supabase é a ÚNICA fonte de verdade dos produtos.
    * 1. Supabase Client direto (quando configurado no frontend via VITE_SUPABASE_URL)
-   * 2. Endpoint do servidor /api/products (que consulta Supabase via backend seguro)
-   * 3. Cache local de fallback
+   * 2. Endpoint seguro /api/products (que consulta public.products via service_role)
    */
   async syncWithServer(force = false): Promise<boolean> {
     const now = Date.now();
@@ -52,7 +71,7 @@ export const storeDb = {
 
     isSyncingProducts = true;
     try {
-      // 1. Tentar conexão direta com Supabase Client no frontend
+      // 1. Consulta direta ao Supabase Client se configurado no frontend
       if (isSupabaseConfigured()) {
         const client = getSupabaseClient();
         if (client) {
@@ -64,29 +83,28 @@ export const storeDb = {
 
             if (error) {
               lastSupabaseError = error.message;
-              console.warn('[storeDb] Supabase DB retornou erro na consulta direta de produtos:', error.message);
+              console.warn('[storeDb] Supabase DB retornou erro na consulta direta:', error.message);
             } else if (Array.isArray(data) && data.length > 0) {
               const mapped = data.map(mapDbRowToProduct);
               inMemoryProducts = mapped;
+              hasLoadedFromSupabase = true;
               lastProductSyncSource = 'supabase_direct';
               lastSupabaseError = null;
               try {
                 localStorage.setItem(PRODUCTS_KEY, JSON.stringify(mapped));
-              } catch {
-                // ignore
-              }
+              } catch {}
               notifyListeners();
               lastProductSyncTimestamp = Date.now();
               return true;
             }
           } catch (supaErr: any) {
             lastSupabaseError = supaErr?.message || String(supaErr);
-            console.warn('[storeDb] Consulta direta ao Supabase falhou, tentando API do servidor:', supaErr);
+            console.warn('[storeDb] Consulta direta falhou, tentando API do servidor:', supaErr);
           }
         }
       }
 
-      // 2. Consulta via API do servidor (/api/products com no-cache)
+      // 2. Consulta via API do servidor (/api/products com cabeçalhos no-cache estritos)
       const res = await fetch(`/api/products?_t=${now}`, {
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -99,29 +117,31 @@ export const storeDb = {
         if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
           const remoteProducts: Product[] = data.products;
           inMemoryProducts = remoteProducts;
+          hasLoadedFromSupabase = true;
           lastProductSyncSource = data.source === 'supabase' ? 'server_api' : 'cache';
           lastSupabaseError = null;
           try {
             localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
           } catch (e) {
-            console.warn('Falha ao guardar catálogo no localStorage:', e);
+            console.warn('Falha ao guardar cache temporário:', e);
           }
           notifyListeners();
           lastProductSyncTimestamp = Date.now();
           return true;
+        } else {
+          lastSupabaseError = data?.error || 'Nenhum produto retornado do Supabase.';
         }
       } else {
         try {
           const errData = await res.json();
-          if (errData && errData.error) {
-            lastSupabaseError = errData.error;
-          }
+          lastSupabaseError = errData?.error || `Erro HTTP ${res.status} ao consultar Supabase.`;
         } catch {
-          // ignore
+          lastSupabaseError = `Erro HTTP ${res.status} ao consultar Supabase.`;
         }
       }
-    } catch (err) {
-      console.warn('[storeDb] Servidor remoto não alcançado, operando com cache local.');
+    } catch (err: any) {
+      lastSupabaseError = err?.message || 'Servidor remoto não alcançado.';
+      console.warn('[storeDb] Erro ao sincronizar com Supabase:', err);
     } finally {
       isSyncingProducts = false;
     }
@@ -198,7 +218,7 @@ export const storeDb = {
   },
 
   // ----------------------------------------------------
-  // PRODUCTS
+  // PRODUCTS (Supabase is the sole source of truth)
   // ----------------------------------------------------
   getProducts(): Product[] {
     if (inMemoryProducts && inMemoryProducts.length > 0) {
@@ -206,11 +226,15 @@ export const storeDb = {
     }
 
     try {
-      const raw = localStorage.getItem(PRODUCTS_KEY) || localStorage.getItem(LEGACY_PRODUCTS_KEY);
+      const raw = localStorage.getItem(PRODUCTS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
           inMemoryProducts = parsed;
+          // Dispara revalidação em segundo plano para garantir frescor
+          if (!isSyncingProducts && Date.now() - lastProductSyncTimestamp > 3000) {
+            setTimeout(() => this.syncWithServer(false), 50);
+          }
           return parsed;
         }
       }
@@ -218,14 +242,11 @@ export const storeDb = {
       // ignore
     }
 
-    // Inicializa com os 41 produtos reais oficiais do catálogo
-    inMemoryProducts = [...PRODUCTS];
-    try {
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(inMemoryProducts));
-    } catch (e) {
-      console.error('Failed to save initial products', e);
+    // Se ainda não carregou do Supabase e não há cache, dispara sync imediato
+    if (!isSyncingProducts) {
+      setTimeout(() => this.syncWithServer(true), 10);
     }
-    return inMemoryProducts;
+    return [];
   },
 
   getProductById(id: string): Product | undefined {

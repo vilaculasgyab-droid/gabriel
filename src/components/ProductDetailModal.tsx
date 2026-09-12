@@ -96,7 +96,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div>
               <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-white shadow-inner mb-4 border border-slate-200">
                 <img
-                  src={product.image}
+                  src={resolveProductImageUrl(product.image, product.updatedAt)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
