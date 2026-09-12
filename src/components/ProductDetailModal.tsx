@@ -23,6 +23,7 @@ import {
 } from '../utils/whatsapp';
 import { useSEO } from '../hooks/useSEO';
 import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
+import { resolveProductImageUrl } from '../utils/imageUtils';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -44,7 +45,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     description: `${product.shortDescription || product.description} Preço: ${product.price} MZN. Disponibilidade: ${product.inStock ? 'Em Stock' : 'Sob Encomenda'}. Encomende via WhatsApp com entrega em Moçambique.`,
     canonicalPath: `/produto/${product.id}`,
     ogType: 'product',
-    ogImage: product.image,
+    ogImage: resolveProductImageUrl(product.image, product.updatedAt),
     product,
     breadcrumbs: [
       { name: 'Início', path: '/' },

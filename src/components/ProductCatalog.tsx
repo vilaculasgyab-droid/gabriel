@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
 import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
+import { resolveProductImageUrl } from '../utils/imageUtils';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -545,7 +546,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                       {/* 1. Large Image with Top-Right Heart Favorite */}
                       <div className="relative aspect-square w-full bg-slate-50/70 border-b border-slate-100 flex items-center justify-center p-3 overflow-hidden">
                         <img
-                          src={product.image}
+                          src={resolveProductImageUrl(product.image, product.updatedAt)}
                           alt={product.name}
                           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"

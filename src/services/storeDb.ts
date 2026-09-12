@@ -1,12 +1,12 @@
 import { Product, Order, Customer, DashboardMetrics, OrderStatus, PaymentStatus, PaymentMethod, CartItem } from '../types';
 import { PRODUCTS } from '../data/products';
 import { imageStorage } from './imageStorage';
+import { isSupabaseConfigured, getSupabaseClient, mapDbRowToProduct, mapDbRowToOrder } from '../lib/supabase';
 
-const PRODUCTS_KEY = 'proseguranca_db_products_v1';
-const ORDERS_KEY = 'proseguranca_db_orders_v2';
-
-// Legacy keys to clean up old mock/demo data
-const LEGACY_ORDERS_KEY = 'proseguranca_db_orders_v1';
+const PRODUCTS_KEY = 'fortimoz_db_products_v2';
+const LEGACY_PRODUCTS_KEY = 'proseguranca_db_products_v1';
+const ORDERS_KEY = 'fortimoz_db_orders_v2';
+const LEGACY_ORDERS_KEY = 'proseguranca_db_orders_v2';
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -21,21 +21,177 @@ function notifyListeners() {
   });
 }
 
+// In-memory runtime cache for instantaneous synchronous reads
+let inMemoryProducts: Product[] | null = null;
+let inMemoryOrders: Order[] | null = null;
+let isSyncingProducts = false;
+let isSyncingOrders = false;
+let lastProductSyncTimestamp = 0;
+let lastOrderSyncTimestamp = 0;
+
 export const storeDb = {
   subscribe(listener: Listener): () => void {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
 
+  /**
+   * Sincroniza o catálogo de produtos com o Supabase.
+   * Prioridade:
+   * 1. Supabase Client direto (quando configurado no frontend via VITE_SUPABASE_URL)
+   * 2. Endpoint do servidor /api/products (que consulta Supabase via backend seguro)
+   * 3. Cache local de fallback
+   */
+  async syncWithServer(force = false): Promise<boolean> {
+    const now = Date.now();
+    if (isSyncingProducts || (!force && now - lastProductSyncTimestamp < 1500)) {
+      return false;
+    }
+
+    isSyncingProducts = true;
+    try {
+      // 1. Tentar conexão direta com Supabase Client no frontend
+      if (isSupabaseConfigured()) {
+        const client = getSupabaseClient();
+        if (client) {
+          try {
+            const { data, error } = await client
+              .from('products')
+              .select('*')
+              .order('id', { ascending: true });
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+              const mapped = data.map(mapDbRowToProduct);
+              inMemoryProducts = mapped;
+              try {
+                localStorage.setItem(PRODUCTS_KEY, JSON.stringify(mapped));
+              } catch {
+                // ignore
+              }
+              notifyListeners();
+              lastProductSyncTimestamp = Date.now();
+              return true;
+            }
+          } catch (supaErr) {
+            console.warn('[storeDb] Consulta direta ao Supabase falhou, tentando API do servidor:', supaErr);
+          }
+        }
+      }
+
+      // 2. Consulta via API do servidor (/api/products com no-cache)
+      const res = await fetch(`/api/products?_t=${now}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+          const remoteProducts: Product[] = data.products;
+          inMemoryProducts = remoteProducts;
+          try {
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
+          } catch (e) {
+            console.warn('Falha ao guardar catálogo no localStorage:', e);
+          }
+          notifyListeners();
+          lastProductSyncTimestamp = Date.now();
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('[storeDb] Servidor remoto não alcançado, operando com cache local.');
+    } finally {
+      isSyncingProducts = false;
+    }
+    return false;
+  },
+
+  /**
+   * Sincroniza a lista de encomendas com o Supabase/Servidor.
+   */
+  async syncOrdersWithServer(force = false): Promise<boolean> {
+    const now = Date.now();
+    if (isSyncingOrders || (!force && now - lastOrderSyncTimestamp < 2000)) {
+      return false;
+    }
+
+    isSyncingOrders = true;
+    try {
+      // 1. Tentar Supabase direto se configurado
+      if (isSupabaseConfigured()) {
+        const client = getSupabaseClient();
+        if (client) {
+          try {
+            const { data, error } = await client
+              .from('orders')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!error && Array.isArray(data)) {
+              const mapped = data.map(mapDbRowToOrder);
+              inMemoryOrders = mapped;
+              try {
+                localStorage.setItem(ORDERS_KEY, JSON.stringify(mapped));
+              } catch {
+                // ignore
+              }
+              notifyListeners();
+              lastOrderSyncTimestamp = Date.now();
+              return true;
+            }
+          } catch (e) {
+            // fallback
+          }
+        }
+      }
+
+      // 2. Tentar API do servidor
+      const res = await fetch(`/api/orders?_t=${now}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.orders)) {
+          inMemoryOrders = data.orders;
+          try {
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(data.orders));
+          } catch (e) {
+            // ignore
+          }
+          notifyListeners();
+          lastOrderSyncTimestamp = Date.now();
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('[storeDb] Falha ao sincronizar pedidos com o servidor.');
+    } finally {
+      isSyncingOrders = false;
+    }
+    return false;
+  },
+
   // ----------------------------------------------------
-  // PRODUCTS (Keeps the real catalog of PPEs intact)
+  // PRODUCTS
   // ----------------------------------------------------
   getProducts(): Product[] {
+    if (inMemoryProducts && inMemoryProducts.length > 0) {
+      return inMemoryProducts;
+    }
+
     try {
-      const raw = localStorage.getItem(PRODUCTS_KEY);
+      const raw = localStorage.getItem(PRODUCTS_KEY) || localStorage.getItem(LEGACY_PRODUCTS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          inMemoryProducts = parsed;
           return parsed;
         }
       }
@@ -43,13 +199,14 @@ export const storeDb = {
       // ignore
     }
 
-    // Initialize with default real PRODUCTS catalog
+    // Inicializa com os 41 produtos reais oficiais do catálogo
+    inMemoryProducts = [...PRODUCTS];
     try {
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(PRODUCTS));
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(inMemoryProducts));
     } catch (e) {
       console.error('Failed to save initial products', e);
     }
-    return PRODUCTS;
+    return inMemoryProducts;
   },
 
   getProductById(id: string): Product | undefined {
@@ -60,7 +217,8 @@ export const storeDb = {
   addProduct(productData: Omit<Product, 'id'> & { id?: string }): Product {
     const products = this.getProducts();
     const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-    
+    const now = new Date().toISOString();
+
     const newProduct: Product = {
       ...productData,
       id,
@@ -69,23 +227,33 @@ export const storeDb = {
       stock: productData.stockCount ?? (productData.stock ?? 25),
       rating: productData.rating || 5.0,
       reviewsCount: productData.reviewsCount || 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     const updated = [newProduct, ...products];
+    inMemoryProducts = updated;
     try {
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updated));
     } catch (e) {
       console.warn('Aviso: erro ao persistir no localStorage:', e);
     }
 
-    // Backup custom image to IndexedDB
     if (newProduct.image && newProduct.image.startsWith('data:')) {
       imageStorage.saveImage(id, newProduct.image);
     }
 
     notifyListeners();
+
+    // Sincronizar criação com Supabase via servidor protegido
+    fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProduct),
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao sincronizar novo produto:', err);
+    });
+
     return newProduct;
   },
 
@@ -95,13 +263,13 @@ export const storeDb = {
     if (index === -1) return null;
 
     const current = products[index];
+    const now = new Date().toISOString();
     const updatedProduct: Product = {
       ...current,
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
     };
 
-    // Keep inStock synchronized with stock count if stock changed
     if (updates.stockCount !== undefined) {
       updatedProduct.stock = updates.stockCount;
       if (updates.inStock === undefined) {
@@ -114,19 +282,30 @@ export const storeDb = {
       }
     }
 
-    // Persist custom image to IndexedDB
+    products[index] = updatedProduct;
+    inMemoryProducts = [...products];
+
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(inMemoryProducts));
+    } catch (e) {
+      console.warn('Aviso: erro ao persistir no localStorage:', e);
+    }
+
     if (updates.image && updates.image.startsWith('data:')) {
       imageStorage.saveImage(id, updates.image);
     }
 
-    products[index] = updatedProduct;
-    try {
-      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
-    } catch (e) {
-      console.warn('Aviso: erro ao gravar produto atualizado no localStorage:', e);
-    }
-
     notifyListeners();
+
+    // Sincronizar atualização com Supabase via servidor protegido
+    fetch(`/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedProduct),
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao sincronizar atualização:', err);
+    });
+
     return updatedProduct;
   },
 
@@ -135,8 +314,21 @@ export const storeDb = {
     const filtered = products.filter((p) => p.id !== id);
     if (filtered.length === products.length) return false;
 
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(filtered));
+    inMemoryProducts = filtered;
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(filtered));
+    } catch {
+      // ignore
+    }
     notifyListeners();
+
+    // Sincronizar exclusão com Supabase via servidor protegido
+    fetch(`/api/products/${id}`, {
+      method: 'DELETE',
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao sincronizar eliminação:', err);
+    });
+
     return true;
   },
 
@@ -167,10 +359,13 @@ export const storeDb = {
   },
 
   // ----------------------------------------------------
-  // ORDERS (Strictly starts empty with 0 orders, no mock data)
+  // ORDERS
   // ----------------------------------------------------
   getOrders(): Order[] {
-    // Purge legacy mock data if present
+    if (inMemoryOrders) {
+      return inMemoryOrders;
+    }
+
     try {
       if (localStorage.getItem(LEGACY_ORDERS_KEY)) {
         localStorage.removeItem(LEGACY_ORDERS_KEY);
@@ -184,7 +379,6 @@ export const storeDb = {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          // Filter out any leftover mock orders with IDs containing mock references
           const realOrders = parsed.filter(
             (o) =>
               o &&
@@ -197,6 +391,7 @@ export const storeDb = {
               o.customerName !== 'Alberto Cossa' &&
               o.customerName !== 'Dr. Fernando Machava'
           );
+          inMemoryOrders = realOrders;
           return realOrders;
         }
       }
@@ -204,7 +399,7 @@ export const storeDb = {
       // ignore
     }
 
-    // Default to empty array (0 orders)
+    inMemoryOrders = [];
     return [];
   },
 
@@ -260,7 +455,7 @@ export const storeDb = {
       updatedAt: new Date().toISOString(),
     };
 
-    // Deduct stock for ordered products
+    // Atualiza estoque local
     data.items.forEach((item) => {
       const prod = this.getProductById(item.product.id);
       if (prod && typeof prod.stockCount === 'number') {
@@ -270,8 +465,23 @@ export const storeDb = {
     });
 
     const updated = [newOrder, ...orders];
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(updated));
+    inMemoryOrders = updated;
+    try {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
     notifyListeners();
+
+    // Sincronizar com Supabase via servidor
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder),
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao sincronizar encomenda com o servidor:', err);
+    });
+
     return newOrder;
   },
 
@@ -286,8 +496,23 @@ export const storeDb = {
     }
     orders[index].updatedAt = new Date().toISOString();
 
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    inMemoryOrders = [...orders];
+    try {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    } catch {
+      // ignore
+    }
     notifyListeners();
+
+    // Sincronizar atualização de status com o servidor / Supabase
+    fetch(`/api/orders/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderStatus: status }),
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao atualizar status do pedido no servidor:', err);
+    });
+
     return true;
   },
 
@@ -302,8 +527,23 @@ export const storeDb = {
     }
     orders[index].updatedAt = new Date().toISOString();
 
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    inMemoryOrders = [...orders];
+    try {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    } catch {
+      // ignore
+    }
     notifyListeners();
+
+    // Sincronizar atualização de pagamento com o servidor / Supabase
+    fetch(`/api/orders/${id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentStatus: status }),
+    }).catch((err) => {
+      console.warn('[storeDb] Erro ao atualizar status de pagamento no servidor:', err);
+    });
+
     return true;
   },
 
@@ -312,13 +552,18 @@ export const storeDb = {
     const filtered = orders.filter((o) => o.id !== id);
     if (filtered.length === orders.length) return false;
 
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(filtered));
+    inMemoryOrders = filtered;
+    try {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(filtered));
+    } catch {
+      // ignore
+    }
     notifyListeners();
     return true;
   },
 
   // ----------------------------------------------------
-  // CUSTOMERS (Derived purely from real client orders)
+  // CUSTOMERS (Derivado das encomendas reais)
   // ----------------------------------------------------
   getCustomers(): Customer[] {
     const orders = this.getOrders();
@@ -409,6 +654,8 @@ export const storeDb = {
   // RESET / BACKUP
   // ----------------------------------------------------
   resetToDefaults(): void {
+    inMemoryProducts = [...PRODUCTS];
+    inMemoryOrders = [];
     localStorage.setItem(PRODUCTS_KEY, JSON.stringify(PRODUCTS));
     localStorage.setItem(ORDERS_KEY, JSON.stringify([]));
     try {

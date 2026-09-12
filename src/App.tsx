@@ -86,10 +86,25 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>(() => storeDb.getProducts());
 
   useEffect(() => {
+    // Initial sync with remote server database to load fresh product catalog
+    storeDb.syncWithServer(true);
+
     const unsubscribe = storeDb.subscribe(() => {
       setProducts(storeDb.getProducts());
     });
-    return () => unsubscribe();
+
+    // Re-check for new images or products when user returns to window/tab
+    const handleFocus = () => {
+      storeDb.syncWithServer(false);
+    };
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('online', handleFocus);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('online', handleFocus);
+    };
   }, []);
 
   // Cart state persisted to localStorage

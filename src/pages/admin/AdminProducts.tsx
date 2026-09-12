@@ -203,6 +203,34 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         finalImage = editingProduct?.image || DEFAULT_EPI_PLACEHOLDER;
       }
 
+      // Se for uma imagem base64 pendente de gravação no servidor, tenta fazer upload
+      if (finalImage.startsWith('data:')) {
+        try {
+          const prodId = editingProduct?.id || formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30);
+          const upRes = await fetch('/api/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: prodId,
+              dataUrl: finalImage,
+              fileName: `${prodId}.webp`,
+              previousImageUrl: editingProduct?.image,
+            }),
+          });
+          if (upRes.ok) {
+            const upData = await upRes.json();
+            if (upData && upData.url) {
+              finalImage = upData.url;
+            }
+          }
+        } catch (upErr) {
+          console.warn('Upload da imagem para o servidor falhou, utilizando armazenamento direto:', upErr);
+        }
+      } else if (!finalImage.startsWith('blob:') && !finalImage.includes('?v=') && finalImage !== DEFAULT_EPI_PLACEHOLDER) {
+        // Assegura token de versionamento para cache busting em URLs normais
+        finalImage = `${finalImage}${finalImage.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      }
+
       if (editingProduct) {
         const imageChanged = imageWasChanged || (finalImage !== editingProduct.image);
 
@@ -228,7 +256,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         });
 
         if (imageChanged) {
-          showToast('Imagem do produto atualizada com sucesso.');
+          showToast('Imagem do produto atualizada com sucesso no catálogo!');
         } else {
           showToast(`Produto "${formData.name}" atualizado com sucesso!`);
         }

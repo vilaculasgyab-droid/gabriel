@@ -134,8 +134,32 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
       // 3. Process & optimize in the background for instant saving readiness
       const optimized = await optimizeAndEncodeImage(file, 1000, 1000, 0.85);
 
-      // Pass the optimized dataUrl up to parent so it's staged for saving
-      onImageChanged(optimized.dataUrl, optimized);
+      // 4. Try uploading directly to server for permanent versioned URL
+      let finalUrl = optimized.dataUrl;
+      try {
+        const cleanName = (productName || file.name).toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30);
+        const res = await fetch('/api/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: cleanName,
+            dataUrl: optimized.dataUrl,
+            fileName: file.name,
+          }),
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.url) {
+            finalUrl = json.url;
+          }
+        }
+      } catch (uploadErr) {
+        console.warn('Upload direto falhou, continuando com dataUrl otimizada:', uploadErr);
+      }
+
+      // Pass the versioned server URL or optimized dataUrl up to parent
+      onImageChanged(finalUrl, { ...optimized, dataUrl: finalUrl });
     } catch (err: any) {
       console.error('Erro ao processar imagem:', err);
       setErrorMessage(
@@ -182,7 +206,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
   const handleSelectPreset = (url: string) => {
     handleCancelNewImage();
     setIsRemoved(false);
-    onImageChanged(url, null);
+    // Assegura query string de versionamento para cache busting em presets
+    const versionedUrl = url.includes('?v=') ? url : `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+    onImageChanged(versionedUrl, null);
   };
 
   // Determine current active image for preview

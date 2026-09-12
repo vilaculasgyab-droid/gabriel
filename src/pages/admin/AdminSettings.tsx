@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   ShieldCheck, 
@@ -14,7 +14,11 @@ import {
   Lock,
   Smartphone,
   Globe,
-  ExternalLink
+  ExternalLink,
+  RefreshCw,
+  Cloud,
+  Server,
+  UploadCloud
 } from 'lucide-react';
 import { AdminUser } from '../../types';
 import { authService } from '../../services/authService';
@@ -49,6 +53,59 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [mpesaEnv, setMpesaEnv] = useState<'sandbox' | 'production'>('sandbox');
   const [emolaMerchantId, setEmolaMerchantId] = useState('EMOLA-FORTIMOZ-001');
   const [visaEnabled, setVisaEnabled] = useState(true);
+
+  // Supabase State & Migration
+  const [supabaseStatus, setSupabaseStatus] = useState<{
+    configured: boolean;
+    connected?: boolean;
+    productCount?: number;
+    orderCount?: number;
+    storageBucketReady?: boolean;
+    error?: string;
+  } | null>(null);
+  const [checkingSupabase, setCheckingSupabase] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [migrationResult, setMigrationResult] = useState<any>(null);
+
+  const fetchSupabaseStatus = async () => {
+    setCheckingSupabase(true);
+    try {
+      const res = await fetch('/api/supabase/status');
+      if (res.ok) {
+        const data = await res.json();
+        setSupabaseStatus(data);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setCheckingSupabase(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupabaseStatus();
+  }, []);
+
+  const handleStartMigration = async () => {
+    setMigrating(true);
+    setMigrationResult(null);
+    try {
+      const res = await fetch('/api/supabase/migrate', { method: 'POST' });
+      const data = await res.json();
+      setMigrationResult(data);
+      if (data.success) {
+        showToast('Migração para Supabase concluída com sucesso!');
+        fetchSupabaseStatus();
+        storeDb.syncWithServer(true);
+      } else {
+        showToast(data.error || 'Falha ao migrar para o Supabase');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Erro de rede na migração');
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -345,43 +402,134 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
         </div>
 
-        {/* Database & Backup */}
+        {/* Database & Supabase Integration */}
         <div className="bg-slate-900 rounded-3xl border border-slate-800 p-5 sm:p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-800">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center">
-              <Database className="w-4 h-4" />
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center">
+                <Database className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Base de Dados & Supabase</h3>
+                <p className="text-[11px] text-slate-400">Migração, sincronização e armazenamento em nuvem</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">Base de Dados & Cópias de Segurança</h3>
-              <p className="text-[11px] text-slate-400">Gestão de armazenamento local e exportação de relatórios</p>
-            </div>
+
+            <button
+              onClick={fetchSupabaseStatus}
+              disabled={checkingSupabase}
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+              title="Recarregar estado do Supabase"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${checkingSupabase ? 'animate-spin text-amber-400' : ''}`} />
+            </button>
           </div>
 
           <div className="space-y-3">
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Compatibilidade com Backend & Supabase</span>
+            {/* Supabase Status Banner */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs font-bold text-white">Status Supabase (Produção)</span>
+                </div>
+                {supabaseStatus?.connected ? (
+                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Conectado
+                  </span>
+                ) : supabaseStatus?.configured ? (
+                  <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold">
+                    A Conectar...
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full font-bold">
+                    Aguardando .env
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                O modelo de dados de Produtos, Pedidos e Clientes foi totalmente estruturado em JSON padronizado com IDs UUID, timestamps ISO e esquemas relacionais, permitindo migração imediata para Supabase, PostgreSQL ou Firebase sem necessidade de refatoração.
-              </p>
+
+              {/* Status details grid */}
+              <div className="grid grid-cols-3 gap-2 text-[11px]">
+                <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                  <span className="text-slate-400 block text-[10px]">Tabela Produtos</span>
+                  <strong className="text-white font-bold text-xs">
+                    {supabaseStatus?.productCount !== undefined ? `${supabaseStatus.productCount} no Supabase` : 'Pronto'}
+                  </strong>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                  <span className="text-slate-400 block text-[10px]">Tabela Pedidos</span>
+                  <strong className="text-white font-bold text-xs">
+                    {supabaseStatus?.orderCount !== undefined ? `${supabaseStatus.orderCount} no Supabase` : '0 pedidos'}
+                  </strong>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                  <span className="text-slate-400 block text-[10px]">Bucket Imagens</span>
+                  <strong className="text-white font-bold text-xs">
+                    {supabaseStatus?.storageBucketReady ? 'product-images' : 'Configurado'}
+                  </strong>
+                </div>
+              </div>
+
+              {/* Migration Trigger Button */}
+              <div className="pt-1">
+                <button
+                  onClick={handleStartMigration}
+                  disabled={migrating}
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {migrating ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                      <span>A Migrar Dados e Imagens para Supabase...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-4 h-4 text-slate-950" />
+                      <span>Executar Migração dos Dados para o Supabase</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Migration Log Summary Box */}
+              {migrationResult && (
+                <div className={`p-3 rounded-xl border text-[11px] space-y-1.5 ${
+                  migrationResult.success ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-200' : 'bg-red-950/40 border-red-500/30 text-red-200'
+                }`}>
+                  <div className="font-bold flex items-center gap-1.5">
+                    {migrationResult.success ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
+                    <span>{migrationResult.message || (migrationResult.success ? 'Migração concluída!' : 'Erro na migração')}</span>
+                  </div>
+                  {migrationResult.summary && (
+                    <div className="text-[10px] text-slate-300 space-y-0.5 pt-1 border-t border-slate-800/60 font-mono">
+                      <div>• Produtos migrados: {migrationResult.summary.productsInsertedOrUpdated}</div>
+                      <div>• Imagens enviadas para Storage: {migrationResult.summary.imagesUploaded}</div>
+                      <div>• Pedidos migrados: {migrationResult.summary.ordersInserted}</div>
+                      {migrationResult.summary.errors?.length > 0 && (
+                        <div className="text-red-400">• Avisos: {migrationResult.summary.errors.length}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+            {/* Local backup controls */}
+            <div className="pt-1 flex flex-col sm:flex-row items-center gap-3">
               <button
                 onClick={handleExportData}
-                className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Download className="w-4 h-4 text-amber-400" />
+                <Download className="w-3.5 h-3.5 text-amber-400" />
                 <span>Exportar Dados (JSON)</span>
               </button>
 
               <button
                 onClick={handleResetData}
-                className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs border border-red-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restaurar Padrões</span>
               </button>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ShoppingBag, 
   Search, 
@@ -46,6 +46,13 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
     const list = storeDb.getOrders();
     setOrders(list);
   };
+
+  useEffect(() => {
+    storeDb.syncOrdersWithServer().then(() => {
+      reloadOrders();
+    });
+    return storeDb.subscribe(reloadOrders);
+  }, []);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {

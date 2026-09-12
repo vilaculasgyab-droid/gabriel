@@ -9,7 +9,7 @@ const rootDir = path.resolve(__dirname, '..');
 const publicDir = path.resolve(rootDir, 'public');
 
 // Site URL configuration
-const DEFAULT_SITE_URL = process.env.VITE_SITE_URL || 'https://proseguranca.co.mz';
+const DEFAULT_SITE_URL = process.env.VITE_SITE_URL || 'https://fortimoz.co.mz';
 const cleanBaseUrl = DEFAULT_SITE_URL.replace(/\/+$/, '');
 
 function escapeXml(unsafe) {
@@ -121,7 +121,7 @@ function buildSitemap(products, categories) {
 }
 
 function buildRobots() {
-  return `# robots.txt para ProSegurança (https://proseguranca.co.mz)
+  return `# robots.txt para FortiMoz (https://fortimoz.co.mz)
 # Rastreamento público liberado para mecanismos de pesquisa
 User-agent: *
 Allow: /
