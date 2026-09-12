@@ -203,7 +203,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         finalImage = editingProduct?.image || DEFAULT_EPI_PLACEHOLDER;
       }
 
-      // Se for uma imagem base64 pendente de gravação no servidor, tenta fazer upload
+      // Se for uma imagem base64 pendente de gravação no servidor, envia para Supabase Storage
       if (finalImage.startsWith('data:')) {
         try {
           const prodId = editingProduct?.id || formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30);
@@ -217,14 +217,15 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
               previousImageUrl: editingProduct?.image,
             }),
           });
-          if (upRes.ok) {
-            const upData = await upRes.json();
-            if (upData && upData.url) {
-              finalImage = upData.url;
-            }
+          const upData = await upRes.json();
+          if (!upRes.ok || !upData.success || !upData.url) {
+            throw new Error(upData.error || 'Falha ao gravar imagem no Supabase Storage.');
           }
-        } catch (upErr) {
-          console.warn('Upload da imagem para o servidor falhou, utilizando armazenamento direto:', upErr);
+          finalImage = upData.url;
+        } catch (upErr: any) {
+          showToast(`Erro no envio da imagem: ${upErr.message}`);
+          setIsSubmitting(false);
+          return;
         }
       } else if (!finalImage.startsWith('blob:') && !finalImage.includes('?v=') && finalImage !== DEFAULT_EPI_PLACEHOLDER) {
         // Assegura token de versionamento para cache busting em URLs normais
@@ -234,8 +235,8 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       if (editingProduct) {
         const imageChanged = imageWasChanged || (finalImage !== editingProduct.image);
 
-        // Update product in storeDb
-        storeDb.updateProduct(editingProduct.id, {
+        // Atualização oficial no Supabase
+        await storeDb.updateProductAsync(editingProduct.id, {
           name: formData.name.trim(),
           categoryId: formData.categoryId,
           categoryName,
@@ -256,14 +257,14 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         });
 
         if (imageChanged) {
-          showToast('Imagem do produto atualizada com sucesso no catálogo!');
+          showToast('Imagem e dados do produto atualizados com sucesso no Supabase!');
         } else {
-          showToast(`Produto "${formData.name}" atualizado com sucesso!`);
+          showToast(`Produto "${formData.name}" atualizado com sucesso no Supabase!`);
         }
         setEditingProduct(null);
       } else {
-        // Create new product
-        storeDb.addProduct({
+        // Criação de novo produto no Supabase
+        await storeDb.addProductAsync({
           name: formData.name.trim(),
           categoryId: formData.categoryId,
           categoryName,
@@ -290,44 +291,72 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
           rating: 5.0,
           reviewsCount: 1,
         });
-        showToast(`Produto "${formData.name}" adicionado ao catálogo!`);
+        showToast(`Produto "${formData.name}" adicionado e salvo com sucesso no Supabase!`);
         setIsAddModalOpen(false);
       }
 
       setImageWasChanged(false);
       setImageWasRemoved(false);
       reloadProducts();
+      onProductChanged?.();
+    } catch (err: any) {
+      console.error('Falha ao salvar produto:', err);
+      showToast(`Erro no Supabase: ${err.message || 'Falha na gravação.'}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deletingProduct) return;
     const name = deletingProduct.name;
-    storeDb.deleteProduct(deletingProduct.id);
-    showToast(`Produto "${name}" eliminado.`);
-    setDeletingProduct(null);
-    reloadProducts();
+    try {
+      await storeDb.deleteProductAsync(deletingProduct.id);
+      showToast(`Produto "${name}" eliminado com sucesso do Supabase.`);
+      setDeletingProduct(null);
+      reloadProducts();
+      onProductChanged?.();
+    } catch (err: any) {
+      showToast(`Erro ao eliminar no Supabase: ${err.message || err}`);
+    }
   };
 
-  const handleToggleStock = (product: Product) => {
-    storeDb.toggleProductStatus(product.id);
-    showToast(`Estado de "${product.name}" alterado para ${!product.inStock ? 'Disponível' : 'Esgotado'}.`);
-    reloadProducts();
+  const handleToggleStock = async (product: Product) => {
+    try {
+      await storeDb.updateProductAsync(product.id, { inStock: !product.inStock });
+      showToast(`Estado de "${product.name}" alterado para ${!product.inStock ? 'Disponível' : 'Esgotado'}.`);
+      reloadProducts();
+      onProductChanged?.();
+    } catch (err: any) {
+      showToast(`Erro ao atualizar estado no Supabase: ${err.message || err}`);
+    }
   };
 
-  const handleToggleFeatured = (product: Product) => {
-    storeDb.toggleProductFeatured(product.id);
-    showToast(`Produto "${product.name}" ${!product.featured ? 'marcado como destaque' : 'removido dos destaques'}.`);
-    reloadProducts();
+  const handleToggleFeatured = async (product: Product) => {
+    try {
+      await storeDb.updateProductAsync(product.id, { featured: !product.featured });
+      showToast(`Produto "${product.name}" ${!product.featured ? 'marcado como destaque' : 'removido dos destaques'}.`);
+      reloadProducts();
+      onProductChanged?.();
+    } catch (err: any) {
+      showToast(`Erro ao atualizar destaque no Supabase: ${err.message || err}`);
+    }
   };
 
-  const handleAdjustStock = (product: Product, delta: number) => {
+  const handleAdjustStock = async (product: Product, delta: number) => {
     const current = product.stockCount ?? (product.stock ?? 0);
     const updated = Math.max(0, current + delta);
-    storeDb.updateStock(product.id, updated);
-    reloadProducts();
+    try {
+      await storeDb.updateProductAsync(product.id, {
+        stock: updated,
+        stockCount: updated,
+        inStock: updated > 0,
+      });
+      reloadProducts();
+      onProductChanged?.();
+    } catch (err: any) {
+      showToast(`Erro ao atualizar estoque no Supabase: ${err.message || err}`);
+    }
   };
 
   return (
@@ -348,13 +377,34 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Adicionar Novo Produto</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={async () => {
+              showToast('A sincronizar catálogo com o Supabase...');
+              const ok = await storeDb.syncWithServer(true);
+              reloadProducts();
+              onProductChanged?.();
+              if (ok) {
+                showToast('Catálogo sincronizado com o Supabase!');
+              } else {
+                showToast('Sincronização concluída com o servidor.');
+              }
+            }}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm border border-slate-700 transition-all cursor-pointer"
+            title="Recarregar catálogo atual do Supabase"
+          >
+            <RefreshCw className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">Sincronizar Supabase</span>
+          </button>
+
+          <button
+            onClick={handleOpenAddModal}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Adicionar Novo Produto</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}

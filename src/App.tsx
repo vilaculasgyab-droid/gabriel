@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Product, CartItem } from './types';
-import { PRODUCTS } from './data/products';
 import { CATEGORIES } from './data/categories';
 import { storeDb } from './services/storeDb';
 import { Navbar } from './components/Navbar';

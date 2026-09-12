@@ -95,7 +95,11 @@ export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
       .order('id', { ascending: true });
 
     if (error) {
-      console.error('[Supabase DB] Erro ao buscar produtos:', error.message);
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        console.warn('[Supabase DB] Permissão pendente na tabela public.products (42501). Execute o script fix-supabase-permissions.sql no SQL Editor do Supabase.');
+      } else {
+        console.error('[Supabase DB] Erro na consulta de produtos:', error.message);
+      }
       return null;
     }
 
@@ -111,8 +115,48 @@ export async function fetchProductsFromSupabase(): Promise<Product[] | null> {
  * Insere ou atualiza um produto no Supabase (public.products).
  */
 export async function upsertProductInSupabase(product: Product): Promise<Product | null> {
+  const result = await upsertProductInSupabaseDetailed(product);
+  return result.success && result.data ? result.data : null;
+}
+
+export interface SupabaseOperationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  code?: string;
+}
+
+/**
+ * Busca um único produto por ID no Supabase (public.products).
+ */
+export async function fetchProductByIdFromSupabase(id: string): Promise<Product | null> {
   const client = getSupabaseAdmin();
   if (!client) return null;
+
+  try {
+    const { data, error } = await client
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+    return mapDbRowToProduct(data);
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Insere ou atualiza um produto com detalhes completos do erro para diagnóstico.
+ */
+export async function upsertProductInSupabaseDetailed(product: Product): Promise<SupabaseOperationResult<Product>> {
+  const client = getSupabaseAdmin();
+  if (!client) {
+    return { success: false, error: 'Supabase não está configurado no servidor.' };
+  }
 
   try {
     const row = mapProductToDbRow(product);
@@ -123,14 +167,24 @@ export async function upsertProductInSupabase(product: Product): Promise<Product
       .single();
 
     if (error) {
-      console.error('[Supabase DB] Erro ao atualizar/inserir produto:', error.message);
-      return null;
+      console.error('[Supabase DB] Erro detalhado ao gravar produto:', error.message, error.hint);
+      return {
+        success: false,
+        error: error.message + (error.hint ? ` (${error.hint})` : ''),
+        code: error.code,
+      };
     }
 
-    return data ? mapDbRowToProduct(data) : product;
-  } catch (err) {
+    return {
+      success: true,
+      data: data ? mapDbRowToProduct(data) : product,
+    };
+  } catch (err: any) {
     console.error('[Supabase DB] Exceção ao gravar produto:', err);
-    return null;
+    return {
+      success: false,
+      error: err?.message || 'Exceção ao persistir no Supabase.',
+    };
   }
 }
 

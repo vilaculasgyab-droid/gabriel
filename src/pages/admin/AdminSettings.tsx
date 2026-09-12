@@ -18,7 +18,8 @@ import {
   RefreshCw,
   Cloud,
   Server,
-  UploadCloud
+  UploadCloud,
+  Copy
 } from 'lucide-react';
 import { AdminUser } from '../../types';
 import { authService } from '../../services/authService';
@@ -454,22 +455,58 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Tabela Produtos</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.productCount !== undefined ? `${supabaseStatus.productCount} no Supabase` : 'Pronto'}
+                    {supabaseStatus?.productsCount !== undefined
+                      ? `${supabaseStatus.productsCount} no Supabase`
+                      : supabaseStatus?.productCount !== undefined
+                      ? `${supabaseStatus.productCount} no Supabase`
+                      : 'Pronto'}
                   </strong>
                 </div>
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Tabela Pedidos</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.orderCount !== undefined ? `${supabaseStatus.orderCount} no Supabase` : '0 pedidos'}
+                    {supabaseStatus?.ordersCount !== undefined
+                      ? `${supabaseStatus.ordersCount} no Supabase`
+                      : supabaseStatus?.orderCount !== undefined
+                      ? `${supabaseStatus.orderCount} no Supabase`
+                      : '0 pedidos'}
                   </strong>
                 </div>
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Bucket Imagens</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.storageBucketReady ? 'product-images' : 'Configurado'}
+                    {supabaseStatus?.storageReady || supabaseStatus?.storageBucketReady ? 'product-images (OK)' : 'Configurado'}
                   </strong>
                 </div>
               </div>
+
+              {supabaseStatus?.error && (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-amber-200">Atenção ao Acesso no Supabase:</strong> {supabaseStatus.error}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                    Para liberar o acesso da loja pública e do backend com RLS ativo, execute o script SQL abaixo no SQL Editor do Supabase:
+                  </p>
+                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-emerald-300 select-all overflow-x-auto">
+                    GRANT SELECT ON TABLE public.products TO anon;
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <a
+                      href="https://supabase.com/dashboard/project/ixubqdyqjxqpmnbwfhhi/sql/new"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[11px] font-bold transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Abrir SQL Editor no Supabase</span>
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Migration Trigger Button */}
               <div className="pt-1">

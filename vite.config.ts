@@ -66,16 +66,37 @@ export default defineConfig(() => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2}'],
           navigateFallback: '/index.html',
-          // Ensure admin, sitemap.xml and robots.txt are never intercepted with SPA index.html fallback
-          navigateFallbackDenylist: [/^\/admin/, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
+          // Ensure admin, API endpoints, sitemap.xml and robots.txt are never intercepted with SPA index.html fallback
+          navigateFallbackDenylist: [/^\/admin/, /^\/api/, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
           cleanupOutdatedCaches: true,
-          cacheId: 'proseguranca-v1',
+          cacheId: 'fortimoz-v2',
           runtimeCaching: [
+            {
+              // API routes must ALWAYS be NetworkOnly, never cached by the Service Worker
+              urlPattern: /^\/api\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
+              // Supabase Storage images must prefer the network with NetworkFirst
+              urlPattern: /.*supabase\.co\/storage\/v1\/object\/public\/product-images\/.*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'fortimoz-supabase-images',
+                networkTimeoutSeconds: 3,
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days fallback
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'proseguranca-google-fonts-cache',
+                cacheName: 'fortimoz-google-fonts-cache',
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
@@ -89,7 +110,7 @@ export default defineConfig(() => {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'proseguranca-gstatic-fonts-cache',
+                cacheName: 'fortimoz-gstatic-fonts-cache',
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
@@ -103,10 +124,10 @@ export default defineConfig(() => {
               urlPattern: /\.(?:png|jpg|jpeg|svg|webp|ico)$/i,
               handler: 'StaleWhileRevalidate',
               options: {
-                cacheName: 'proseguranca-media-cache',
+                cacheName: 'fortimoz-media-cache',
                 expiration: {
                   maxEntries: 60,
-                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                  maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
                 },
                 cacheableResponse: {
                   statuses: [0, 200],

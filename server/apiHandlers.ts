@@ -12,7 +12,8 @@ import {
 import {
   isSupabaseServerConfigured,
   fetchProductsFromSupabase,
-  upsertProductInSupabase,
+  fetchProductByIdFromSupabase,
+  upsertProductInSupabaseDetailed,
   deleteProductFromSupabase,
   uploadImageToSupabaseStorage,
   fetchOrdersFromSupabase,
@@ -46,6 +47,18 @@ export async function handleGetProducts(req: Request, res: Response) {
           products: supabaseProducts,
         });
       }
+
+      // Se o Supabase estiver configurado mas falhar na consulta, reportar o erro explicitamente
+      if (supabaseProducts === null) {
+        return res.status(403).json({
+          success: false,
+          source: 'supabase_permission_error',
+          supabaseStatus: 'permission_denied',
+          products: [],
+          error: 'Acesso à tabela public.products bloqueado por permissões do PostgreSQL no Supabase (permission denied for table products).',
+          hint: 'Execute o script fix-supabase-permissions.sql no SQL Editor do Supabase para conceder GRANT SELECT ON public.products TO anon, service_role;',
+        });
+      }
     }
 
     // Fallback gracioso para dados locais quando o Supabase ainda não estiver configurado
@@ -72,22 +85,44 @@ export async function handleCreateProduct(req: Request, res: Response) {
       return res.status(400).json({ success: false, error: 'Nome e preço são obrigatórios.' });
     }
 
-    // Grava localmente como backup/fallback
-    const localProduct = addStoredProduct(productData);
+    const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+    const now = new Date().toISOString();
+    const newProduct: Product = {
+      ...productData,
+      id,
+      inStock: productData.inStock ?? (productData.stockCount !== undefined ? productData.stockCount > 0 : true),
+      stockCount: productData.stockCount ?? 25,
+      stock: productData.stockCount ?? 25,
+      rating: productData.rating || 5.0,
+      reviewsCount: productData.reviewsCount || 1,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    // Se o Supabase estiver configurado, grava no Supabase (public.products)
-    let finalProduct = localProduct;
     if (isSupabaseServerConfigured()) {
-      const supabaseProduct = await upsertProductInSupabase(localProduct);
-      if (supabaseProduct) {
-        finalProduct = supabaseProduct;
+      const supaResult = await upsertProductInSupabaseDetailed(newProduct);
+      if (!supaResult.success) {
+        return res.status(500).json({
+          success: false,
+          error: `Erro ao gravar produto no Supabase: ${supaResult.error}`,
+          hint: 'Execute fix-supabase-permissions.sql no SQL Editor do Supabase se o erro for permission denied.',
+        });
       }
+
+      addStoredProduct(newProduct);
+      return res.status(201).json({
+        success: true,
+        source: 'supabase',
+        product: supaResult.data || newProduct,
+        message: 'Produto criado com sucesso no Supabase.',
+      });
     }
 
-    return res.status(201).json({ success: true, product: finalProduct });
+    const localProduct = addStoredProduct(newProduct);
+    return res.status(201).json({ success: true, source: 'local_fallback', product: localProduct });
   } catch (err: any) {
     console.error('[API] Erro ao criar produto:', err);
-    return res.status(500).json({ success: false, error: 'Falha ao criar produto.' });
+    return res.status(500).json({ success: false, error: err?.message || 'Falha ao criar produto.' });
   }
 }
 
@@ -101,25 +136,55 @@ export async function handleUpdateProduct(req: Request, res: Response) {
       return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
     }
 
-    // Atualiza localmente
+    if (isSupabaseServerConfigured()) {
+      // Obter dados base existentes para merge seguro
+      const currentSupabase = await fetchProductByIdFromSupabase(id);
+      const baseProduct = currentSupabase || getStoredProducts().find((p) => p.id === id);
+      if (!baseProduct) {
+        return res.status(404).json({ success: false, error: `Produto com ID ${id} não encontrado.` });
+      }
+
+      const mergedProduct: Product = {
+        ...baseProduct,
+        ...updates,
+        id,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const supaResult = await upsertProductInSupabaseDetailed(mergedProduct);
+      if (!supaResult.success) {
+        return res.status(500).json({
+          success: false,
+          error: `Erro ao atualizar no Supabase: ${supaResult.error}`,
+          hint: 'Execute fix-supabase-permissions.sql no SQL Editor do Supabase se o erro for permission denied.',
+        });
+      }
+
+      // Confirmação com re-leitura direta do Supabase
+      const confirmed = await fetchProductByIdFromSupabase(id);
+      const finalProduct = confirmed || supaResult.data || mergedProduct;
+
+      // Manter sincronizado localmente
+      updateStoredProduct(id, updates);
+
+      return res.json({
+        success: true,
+        source: 'supabase',
+        product: finalProduct,
+        message: 'Produto atualizado e confirmado com sucesso no Supabase.',
+      });
+    }
+
+    // Fallback caso Supabase não esteja configurado
     const updatedLocal = updateStoredProduct(id, updates);
     if (!updatedLocal) {
       return res.status(404).json({ success: false, error: 'Produto não encontrado.' });
     }
 
-    // Se o Supabase estiver configurado, grava a atualização no Supabase
-    let finalProduct = updatedLocal;
-    if (isSupabaseServerConfigured()) {
-      const supabaseProduct = await upsertProductInSupabase(updatedLocal);
-      if (supabaseProduct) {
-        finalProduct = supabaseProduct;
-      }
-    }
-
-    return res.json({ success: true, product: finalProduct });
+    return res.json({ success: true, source: 'local_fallback', product: updatedLocal });
   } catch (err: any) {
     console.error('[API] Erro ao atualizar produto:', err);
-    return res.status(500).json({ success: false, error: 'Falha ao atualizar produto.' });
+    return res.status(500).json({ success: false, error: err?.message || 'Falha ao atualizar produto.' });
   }
 }
 
@@ -133,11 +198,17 @@ export async function handleDeleteProduct(req: Request, res: Response) {
     }
 
     if (isSupabaseServerConfigured()) {
-      await deleteProductFromSupabase(id);
+      const deletedFromSupabase = await deleteProductFromSupabase(id);
+      if (!deletedFromSupabase) {
+        return res.status(500).json({
+          success: false,
+          error: 'Falha ao remover produto do Supabase. Verifique permissões da tabela products.',
+        });
+      }
     }
 
-    const deleted = deleteStoredProduct(id);
-    return res.json({ success: true, message: 'Produto eliminado com sucesso.' });
+    deleteStoredProduct(id);
+    return res.json({ success: true, message: 'Produto eliminado com sucesso do catálogo.' });
   } catch (err: any) {
     console.error('[API] Erro ao eliminar produto:', err);
     return res.status(500).json({ success: false, error: 'Falha ao eliminar produto.' });
@@ -186,11 +257,14 @@ export async function handleUploadImage(req: Request, res: Response) {
           message: 'Imagem guardada no Supabase Storage com sucesso.',
         });
       } else {
-        console.warn('[Upload] Falha no Supabase Storage, revertendo para armazenamento local...');
+        return res.status(500).json({
+          success: false,
+          error: 'Falha ao enviar imagem para o Supabase Storage (bucket product-images).',
+        });
       }
     }
 
-    // Fallback: Armazenamento local com hash versionado
+    // Fallback: Armazenamento local com hash versionado se Supabase não estiver configurado
     const localResult = await saveUploadedImage(productId || 'prod', dataUrl, originalFileName);
     return res.json({
       success: true,

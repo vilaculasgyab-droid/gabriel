@@ -28,6 +28,8 @@ let isSyncingProducts = false;
 let isSyncingOrders = false;
 let lastProductSyncTimestamp = 0;
 let lastOrderSyncTimestamp = 0;
+let lastProductSyncSource: 'supabase_direct' | 'server_api' | 'cache' | 'none' = 'none';
+let lastSupabaseError: string | null = null;
 
 export const storeDb = {
   subscribe(listener: Listener): () => void {
@@ -60,9 +62,14 @@ export const storeDb = {
               .select('*')
               .order('id', { ascending: true });
 
-            if (!error && Array.isArray(data) && data.length > 0) {
+            if (error) {
+              lastSupabaseError = error.message;
+              console.warn('[storeDb] Supabase DB retornou erro na consulta direta de produtos:', error.message);
+            } else if (Array.isArray(data) && data.length > 0) {
               const mapped = data.map(mapDbRowToProduct);
               inMemoryProducts = mapped;
+              lastProductSyncSource = 'supabase_direct';
+              lastSupabaseError = null;
               try {
                 localStorage.setItem(PRODUCTS_KEY, JSON.stringify(mapped));
               } catch {
@@ -72,7 +79,8 @@ export const storeDb = {
               lastProductSyncTimestamp = Date.now();
               return true;
             }
-          } catch (supaErr) {
+          } catch (supaErr: any) {
+            lastSupabaseError = supaErr?.message || String(supaErr);
             console.warn('[storeDb] Consulta direta ao Supabase falhou, tentando API do servidor:', supaErr);
           }
         }
@@ -91,6 +99,8 @@ export const storeDb = {
         if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
           const remoteProducts: Product[] = data.products;
           inMemoryProducts = remoteProducts;
+          lastProductSyncSource = data.source === 'supabase' ? 'server_api' : 'cache';
+          lastSupabaseError = null;
           try {
             localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
           } catch (e) {
@@ -99,6 +109,15 @@ export const storeDb = {
           notifyListeners();
           lastProductSyncTimestamp = Date.now();
           return true;
+        }
+      } else {
+        try {
+          const errData = await res.json();
+          if (errData && errData.error) {
+            lastSupabaseError = errData.error;
+          }
+        } catch {
+          // ignore
         }
       }
     } catch (err) {
@@ -214,6 +233,14 @@ export const storeDb = {
     return products.find((p) => p.id === id);
   },
 
+  getSyncDiagnostics(): { source: string; lastError: string | null; lastSync: number } {
+    return {
+      source: lastProductSyncSource,
+      lastError: lastSupabaseError,
+      lastSync: lastProductSyncTimestamp,
+    };
+  },
+
   addProduct(productData: Omit<Product, 'id'> & { id?: string }): Product {
     const products = this.getProducts();
     const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
@@ -255,6 +282,37 @@ export const storeDb = {
     });
 
     return newProduct;
+  },
+
+  /**
+   * Cria produto de forma assíncrona enviando diretamente para o Supabase (/api/products).
+   * Lança erro explícito se a gravação for rejeitada.
+   */
+  async addProductAsync(productData: Omit<Product, 'id'> & { id?: string }): Promise<Product> {
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(productData),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success || !data.product) {
+      const errMsg = data.error || 'Falha ao gravar produto no Supabase.';
+      throw new Error(errMsg);
+    }
+
+    const finalProduct: Product = data.product;
+    const products = this.getProducts();
+    const updated = [finalProduct, ...products.filter((p) => p.id !== finalProduct.id)];
+    inMemoryProducts = updated;
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+
+    notifyListeners();
+    return finalProduct;
   },
 
   updateProduct(id: string, updates: Partial<Product>): Product | null {
@@ -309,6 +367,43 @@ export const storeDb = {
     return updatedProduct;
   },
 
+  /**
+   * Atualiza produto de forma assíncrona com validação estrita no Supabase (/api/products/:id).
+   * Lança erro explícito se o Supabase recusar a atualização.
+   */
+  async updateProductAsync(id: string, updates: Partial<Product>): Promise<Product> {
+    const res = await fetch(`/api/products/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success || !data.product) {
+      const errMsg = data.error || 'Falha ao atualizar produto no Supabase.';
+      throw new Error(errMsg);
+    }
+
+    const finalProduct: Product = data.product;
+    const products = this.getProducts();
+    const index = products.findIndex((p) => p.id === id);
+    if (index !== -1) {
+      products[index] = finalProduct;
+      inMemoryProducts = [...products];
+    } else {
+      inMemoryProducts = [finalProduct, ...products];
+    }
+
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(inMemoryProducts));
+    } catch {
+      // ignore
+    }
+
+    notifyListeners();
+    return finalProduct;
+  },
+
   deleteProduct(id: string): boolean {
     const products = this.getProducts();
     const filtered = products.filter((p) => p.id !== id);
@@ -329,6 +424,32 @@ export const storeDb = {
       console.warn('[storeDb] Erro ao sincronizar eliminação:', err);
     });
 
+    return true;
+  },
+
+  /**
+   * Remove produto no Supabase de forma assíncrona.
+   */
+  async deleteProductAsync(id: string): Promise<boolean> {
+    const res = await fetch(`/api/products/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      const errMsg = data.error || 'Falha ao excluir produto no Supabase.';
+      throw new Error(errMsg);
+    }
+
+    const products = this.getProducts().filter((p) => p.id !== id);
+    inMemoryProducts = products;
+    try {
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    } catch {
+      // ignore
+    }
+
+    notifyListeners();
     return true;
   },
 
