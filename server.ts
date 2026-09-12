@@ -1,3 +1,11 @@
+// Sanitize container environment global __dirname if set to '.'
+if (typeof globalThis !== 'undefined' && (globalThis as any).__dirname === '.') {
+  delete (globalThis as any).__dirname;
+}
+if (typeof global !== 'undefined' && (global as any).__dirname === '.') {
+  delete (global as any).__dirname;
+}
+
 import 'dotenv/config';
 import express from 'express';
 import http from 'http';
