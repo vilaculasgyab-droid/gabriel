@@ -168,19 +168,36 @@ export async function handleProducts(req: any, res: any) {
       } catch {}
     }
 
-    // Initialize Supabase Client with service_role
-    const supabaseUrl = cleanEnv(process.env.SUPABASE_URL);
-    const supabaseServiceRole = cleanEnv(process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY);
+    // Initialize Supabase Client (Protected server-side endpoint)
+    // Supports SUPABASE_URL and standard Vercel environment variable naming
+    const supabaseUrl = cleanEnv(
+      process.env.SUPABASE_URL ||
+      process.env.VITE_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+    );
+    const supabaseServiceRole = cleanEnv(
+      process.env.SUPABASE_SERVICE_ROLE ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_SECRET_KEY
+    );
+    const supabaseAnon = cleanEnv(
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
 
-    if (!supabaseUrl || !supabaseServiceRole) {
-      console.error('[API PRODUCTS] SUPABASE_URL ou SUPABASE_SERVICE_ROLE ausente no ambiente');
+    // Para operações de leitura (GET), se service_role não estiver presente, a chave anon permite consultar produtos
+    const supabaseKey = supabaseServiceRole || (req.method === 'GET' ? supabaseAnon : '');
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[API PRODUCTS] Credenciais do Supabase ausentes no ambiente do servidor');
       return res.status(500).json({
         success: false,
         error: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE não configurado no ambiente da Vercel.',
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceRole, {
+    const supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
