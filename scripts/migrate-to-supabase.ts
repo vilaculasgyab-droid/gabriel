@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { Product, Order } from '../src/types';
-import { mapProductToDbRow, mapOrderToDbRow } from '../src/lib/supabase';
+import { mapProductToDbRow, mapOrderToDbRow } from '../src/lib/supabaseMappers';
 
 // Helper to resolve paths relative to project root
 const ROOT_DIR = process.cwd();

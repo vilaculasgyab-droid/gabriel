@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import { Product, Order } from '../src/types';
-import { mapDbRowToProduct, mapProductToDbRow, mapDbRowToOrder, mapOrderToDbRow } from '../src/lib/supabase';
+import { mapDbRowToProduct, mapProductToDbRow, mapDbRowToOrder, mapOrderToDbRow } from '../src/lib/supabaseMappers';
 
 const BUCKET_NAME = 'product-images';
 
@@ -148,17 +148,22 @@ export async function fetchProductsFromSupabaseDetailed(): Promise<SupabaseQuery
   const key = getSupabaseKey();
 
   if (!url || !key) {
+    if (!url) {
+      console.error('[Supabase] SUPABASE_URL não configurada no servidor (process.env.SUPABASE_URL)');
+    }
+    if (!key) {
+      console.error('[Supabase] Credencial do servidor não configurada (process.env.SUPABASE_SERVICE_ROLE ou process.env.SUPABASE_ANON_KEY)');
+    }
     const missing: string[] = [];
     if (!url) missing.push('SUPABASE_URL');
-    if (!key) missing.push('SUPABASE_ANON_KEY ou SUPABASE_SERVICE_ROLE');
+    if (!key) missing.push('SUPABASE_SERVICE_ROLE ou SUPABASE_ANON_KEY');
     const msg = `Variáveis de ambiente do Supabase não configuradas no servidor: ${missing.join(', ')}`;
-    console.error('[Supabase DB Config Error]', msg);
     return {
       success: false,
       error: {
         code: 'MISSING_ENV_VARS',
         message: msg,
-        details: 'Adicione SUPABASE_URL e SUPABASE_ANON_KEY (ou SUPABASE_SERVICE_ROLE) no painel de ambiente da Vercel ou do servidor.',
+        details: 'Adicione SUPABASE_URL e SUPABASE_SERVICE_ROLE (ou SUPABASE_ANON_KEY) no painel de ambiente da Vercel ou do servidor.',
         hint: 'Defina as variáveis de ambiente e realize novo deploy.',
       },
     };
