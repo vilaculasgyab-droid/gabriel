@@ -1,7 +1,4 @@
-import { Request, Response } from 'express';
-import { handleHealthCheck } from '../server/apiHandlers';
-
-export default function handler(req: Request, res: Response) {
+export default function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
@@ -11,6 +8,15 @@ export default function handler(req: Request, res: Response) {
     return res.status(200).end();
   }
 
-  return handleHealthCheck(req, res);
-}
+  const supabaseConfigured = Boolean(
+    process.env.SUPABASE_URL && 
+    (process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY)
+  );
 
+  return res.status(200).json({
+    status: 'ok',
+    store: 'FortiMoz EPIs Moçambique',
+    supabaseConfigured,
+    timestamp: new Date().toISOString(),
+  });
+}

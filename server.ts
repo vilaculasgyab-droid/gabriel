@@ -13,11 +13,6 @@ import net from 'net';
 import path from 'path';
 import fs from 'fs';
 import {
-  handleGetProducts,
-  handleGetProductById,
-  handleCreateProduct,
-  handleUpdateProduct,
-  handleDeleteProduct,
   handleUploadImage,
   handleGetOrders,
   handleCreateOrder,
@@ -26,7 +21,7 @@ import {
   handleSupabaseStatus,
   handleTriggerMigration,
 } from './server/apiHandlers';
-import { getStoredProducts } from './server/storeData';
+import productsHandler from './api/products';
 
 // In Google AI Studio containers, port 3000 is the designated application port routed by nginx.
 // If process.env.PORT is explicitly provided and is not 8080 (the internal nginx proxy port), use it;
@@ -70,23 +65,18 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-  // Initialize stored products database on boot
-  try {
-    getStoredProducts();
-    console.log('[Server] Catálogo de produtos inicializado com sucesso.');
-  } catch (err) {
-    console.error('[Server] Erro ao inicializar catálogo:', err);
-  }
-
   // ----------------------------------------------------
   // 1. API ROUTES (FIRST)
   // ----------------------------------------------------
   app.get('/api/health', handleHealthCheck);
-  app.get('/api/products', handleGetProducts);
-  app.get('/api/products/:id', handleGetProductById);
-  app.post('/api/products', handleCreateProduct);
-  app.put('/api/products/:id', handleUpdateProduct);
-  app.delete('/api/products/:id', handleDeleteProduct);
+  app.all('/api/products', (req, res) => productsHandler(req, res));
+  app.all('/api/products/:id', (req, res) => {
+    if (!req.query) req.query = {};
+    if (!req.query.id && req.params?.id) {
+      req.query.id = req.params.id;
+    }
+    return productsHandler(req, res);
+  });
   app.post('/api/upload-image', handleUploadImage);
   app.get('/api/orders', handleGetOrders);
   app.post('/api/orders', handleCreateOrder);
