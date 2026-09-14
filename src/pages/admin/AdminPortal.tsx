@@ -52,11 +52,34 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   }, []);
 
   useEffect(() => {
+    // Sincronizar e verificar sessão com o Supabase Auth em background
+    authService.syncSessionWithSupabase().then((user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setAdminUser(user);
+      }
+    });
+
+    // Subscrever a eventos de autenticação do Supabase (ex: expiração, logout noutra aba)
+    const unsubAuth = authService.subscribeAuthState((user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setAdminUser(user);
+      } else {
+        setIsAuthenticated(false);
+        setAdminUser(null);
+      }
+    });
+
     // Subscribe to changes in storeDb
-    const unsubscribe = storeDb.subscribe(() => {
+    const unsubscribeDb = storeDb.subscribe(() => {
       refreshMetrics();
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubAuth();
+      unsubscribeDb();
+    };
   }, [refreshMetrics]);
 
   const handleLoginSuccess = () => {
