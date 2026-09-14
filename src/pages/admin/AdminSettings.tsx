@@ -108,10 +108,10 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProfile(true);
-    const res = authService.updateProfile(name, email);
+    const res = await authService.updateProfile(name, email);
     setSavingProfile(false);
     if (res.success) {
       showToast('Perfil do administrador atualizado com sucesso!');
@@ -145,7 +145,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      showToast('Palavra-passe alterada com sucesso! Guardada com hash SHA-256 encriptado.');
+      showToast('Palavra-passe alterada com sucesso! Guardada com segurança no Supabase.');
     } else {
       setPasswordError(res.error || 'Erro ao alterar palavra-passe.');
     }
@@ -202,7 +202,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Alterar Palavra-passe Segura</h3>
-              <p className="text-[11px] text-slate-400">Encriptada nativamente com SHA-256 e Salt criptográfico</p>
+              <p className="text-[11px] text-slate-400">Autenticação encriptada e persistida no Supabase Auth</p>
             </div>
           </div>
 

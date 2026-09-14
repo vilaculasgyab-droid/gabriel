@@ -20,6 +20,9 @@ import {
   handleHealthCheck,
   handleSupabaseStatus,
   handleTriggerMigration,
+  handleAdminLogin,
+  handleAdminChangePassword,
+  handleAdminUpdateProfile,
 } from './server/apiHandlers';
 import productsHandler from './api/products';
 
@@ -83,6 +86,9 @@ async function startServer() {
   app.put('/api/orders/:id/status', handleUpdateOrderStatus);
   app.get('/api/supabase/status', handleSupabaseStatus);
   app.post('/api/supabase/migrate', handleTriggerMigration);
+  app.post('/api/admin/login', handleAdminLogin);
+  app.post('/api/admin/change-password', handleAdminChangePassword);
+  app.post('/api/admin/profile', handleAdminUpdateProfile);
 
   // ----------------------------------------------------
   // 2. STATIC ASSETS SERVING WITH SMART CACHE HEADERS

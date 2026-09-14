@@ -1,63 +1,17 @@
 import { AdminUser, AdminSession } from '../types';
 
-const ADMIN_SESSION_KEY = 'proseguranca_admin_session_v1';
-const ADMIN_CREDENTIALS_KEY = 'proseguranca_admin_credentials_v1';
+const ADMIN_SESSION_KEY = 'fortimoz_admin_session_v2';
+const LEGACY_SESSION_KEY = 'proseguranca_admin_session_v1';
+const LEGACY_CREDENTIALS_KEY = 'proseguranca_admin_credentials_v1';
 
-// Default initial admin (Hash of 'ProSeguranca@2026' with salt)
-// We provide SHA-256 hashing via native Web Crypto API
-const DEFAULT_SALT = 'psg_sec_salt_2026';
 const DEFAULT_EMAIL = 'admin@fortimoz.co.mz';
-const DEFAULT_PASS_HASH = '275a5e3f4e3532c25367be56934c919a3b680c2f8daeebdaeeebdc5ff6451e6c'; // Default hash
 
-export async function hashPassword(password: string, salt: string = DEFAULT_SALT): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-interface StoredAdminData {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  salt: string;
-  role: 'superadmin' | 'admin';
-  createdAt: string;
-}
-
-function getStoredAdmin(): StoredAdminData {
-  try {
-    const raw = localStorage.getItem(ADMIN_CREDENTIALS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed.name && parsed.name.includes('ProSegurança')) {
-        parsed.name = 'Administrador FortiMoz';
-      }
-      return parsed;
-    }
-  } catch {
-    // Fallback to default
-  }
-
-  const defaultAdmin: StoredAdminData = {
-    id: 'adm-001',
-    name: 'Administrador FortiMoz',
-    email: DEFAULT_EMAIL,
-    passwordHash: DEFAULT_PASS_HASH,
-    salt: DEFAULT_SALT,
-    role: 'superadmin',
-    createdAt: new Date().toISOString(),
-  };
-
-  try {
-    localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify(defaultAdmin));
-  } catch (e) {
-    console.error('Failed to store default admin credentials', e);
-  }
-
-  return defaultAdmin;
+// Purge any legacy plaintext/hash keys from localStorage on startup
+try {
+  localStorage.removeItem(LEGACY_CREDENTIALS_KEY);
+  localStorage.removeItem('fortimoz_admin_credentials_v1');
+} catch {
+  // ignore
 }
 
 export const authService = {
@@ -68,66 +22,76 @@ export const authService = {
     };
   },
 
+  /**
+   * Realiza login através da API segura (/api/admin/login) conectada ao Supabase Auth
+   */
   async login(emailInput: string, passwordInput: string): Promise<{ success: boolean; error?: string; user?: AdminUser }> {
-    const admin = getStoredAdmin();
-    const cleanEmail = emailInput.trim().toLowerCase();
-    const storedEmail = admin.email.toLowerCase();
+    const cleanEmail = (emailInput || '').trim();
+    const cleanPassword = (passwordInput || '').trim();
 
-    const isEmailValid =
-      cleanEmail === storedEmail ||
-      cleanEmail === 'admin@fortimoz.co.mz' ||
-      cleanEmail === 'admin@proseguranca.co.mz';
-
-    if (!isEmailValid) {
-      return { success: false, error: 'Credenciais de administrador inválidas.' };
+    if (!cleanEmail || !cleanPassword) {
+      return { success: false, error: 'Por favor, introduza o e-mail e a palavra-passe.' };
     }
-
-    const inputHash = await hashPassword(passwordInput, admin.salt);
-    const validFortiMozHash = await hashPassword('FortiMoz@2026', admin.salt);
-    const validLegacyHash = await hashPassword('ProSeguranca@2026', admin.salt);
-
-    const isPasswordValid = 
-      inputHash === admin.passwordHash ||
-      inputHash === validFortiMozHash ||
-      inputHash === validLegacyHash ||
-      passwordInput === 'FortiMoz@2026' ||
-      passwordInput === 'ProSeguranca@2026';
-
-    if (!isPasswordValid) {
-      return { success: false, error: 'Senha incorreta. Verifique os dados.' };
-    }
-
-    // Generate secure session token
-    const randomBytes = new Uint8Array(24);
-    crypto.getRandomValues(randomBytes);
-    const token = 'psg_tok_' + Array.from(randomBytes).map((b) => b.toString(16).padStart(2, '0')).join('');
-    
-    const user: AdminUser = {
-      id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      role: admin.role,
-      avatar: '/proseguranca-logo.png',
-    };
-
-    const session: AdminSession = {
-      token,
-      user,
-      expiresAt: Date.now() + 8 * 60 * 60 * 1000, // 8 hours
-    };
 
     try {
-      localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
-    } catch (e) {
-      console.error('Failed to persist admin session', e);
-    }
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store',
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: cleanPassword,
+        }),
+      });
 
-    return { success: true, user };
+      const data = await res.json();
+
+      if (!res.ok || !data.success || !data.user) {
+        return {
+          success: false,
+          error: data.error || 'Credenciais de administrador inválidas. Verifique os dados.',
+        };
+      }
+
+      const user: AdminUser = {
+        id: data.user.id,
+        name: data.user.name || 'Administrador FortiMoz',
+        email: data.user.email || cleanEmail,
+        role: data.user.role || 'superadmin',
+        avatar: data.user.avatar || '/proseguranca-logo.png',
+      };
+
+      const session: AdminSession = {
+        token: data.token || 'adm_tok_' + Math.random().toString(36).slice(2),
+        user,
+        expiresAt: Date.now() + 8 * 60 * 60 * 1000, // 8 hours
+      };
+
+      try {
+        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+      } catch (e) {
+        console.error('Failed to persist admin session', e);
+      }
+
+      return { success: true, user };
+    } catch (err: any) {
+      console.error('[authService] Erro de rede ao autenticar:', err);
+      return {
+        success: false,
+        error: 'Erro de comunicação com o servidor de autenticação.',
+      };
+    }
   },
 
   getSession(): AdminSession | null {
     try {
-      const raw = localStorage.getItem(ADMIN_SESSION_KEY);
+      let raw = localStorage.getItem(ADMIN_SESSION_KEY);
+      if (!raw) {
+        // Check legacy session
+        raw = localStorage.getItem(LEGACY_SESSION_KEY);
+      }
       if (!raw) return null;
       const session: AdminSession = JSON.parse(raw);
       if (Date.now() > session.expiresAt) {
@@ -152,57 +116,114 @@ export const authService = {
   logout(): void {
     try {
       localStorage.removeItem(ADMIN_SESSION_KEY);
+      localStorage.removeItem(LEGACY_SESSION_KEY);
     } catch (e) {
       console.error('Failed to clear admin session', e);
     }
   },
 
+  /**
+   * Altera a senha através da API segura (/api/admin/change-password) conectada ao Supabase Auth.
+   * Valida estritamente a senha atual com o Supabase antes de aplicar a nova senha.
+   */
   async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
-    const admin = getStoredAdmin();
-    const currentHash = await hashPassword(currentPassword, admin.salt);
-    
-    if (currentHash !== admin.passwordHash && currentPassword !== 'ProSeguranca@2026') {
-      return { success: false, error: 'A senha atual está incorreta.' };
+    const session = this.getSession();
+    const adminEmail = session?.user?.email || DEFAULT_EMAIL;
+
+    if (!currentPassword) {
+      return { success: false, error: 'A senha atual não está correta.' };
     }
 
-    if (newPassword.length < 6) {
-      return { success: false, error: 'A nova senha deve ter no mínimo 6 caracteres.' };
+    if (!newPassword || newPassword.length < 6) {
+      return { success: false, error: 'A nova palavra-passe deve ter pelo menos 6 caracteres.' };
     }
-
-    const newSalt = 'psg_salt_' + Date.now().toString(36);
-    const newHash = await hashPassword(newPassword, newSalt);
-
-    admin.salt = newSalt;
-    admin.passwordHash = newHash;
 
     try {
-      localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify(admin));
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          email: adminEmail,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        return {
+          success: false,
+          error: data.error || 'A senha atual não está correta.',
+        };
+      }
+
       return { success: true };
-    } catch {
-      return { success: false, error: 'Erro ao guardar nova senha no banco de dados local.' };
+    } catch (err: any) {
+      console.error('[authService] Erro ao comunicar alteração de senha:', err);
+      return {
+        success: false,
+        error: 'Erro de comunicação com o servidor ao alterar senha.',
+      };
     }
   },
 
-  updateProfile(name: string, email: string): { success: boolean; error?: string } {
-    const admin = getStoredAdmin();
-    if (!name.trim() || !email.trim()) {
+  /**
+   * Atualiza o perfil administrativo via API e na sessão local
+   */
+  async updateProfile(name: string, email: string): Promise<{ success: boolean; error?: string }> {
+    const cleanName = (name || '').trim();
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    if (!cleanName || !cleanEmail) {
       return { success: false, error: 'Nome e e-mail são obrigatórios.' };
     }
 
-    admin.name = name.trim();
-    admin.email = email.trim().toLowerCase();
-
     try {
-      localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify(admin));
+      const res = await fetch('/api/admin/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store',
+        },
+        body: JSON.stringify({
+          name: cleanName,
+          email: cleanEmail,
+        }),
+      });
+
+      const data = await res.json();
+
       const session = this.getSession();
       if (session) {
-        session.user.name = admin.name;
-        session.user.email = admin.email;
+        session.user.name = cleanName;
+        session.user.email = cleanEmail;
+        try {
+          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Falha ao atualizar perfil.' };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('[authService] Erro ao atualizar perfil:', err);
+      // Even if offline, update local session
+      const session = this.getSession();
+      if (session) {
+        session.user.name = cleanName;
+        session.user.email = cleanEmail;
         localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
       }
       return { success: true };
-    } catch {
-      return { success: false, error: 'Erro ao atualizar perfil do administrador.' };
     }
   },
 };
+

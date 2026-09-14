@@ -422,3 +422,49 @@ export function handleHealthCheck(req: Request, res: Response) {
     uptime: process.uptime(),
   });
 }
+
+// POST /api/admin/login
+export async function handleAdminLogin(req: Request, res: Response) {
+  setApiNoCacheHeaders(res);
+  try {
+    const { handleAdminLoginCore } = await import('../api/_adminAuthCore');
+    const { email, password } = req.body || {};
+    const result = await handleAdminLoginCore(email, password);
+    const status = result.success ? 200 : 401;
+    return res.status(status).json(result);
+  } catch (err: any) {
+    console.error('[API /api/admin/login] Erro:', err);
+    return res.status(500).json({ success: false, error: 'Erro interno no servidor ao processar autenticação.' });
+  }
+}
+
+// POST /api/admin/change-password
+export async function handleAdminChangePassword(req: Request, res: Response) {
+  setApiNoCacheHeaders(res);
+  try {
+    const { handleAdminChangePasswordCore } = await import('../api/_adminAuthCore');
+    const { currentPassword, newPassword, email } = req.body || {};
+    const result = await handleAdminChangePasswordCore(currentPassword, newPassword, email);
+    const status = result.success ? 200 : 400;
+    return res.status(status).json(result);
+  } catch (err: any) {
+    console.error('[API /api/admin/change-password] Erro:', err);
+    return res.status(500).json({ success: false, error: 'Erro interno no servidor ao alterar palavra-passe.' });
+  }
+}
+
+// POST /api/admin/profile
+export async function handleAdminUpdateProfile(req: Request, res: Response) {
+  setApiNoCacheHeaders(res);
+  try {
+    const { handleAdminUpdateProfileCore } = await import('../api/_adminAuthCore');
+    const { name, email } = req.body || {};
+    const result = await handleAdminUpdateProfileCore(name, email);
+    const status = result.success ? 200 : 400;
+    return res.status(status).json(result);
+  } catch (err: any) {
+    console.error('[API /api/admin/profile] Erro:', err);
+    return res.status(500).json({ success: false, error: 'Erro interno ao atualizar perfil.' });
+  }
+}
+
