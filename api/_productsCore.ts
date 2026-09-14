@@ -10,7 +10,7 @@ function cleanEnv(val: string | undefined): string {
   return s;
 }
 
-// Standalone mapper: guarantees complete schema compatibility
+// Standalone mapper: guarantees complete schema compatibility without importing server modules
 function mapDbRowToProduct(row: any) {
   let specs: any[] = [];
   if (Array.isArray(row.specifications)) {
@@ -142,7 +142,7 @@ function extractProductId(req: any, body: any): string | undefined {
   return undefined;
 }
 
-export default async function handler(req: any, res: any) {
+export async function handleProducts(req: any, res: any) {
   try {
     // Strict Anti-Cache and CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -173,7 +173,7 @@ export default async function handler(req: any, res: any) {
     const supabaseServiceRole = cleanEnv(process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY);
 
     if (!supabaseUrl || !supabaseServiceRole) {
-      console.error('[API PRODUCTS [id]] SUPABASE_URL ou SUPABASE_SERVICE_ROLE ausente no ambiente');
+      console.error('[API PRODUCTS] SUPABASE_URL ou SUPABASE_SERVICE_ROLE ausente no ambiente');
       return res.status(500).json({
         success: false,
         error: 'SUPABASE_URL ou SUPABASE_SERVICE_ROLE não configurado no ambiente da Vercel.',
@@ -190,7 +190,7 @@ export default async function handler(req: any, res: any) {
     const targetId = extractProductId(req, body);
 
     // ----------------------------------------------------
-    // GET /api/products/:id (Produto individual)
+    // GET /api/products?id=... ou /api/products/:id (Produto individual)
     // ----------------------------------------------------
     if (req.method === 'GET' && targetId) {
       const { data, error } = await supabase
@@ -200,7 +200,7 @@ export default async function handler(req: any, res: any) {
         .maybeSingle();
 
       if (error) {
-        console.error('[API PRODUCTS [id]] Erro ao consultar produto:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao consultar produto:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
@@ -223,7 +223,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ----------------------------------------------------
-    // GET /api/products/:id sem id -> Todos os produtos
+    // GET /api/products (Todos os produtos)
     // ----------------------------------------------------
     if (req.method === 'GET') {
       const { data, error } = await supabase
@@ -232,7 +232,7 @@ export default async function handler(req: any, res: any) {
         .order('id', { ascending: true });
 
       if (error) {
-        console.error('[API PRODUCTS [id]] Erro ao consultar tabela public.products:', error.message);
+        console.error('[API PRODUCTS] Erro ao consultar tabela public.products:', error.message);
         return res.status(500).json({
           success: false,
           error: error.message || 'Erro ao consultar tabela public.products.',
@@ -250,7 +250,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ----------------------------------------------------
-    // POST /api/products/:id
+    // POST /api/products (Criar novo produto no Supabase)
     // ----------------------------------------------------
     if (req.method === 'POST') {
       const rawProduct = body;
@@ -258,7 +258,7 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ success: false, error: 'Dados do produto inválidos ou ausentes (nome obrigatório).' });
       }
 
-      const newId = targetId || rawProduct.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const newId = rawProduct.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
       const productToInsert = {
         ...rawProduct,
         id: newId,
@@ -273,15 +273,19 @@ export default async function handler(req: any, res: any) {
         .single();
 
       if (error) {
-        console.error('[API PRODUCTS [id]] Erro ao criar produto no Supabase:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao criar produto no Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
           code: error.code,
+          details: error.details,
+          hint: error.hint,
         });
       }
 
       const product = mapDbRowToProduct(data);
+      console.log(`[API PRODUCTS] Novo produto criado com sucesso: ${product.id} (${product.name})`);
+
       return res.status(201).json({
         success: true,
         source: 'supabase',
@@ -298,6 +302,7 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ success: false, error: 'ID do produto não informado para atualização.' });
       }
 
+      // Buscar produto existente para garantir merge seguro e íntegro
       const { data: existing, error: findError } = await supabase
         .from('products')
         .select('*')
@@ -305,7 +310,7 @@ export default async function handler(req: any, res: any) {
         .maybeSingle();
 
       if (findError) {
-        console.error('[API PRODUCTS [id]] Erro ao verificar produto existente:', findError.message);
+        console.error('[API PRODUCTS] Erro ao verificar produto existente:', findError.message);
       }
 
       const base = existing ? mapDbRowToProduct(existing) : {};
@@ -324,15 +329,19 @@ export default async function handler(req: any, res: any) {
         .single();
 
       if (error) {
-        console.error('[API PRODUCTS [id]] Erro ao atualizar produto no Supabase:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao atualizar produto no Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
           code: error.code,
+          details: error.details,
+          hint: error.hint,
         });
       }
 
       const product = mapDbRowToProduct(data);
+      console.log(`[API PRODUCTS] Produto atualizado com sucesso: ${product.id} (Preço: ${product.price}, Img: ${product.image?.slice(0, 40)}...)`);
+
       return res.status(200).json({
         success: true,
         source: 'supabase',
@@ -355,13 +364,15 @@ export default async function handler(req: any, res: any) {
         .eq('id', targetId);
 
       if (error) {
-        console.error('[API PRODUCTS [id]] Erro ao remover produto do Supabase:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao remover produto do Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
           code: error.code,
         });
       }
+
+      console.log(`[API PRODUCTS] Produto eliminado com sucesso: ${targetId}`);
 
       return res.status(200).json({
         success: true,
@@ -375,10 +386,11 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Allow', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
     return res.status(405).json({ error: `Método ${req.method} não permitido.` });
   } catch (err: any) {
-    console.error('[API PRODUCTS [id]] Exceção crítica:', err);
+    console.error('[API PRODUCTS] Exceção crítica:', err);
     return res.status(500).json({
       success: false,
       error: err?.message || 'Erro interno no servidor.',
     });
   }
 }
+export default handleProducts;

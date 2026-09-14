@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -105,6 +105,22 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
     if (onProductChanged) onProductChanged();
   };
 
+  // Subscrição em tempo real aos dados do Supabase via storeDb
+  useEffect(() => {
+    // Sincroniza imediatamente com o Supabase ao abrir a aba de produtos
+    storeDb.syncWithServer(true).then(() => {
+      setProducts(storeDb.getProducts());
+    });
+
+    const unsubscribe = storeDb.subscribe(() => {
+      setProducts(storeDb.getProducts());
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   // Filtered products
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -204,8 +220,26 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         finalImage = editingProduct?.image || DEFAULT_EPI_PLACEHOLDER;
       }
 
+      // Se for uma URL blob local temporária, converte para DataURL base64 para envio seguro
+      if (finalImage.startsWith('blob:')) {
+        try {
+          const blobRes = await fetch(finalImage);
+          const blob = await blobRes.blob();
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+          reader.readAsDataURL(blob);
+          finalImage = await base64Promise;
+        } catch (bErr) {
+          console.warn('Aviso: falha ao extrair base64 de blob URL, recorrendo à imagem existente:', bErr);
+          finalImage = editingProduct?.image || DEFAULT_EPI_PLACEHOLDER;
+        }
+      }
+
       // Se for uma imagem base64 pendente de gravação no servidor, envia para Supabase Storage
-      if (finalImage.startsWith('data:')) {
+      if (finalImage.startsWith('data:') && !finalImage.includes('data:image/svg+xml')) {
         try {
           const prodId = editingProduct?.id || formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 30);
           const upRes = await fetch('/api/upload-image', {
@@ -228,7 +262,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
           setIsSubmitting(false);
           return;
         }
-      } else if (!finalImage.startsWith('blob:') && !finalImage.includes('?v=') && finalImage !== DEFAULT_EPI_PLACEHOLDER) {
+      } else if (!finalImage.startsWith('data:') && !finalImage.includes('?v=') && finalImage !== DEFAULT_EPI_PLACEHOLDER) {
         // Assegura token de versionamento para cache busting em URLs normais
         finalImage = `${finalImage}${finalImage.includes('?') ? '&' : '?'}v=${Date.now()}`;
       }
@@ -298,6 +332,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
 
       setImageWasChanged(false);
       setImageWasRemoved(false);
+      await storeDb.syncWithServer(true);
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
@@ -312,13 +347,17 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
     if (!deletingProduct) return;
     const name = deletingProduct.name;
     try {
+      setIsSubmitting(true);
       await storeDb.deleteProductAsync(deletingProduct.id);
       showToast(`Produto "${name}" eliminado com sucesso do Supabase.`);
       setDeletingProduct(null);
+      await storeDb.syncWithServer(true);
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
       showToast(`Erro ao eliminar no Supabase: ${err.message || err}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

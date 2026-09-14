@@ -10,7 +10,7 @@ function cleanEnv(val: string | undefined): string {
   return s;
 }
 
-// Standalone mapper: guarantees complete schema compatibility without importing server modules
+// Standalone mapper: guarantees complete schema compatibility
 function mapDbRowToProduct(row: any) {
   let specs: any[] = [];
   if (Array.isArray(row.specifications)) {
@@ -36,7 +36,7 @@ function mapDbRowToProduct(row: any) {
         apps = [String(parsed)];
       }
     } catch {
-      apps = row.applications
+      apps = String(row.applications)
         .split(',')
         .map((s: string) => s.trim())
         .filter(Boolean);
@@ -90,6 +90,9 @@ function mapDbRowToProduct(row: any) {
 }
 
 function mapProductToDbRow(p: any) {
+  const stock = Number(p.stockCount ?? p.stock_count ?? p.stock ?? 25);
+  const inStock = Boolean(p.inStock ?? p.in_stock ?? stock > 0);
+
   return {
     id: String(p.id),
     name: String(p.name || ''),
@@ -106,9 +109,9 @@ function mapProductToDbRow(p: any) {
     description: String(p.description || p.shortDescription || p.short_description || p.name || ''),
     specifications: Array.isArray(p.specifications) ? p.specifications : [],
     applications: Array.isArray(p.applications) ? p.applications : [],
-    in_stock: Boolean(p.inStock ?? p.in_stock ?? true),
-    stock: Number(p.stock ?? p.stockCount ?? p.stock_count ?? 25),
-    stock_count: Number(p.stockCount ?? p.stock_count ?? p.stock ?? 25),
+    in_stock: inStock,
+    stock: stock,
+    stock_count: stock,
     featured: Boolean(p.featured),
     min_quantity: Number(p.minQuantity || p.min_quantity || 1),
     available_sizes: Array.isArray(p.availableSizes) ? p.availableSizes : (Array.isArray(p.available_sizes) ? p.available_sizes : []),
@@ -119,13 +122,31 @@ function mapProductToDbRow(p: any) {
   };
 }
 
+function extractProductId(req: any, body: any): string | undefined {
+  if (req.query?.id && typeof req.query.id === 'string' && req.query.id.trim()) {
+    return req.query.id.trim();
+  }
+  if (req.params?.id && typeof req.params.id === 'string' && req.params.id.trim()) {
+    return req.params.id.trim();
+  }
+  if (body?.id && typeof body.id === 'string' && body.id.trim()) {
+    return body.id.trim();
+  }
+  if (req.url) {
+    const cleanUrl = req.url.split('?')[0];
+    const match = cleanUrl.match(/\/api\/products\/([^\/?#]+)/);
+    if (match && match[1] && match[1] !== 'index') {
+      return decodeURIComponent(match[1]);
+    }
+  }
+  return undefined;
+}
+
 export default async function handler(req: any, res: any) {
   try {
-    console.log('[API PRODUCTS] Function started');
-
-    // CORS & Strict Anti-Cache headers
+    // Strict Anti-Cache and CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
@@ -135,14 +156,19 @@ export default async function handler(req: any, res: any) {
       return res.status(200).end();
     }
 
-    // Parse body safely if string
-    if (typeof req.body === 'string' && req.body.trim()) {
+    // Parse body safely
+    let body = req.body;
+    if (Buffer.isBuffer(body)) {
       try {
-        req.body = JSON.parse(req.body);
+        body = JSON.parse(body.toString('utf-8'));
+      } catch {}
+    } else if (typeof body === 'string' && body.trim()) {
+      try {
+        body = JSON.parse(body);
       } catch {}
     }
 
-    // 1. Ler e validar variáveis de ambiente com segurança
+    // Initialize Supabase Client with service_role
     const supabaseUrl = cleanEnv(process.env.SUPABASE_URL);
     const supabaseServiceRole = cleanEnv(process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -154,9 +180,6 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    console.log('[API PRODUCTS] Environment validated');
-
-    // 2. Criar cliente Supabase com credenciais seguras do servidor
     const supabase = createClient(supabaseUrl, supabaseServiceRole, {
       auth: {
         persistSession: false,
@@ -164,19 +187,16 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    console.log('[API PRODUCTS] Supabase client created');
-
-    const queryId = req.query?.id as string | undefined;
+    const targetId = extractProductId(req, body);
 
     // ----------------------------------------------------
-    // GET /api/products?id=... (Produto individual)
+    // GET /api/products?id=... ou /api/products/:id (Produto individual)
     // ----------------------------------------------------
-    if (req.method === 'GET' && queryId) {
-      console.log(`[API PRODUCTS] Consultando produto individual ID: ${queryId}`);
+    if (req.method === 'GET' && targetId) {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('id', queryId)
+        .eq('id', targetId)
         .maybeSingle();
 
       if (error) {
@@ -185,24 +205,20 @@ export default async function handler(req: any, res: any) {
           success: false,
           error: error.message,
           code: error.code,
-          details: error.details,
-          hint: error.hint,
         });
       }
 
       if (!data) {
         return res.status(404).json({
           success: false,
-          error: `Produto com ID ${queryId} não encontrado.`,
+          error: `Produto com ID ${targetId} não encontrado.`,
         });
       }
 
-      const product = mapDbRowToProduct(data);
-      console.log('[API PRODUCTS] Returning response');
       return res.status(200).json({
         success: true,
         source: 'supabase',
-        product,
+        product: mapDbRowToProduct(data),
       });
     }
 
@@ -210,31 +226,21 @@ export default async function handler(req: any, res: any) {
     // GET /api/products (Todos os produtos)
     // ----------------------------------------------------
     if (req.method === 'GET') {
-      console.log('[API PRODUCTS] Query started');
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .order('id', { ascending: true });
 
-      console.log('[API PRODUCTS] Query completed');
-
       if (error) {
-        console.error('[API PRODUCTS] Erro ao consultar tabela public.products:');
-        console.error('Código:', error.code || 'sem código');
-        console.error('Mensagem:', error.message);
+        console.error('[API PRODUCTS] Erro ao consultar tabela public.products:', error.message);
         return res.status(500).json({
           success: false,
           error: error.message || 'Erro ao consultar tabela public.products.',
           code: error.code,
-          details: error.details,
-          hint: error.hint,
         });
       }
 
       const products = (data || []).map(mapDbRowToProduct);
-      console.log(`[API PRODUCTS] Produtos mapeados: ${products.length}`);
-      console.log('[API PRODUCTS] Returning response');
-
       return res.status(200).json({
         success: true,
         source: 'supabase',
@@ -244,16 +250,20 @@ export default async function handler(req: any, res: any) {
     }
 
     // ----------------------------------------------------
-    // POST /api/products (Criar produto)
+    // POST /api/products (Criar novo produto no Supabase)
     // ----------------------------------------------------
     if (req.method === 'POST') {
-      const rawProduct = req.body;
+      const rawProduct = body;
       if (!rawProduct || !rawProduct.name) {
-        return res.status(400).json({ success: false, error: 'Dados do produto inválidos ou ausentes.' });
+        return res.status(400).json({ success: false, error: 'Dados do produto inválidos ou ausentes (nome obrigatório).' });
       }
 
-      const newId = rawProduct.id || `prod_${Date.now()}`;
-      const productToInsert = { ...rawProduct, id: newId };
+      const newId = rawProduct.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      const productToInsert = {
+        ...rawProduct,
+        id: newId,
+        createdAt: new Date().toISOString(),
+      };
       const dbRow = mapProductToDbRow(productToInsert);
 
       const { data, error } = await supabase
@@ -263,7 +273,7 @@ export default async function handler(req: any, res: any) {
         .single();
 
       if (error) {
-        console.error('[API PRODUCTS] Erro ao criar produto:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao criar produto no Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
@@ -274,30 +284,42 @@ export default async function handler(req: any, res: any) {
       }
 
       const product = mapDbRowToProduct(data);
+      console.log(`[API PRODUCTS] Novo produto criado com sucesso: ${product.id} (${product.name})`);
+
       return res.status(201).json({
         success: true,
         source: 'supabase',
         product,
+        message: 'Produto adicionado com sucesso no Supabase.',
       });
     }
 
     // ----------------------------------------------------
-    // PUT /api/products (Atualizar produto)
+    // PUT / PATCH /api/products/:id (Atualizar produto no Supabase)
     // ----------------------------------------------------
-    if (req.method === 'PUT') {
-      const id = queryId || req.body?.id;
-      if (!id) {
-        return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
+    if (req.method === 'PUT' || req.method === 'PATCH') {
+      if (!targetId) {
+        return res.status(400).json({ success: false, error: 'ID do produto não informado para atualização.' });
       }
 
-      const { data: existing } = await supabase
+      // Buscar produto existente para garantir merge seguro e íntegro
+      const { data: existing, error: findError } = await supabase
         .from('products')
         .select('*')
-        .eq('id', id)
+        .eq('id', targetId)
         .maybeSingle();
 
+      if (findError) {
+        console.error('[API PRODUCTS] Erro ao verificar produto existente:', findError.message);
+      }
+
       const base = existing ? mapDbRowToProduct(existing) : {};
-      const merged = { ...base, ...req.body, id, updatedAt: new Date().toISOString() };
+      const merged = {
+        ...base,
+        ...(body || {}),
+        id: targetId,
+        updatedAt: new Date().toISOString(),
+      };
       const dbRow = mapProductToDbRow(merged);
 
       const { data, error } = await supabase
@@ -307,7 +329,7 @@ export default async function handler(req: any, res: any) {
         .single();
 
       if (error) {
-        console.error('[API PRODUCTS] Erro ao atualizar produto:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao atualizar produto no Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
@@ -318,29 +340,31 @@ export default async function handler(req: any, res: any) {
       }
 
       const product = mapDbRowToProduct(data);
+      console.log(`[API PRODUCTS] Produto atualizado com sucesso: ${product.id} (Preço: ${product.price}, Img: ${product.image?.slice(0, 40)}...)`);
+
       return res.status(200).json({
         success: true,
         source: 'supabase',
         product,
+        message: 'Produto atualizado e confirmado com sucesso no Supabase.',
       });
     }
 
     // ----------------------------------------------------
-    // DELETE /api/products (Remover produto)
+    // DELETE /api/products/:id (Eliminar produto no Supabase)
     // ----------------------------------------------------
     if (req.method === 'DELETE') {
-      const id = queryId || req.body?.id;
-      if (!id) {
-        return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
+      if (!targetId) {
+        return res.status(400).json({ success: false, error: 'ID do produto não informado para exclusão.' });
       }
 
       const { error } = await supabase
         .from('products')
         .delete()
-        .eq('id', id);
+        .eq('id', targetId);
 
       if (error) {
-        console.error('[API PRODUCTS] Erro ao remover produto:', error.code, error.message);
+        console.error('[API PRODUCTS] Erro ao remover produto do Supabase:', error.code, error.message);
         return res.status(500).json({
           success: false,
           error: error.message,
@@ -348,20 +372,24 @@ export default async function handler(req: any, res: any) {
         });
       }
 
+      console.log(`[API PRODUCTS] Produto eliminado com sucesso: ${targetId}`);
+
       return res.status(200).json({
         success: true,
         source: 'supabase',
-        message: `Produto ${id} removido com sucesso.`,
+        deletedId: targetId,
+        message: `Produto ${targetId} removido com sucesso do catálogo Supabase.`,
       });
     }
 
-    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+    // Método não suportado
+    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
     return res.status(405).json({ error: `Método ${req.method} não permitido.` });
   } catch (err: any) {
-    console.error('[API PRODUCTS] Crash inesperado capturado na função:', err?.message || err);
+    console.error('[API PRODUCTS] Exceção crítica:', err);
     return res.status(500).json({
       success: false,
-      error: err?.message || 'Erro interno na Serverless Function.',
+      error: err?.message || 'Erro interno no servidor.',
     });
   }
 }

@@ -327,13 +327,16 @@ export const storeDb = {
   async addProductAsync(productData: Omit<Product, 'id'> & { id?: string }): Promise<Product> {
     const res = await fetch('/api/products', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
       body: JSON.stringify(productData),
     });
 
     const data = await res.json();
     if (!res.ok || !data.success || !data.product) {
-      const errMsg = data.error || 'Falha ao gravar produto no Supabase.';
+      const errMsg = data.error || data.message || 'Falha ao gravar produto no Supabase.';
       throw new Error(errMsg);
     }
 
@@ -348,6 +351,8 @@ export const storeDb = {
     }
 
     notifyListeners();
+    // Força re-sincronização imediata para confirmar integridade com Supabase
+    this.syncWithServer(true).catch(() => {});
     return finalProduct;
   },
 
@@ -391,11 +396,15 @@ export const storeDb = {
 
     notifyListeners();
 
-    // Sincronizar atualização com Supabase via servidor protegido
-    fetch(`/api/products/${id}`, {
+    // Sincronizar atualização com Supabase via endpoint seguro
+    const encodedId = encodeURIComponent(id);
+    fetch(`/api/products/${encodedId}?id=${encodedId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProduct),
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
+      body: JSON.stringify({ ...updatedProduct, id }),
     }).catch((err) => {
       console.warn('[storeDb] Erro ao sincronizar atualização:', err);
     });
@@ -408,15 +417,22 @@ export const storeDb = {
    * Lança erro explícito se o Supabase recusar a atualização.
    */
   async updateProductAsync(id: string, updates: Partial<Product>): Promise<Product> {
-    const res = await fetch(`/api/products/${id}`, {
+    const encodedId = encodeURIComponent(id);
+    const payload = { ...updates, id };
+
+    // Envia tanto no path quanto na query e no corpo para compatibilidade total com Vercel
+    const res = await fetch(`/api/products/${encodedId}?id=${encodedId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
     if (!res.ok || !data.success || !data.product) {
-      const errMsg = data.error || 'Falha ao atualizar produto no Supabase.';
+      const errMsg = data.error || data.message || 'Falha ao atualizar produto no Supabase.';
       throw new Error(errMsg);
     }
 
@@ -437,6 +453,8 @@ export const storeDb = {
     }
 
     notifyListeners();
+    // Força re-sincronização imediata para confirmar integridade com Supabase
+    this.syncWithServer(true).catch(() => {});
     return finalProduct;
   },
 
@@ -454,8 +472,14 @@ export const storeDb = {
     notifyListeners();
 
     // Sincronizar exclusão com Supabase via servidor protegido
-    fetch(`/api/products/${id}`, {
+    const encodedId = encodeURIComponent(id);
+    fetch(`/api/products/${encodedId}?id=${encodedId}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
+      body: JSON.stringify({ id }),
     }).catch((err) => {
       console.warn('[storeDb] Erro ao sincronizar eliminação:', err);
     });
@@ -467,13 +491,19 @@ export const storeDb = {
    * Remove produto no Supabase de forma assíncrona.
    */
   async deleteProductAsync(id: string): Promise<boolean> {
-    const res = await fetch(`/api/products/${id}`, {
+    const encodedId = encodeURIComponent(id);
+    const res = await fetch(`/api/products/${encodedId}?id=${encodedId}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store',
+      },
+      body: JSON.stringify({ id }),
     });
 
     const data = await res.json();
     if (!res.ok || !data.success) {
-      const errMsg = data.error || 'Falha ao excluir produto no Supabase.';
+      const errMsg = data.error || data.message || 'Falha ao excluir produto no Supabase.';
       throw new Error(errMsg);
     }
 
@@ -486,6 +516,8 @@ export const storeDb = {
     }
 
     notifyListeners();
+    // Força re-sincronização imediata para confirmar integridade com Supabase
+    this.syncWithServer(true).catch(() => {});
     return true;
   },
 
