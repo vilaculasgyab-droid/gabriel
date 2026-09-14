@@ -12,17 +12,36 @@ import { Product, Order, OrderItem, ProductSpecification } from '../types';
  * quanto camelCase (categoryId, shortDescription).
  */
 export function mapDbRowToProduct(row: any): Product {
-  const specs: ProductSpecification[] = Array.isArray(row.specifications)
-    ? row.specifications
-    : typeof row.specifications === 'string'
-    ? JSON.parse(row.specifications)
-    : [];
+  let specs: ProductSpecification[] = [];
+  if (Array.isArray(row.specifications)) {
+    specs = row.specifications;
+  } else if (typeof row.specifications === 'string') {
+    try {
+      const parsed = JSON.parse(row.specifications);
+      if (Array.isArray(parsed)) specs = parsed;
+    } catch {
+      specs = [];
+    }
+  }
 
-  const apps: string[] = Array.isArray(row.applications)
-    ? row.applications
-    : typeof row.applications === 'string'
-    ? JSON.parse(row.applications)
-    : [];
+  let apps: string[] = [];
+  if (Array.isArray(row.applications)) {
+    apps = row.applications;
+  } else if (typeof row.applications === 'string') {
+    try {
+      const parsed = JSON.parse(row.applications);
+      if (Array.isArray(parsed)) {
+        apps = parsed;
+      } else {
+        apps = [String(parsed)];
+      }
+    } catch {
+      apps = row.applications
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+    }
+  }
 
   const sizes: string[] | undefined = Array.isArray(row.available_sizes || row.availableSizes)
     ? row.available_sizes || row.availableSizes

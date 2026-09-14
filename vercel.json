@@ -102,6 +102,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
       "source": "/((?!api/|sw\\.js|manifest\\.webmanifest|offline\\.html|sitemap\\.xml|robots\\.txt|assets/).*)",
       "destination": "/index.html"
     }

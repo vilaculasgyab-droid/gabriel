@@ -12,6 +12,12 @@ export default async function handler(req: Request, res: Response) {
     return res.status(200).end();
   }
 
+  if (typeof req.body === 'string' && req.body.trim()) {
+    try {
+      req.body = JSON.parse(req.body);
+    } catch {}
+  }
+
   // Normalizar id para compatibilidade com Vercel Serverless Functions
   if (req.query?.id && (!req.params || !req.params.id)) {
     req.params = { ...(req.params || {}), id: req.query.id as string };

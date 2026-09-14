@@ -22,7 +22,6 @@ import {
   updateOrderStatusInSupabase,
   checkSupabaseStatus,
 } from './supabaseAdmin';
-import { runMigration } from '../scripts/migrate-to-supabase';
 import { Product, Order } from '../src/types';
 
 // Strict anti-caching headers for API responses so clients always get fresh data
@@ -40,13 +39,14 @@ export async function handleGetProducts(req: Request, res: Response) {
   try {
     const queryResult = await fetchProductsFromSupabaseDetailed();
 
-    if (queryResult.success && queryResult.data) {
+    if (queryResult.success) {
+      const products = queryResult.data || [];
       return res.status(200).json({
         success: true,
         source: 'supabase',
-        count: queryResult.data.length,
+        count: products.length,
         timestamp: new Date().toISOString(),
-        products: queryResult.data,
+        products,
       });
     }
 
@@ -59,7 +59,7 @@ export async function handleGetProducts(req: Request, res: Response) {
       hint: supaError?.hint,
     });
 
-    const statusCode = supaError?.code === '42501' ? 403 : supaError?.code === 'MISSING_ENV_VARS' ? 503 : 500;
+    const statusCode = supaError?.code === '42501' ? 403 : 500;
 
     return res.status(statusCode).json({
       success: false,
@@ -398,11 +398,12 @@ export async function handleTriggerMigration(req: Request, res: Response) {
     if (!isSupabaseServerConfigured()) {
       return res.status(400).json({
         success: false,
-        error: 'Supabase não está configurado no ambiente. Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.',
+        error: 'Supabase não está configurado no ambiente. Configure SUPABASE_URL e SUPABASE_SERVICE_ROLE.',
       });
     }
 
     console.log('[API] Executando migração para Supabase solicitada via API...');
+    const { runMigration } = await import('../scripts/migrate-to-supabase');
     const result = await runMigration();
     return res.json(result);
   } catch (err: any) {

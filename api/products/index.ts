@@ -5,10 +5,9 @@ import {
   handleCreateProduct,
   handleUpdateProduct,
   handleDeleteProduct,
-} from '../server/apiHandlers';
+} from '../../server/apiHandlers';
 
 export default async function handler(req: Request, res: Response) {
-  // Configurar cabeçalhos CORS e no-cache para todas as requisições à API
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
@@ -45,5 +44,3 @@ export default async function handler(req: Request, res: Response) {
     return res.status(405).json({ error: `Método ${req.method} não permitido.` });
   }
 }
-
-

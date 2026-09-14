@@ -84,7 +84,7 @@ export const storeDb = {
             if (error) {
               lastSupabaseError = error.message;
               console.warn('[storeDb] Supabase DB retornou erro na consulta direta:', error.message);
-            } else if (Array.isArray(data) && data.length > 0) {
+            } else if (Array.isArray(data)) {
               const mapped = data.map(mapDbRowToProduct);
               inMemoryProducts = mapped;
               hasLoadedFromSupabase = true;
@@ -114,11 +114,16 @@ export const storeDb = {
 
       if (res.ok) {
         const data = await res.json();
-        if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
-          const remoteProducts: Product[] = data.products;
+        const remoteProducts: Product[] | null = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.products)
+          ? data.products
+          : null;
+
+        if (remoteProducts !== null) {
           inMemoryProducts = remoteProducts;
           hasLoadedFromSupabase = true;
-          lastProductSyncSource = data.source === 'supabase' ? 'server_api' : 'cache';
+          lastProductSyncSource = 'server_api';
           lastSupabaseError = null;
           try {
             localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
@@ -129,7 +134,7 @@ export const storeDb = {
           lastProductSyncTimestamp = Date.now();
           return true;
         } else {
-          lastSupabaseError = data?.error || 'Nenhum produto retornado do Supabase.';
+          lastSupabaseError = data?.error || 'Formato de resposta inesperado da API.';
         }
       } else {
         try {

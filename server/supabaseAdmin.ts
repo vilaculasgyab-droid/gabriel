@@ -9,36 +9,45 @@ const BUCKET_NAME = 'product-images';
 let adminClient: SupabaseClient | null = null;
 let readClient: SupabaseClient | null = null;
 
+function cleanEnvValue(val: string | undefined): string {
+  if (!val) return '';
+  let s = val.trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 export function getSupabaseUrl(): string {
-  return (
+  return cleanEnvValue(
     process.env.SUPABASE_URL ||
     process.env.VITE_SUPABASE_URL ||
     ''
-  ).trim();
+  );
 }
 
 export function getSupabaseServiceRoleKey(): string {
-  return (
+  return cleanEnvValue(
     process.env.SUPABASE_SERVICE_ROLE ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_SECRET_KEY ||
     ''
-  ).trim();
+  );
 }
 
 export function getSupabaseAnonKey(): string {
-  return (
+  return cleanEnvValue(
     process.env.SUPABASE_ANON_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY ||
     ''
-  ).trim();
+  );
 }
 
 export function getSupabaseKey(): string {
-  return (
+  return cleanEnvValue(
     getSupabaseServiceRoleKey() ||
     getSupabaseAnonKey()
-  ).trim();
+  );
 }
 
 export function isSupabaseServerConfigured(): boolean {
@@ -181,14 +190,16 @@ export async function fetchProductsFromSupabaseDetailed(): Promise<SupabaseQuery
   }
 
   try {
+    console.log('[Supabase] Consultando public.products');
     const { data, error } = await client
       .from('products')
       .select('*')
       .order('id', { ascending: true });
 
     if (error) {
-      console.error('[Supabase DB Error] Código:', error.code);
-      console.error('[Supabase DB Error] Mensagem:', error.message);
+      console.error('[Supabase] Erro ao consultar products:');
+      console.error(error.code || 'sem código');
+      console.error(error.message);
       if (error.details) console.error('[Supabase DB Error] Detalhes:', error.details);
       if (error.hint) console.error('[Supabase DB Error] Hint:', error.hint);
 
@@ -203,13 +214,18 @@ export async function fetchProductsFromSupabaseDetailed(): Promise<SupabaseQuery
       };
     }
 
+    const count = data ? data.length : 0;
+    console.log('[Supabase] Produtos encontrados:', count);
+
     const mapped = (data || []).map(mapDbRowToProduct);
     return {
       success: true,
       data: mapped,
     };
   } catch (err: any) {
-    console.error('[Supabase DB Exception] Exceção ao buscar produtos:', err);
+    console.error('[Supabase] Erro ao consultar products:');
+    console.error('EXCEPTION');
+    console.error(err?.message || 'Exceção não tratada ao consultar o Supabase.');
     return {
       success: false,
       error: {
