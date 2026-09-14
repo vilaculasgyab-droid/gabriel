@@ -206,37 +206,64 @@ export async function handleAdminLoginCore(
   const adminClient = getAdminClient();
   const anonClient = getAnonClient();
 
-  if (adminClient && anonClient) {
-    // 1. Ensure admin user exists in Supabase
-    await ensureSupabaseAdminUser();
-
-    // 2. Validate password via Supabase Auth signInWithPassword
+  if (anonClient) {
+    // 1. Validate password via Supabase Auth signInWithPassword directly
     const { data, error } = await anonClient.auth.signInWithPassword({
       email: cleanEmail,
       password,
     });
 
-    if (error || !data?.user) {
+    if (!error && data?.user) {
+      const user = {
+        id: data.user.id,
+        name: data.user.user_metadata?.name || 'Administrador FortiMoz',
+        email: data.user.email || cleanEmail,
+        role: (data.user.user_metadata?.role as any) || 'superadmin',
+        avatar: '/proseguranca-logo.png',
+      };
+
+      const token = data.session?.access_token || ('adm_tok_' + crypto.randomBytes(16).toString('hex'));
+
       return {
-        success: false,
-        error: 'Credenciais de administrador inválidas. Verifique o e-mail e a palavra-passe.',
+        success: true,
+        user,
+        token,
       };
     }
 
-    const user = {
-      id: data.user.id,
-      name: data.user.user_metadata?.name || 'Administrador FortiMoz',
-      email: data.user.email || cleanEmail,
-      role: (data.user.user_metadata?.role as any) || 'superadmin',
-      avatar: '/proseguranca-logo.png',
-    };
-
-    const token = data.session?.access_token || ('adm_tok_' + crypto.randomBytes(16).toString('hex'));
+    // 2. If first attempt fails and adminClient is available, verify if user needs initialization
+    if (adminClient) {
+      try {
+        const ensured = await ensureSupabaseAdminUser();
+        if (ensured) {
+          const retry = await anonClient.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
+          if (!retry.error && retry.data?.user) {
+            const user = {
+              id: retry.data.user.id,
+              name: retry.data.user.user_metadata?.name || 'Administrador FortiMoz',
+              email: retry.data.user.email || cleanEmail,
+              role: (retry.data.user.user_metadata?.role as any) || 'superadmin',
+              avatar: '/proseguranca-logo.png',
+            };
+            const token = retry.data.session?.access_token || ('adm_tok_' + crypto.randomBytes(16).toString('hex'));
+            return {
+              success: true,
+              user,
+              token,
+            };
+          }
+        }
+      } catch (ensureErr) {
+        console.warn('[AdminAuthCore] Erro ao assegurar usuário admin no Supabase:', ensureErr);
+      }
+    }
 
     return {
-      success: true,
-      user,
-      token,
+      success: false,
+      error: 'Credenciais de administrador inválidas. Verifique o e-mail e a palavra-passe.',
     };
   }
 
@@ -286,11 +313,8 @@ export async function handleAdminChangePasswordCore(
   const adminClient = getAdminClient();
   const anonClient = getAnonClient();
 
-  if (adminClient && anonClient) {
-    // 1. Ensure user exists
-    await ensureSupabaseAdminUser();
-
-    // 2. STRICT VERIFICATION: Verify current password against Supabase Auth
+  if (anonClient) {
+    // 1. STRICT VERIFICATION: Verify current password against Supabase Auth
     const { data: verifyData, error: verifyErr } = await anonClient.auth.signInWithPassword({
       email: cleanEmail,
       password: curPass,
@@ -303,21 +327,36 @@ export async function handleAdminChangePasswordCore(
       };
     }
 
-    // 3. Update password in Supabase Auth using Admin Client
-    const { error: updateErr } = await adminClient.auth.admin.updateUserById(
-      verifyData.user.id,
-      { password: newPass }
-    );
+    // 2. Update password in Supabase Auth
+    if (adminClient) {
+      const { error: updateErr } = await adminClient.auth.admin.updateUserById(
+        verifyData.user.id,
+        { password: newPass }
+      );
 
-    if (updateErr) {
-      console.error('[AdminAuthCore] Erro ao atualizar senha no Supabase:', updateErr.message);
-      return {
-        success: false,
-        error: `Falha ao gravar nova senha no Supabase: ${updateErr.message}`,
-      };
+      if (updateErr) {
+        console.error('[AdminAuthCore] Erro ao atualizar senha no Supabase:', updateErr.message);
+        return {
+          success: false,
+          error: `Falha ao gravar nova senha no Supabase: ${updateErr.message}`,
+        };
+      }
+    } else if (verifyData.session?.access_token) {
+      // Direct user password update if admin service role is unavailable
+      const userClient = createClient(getSupabaseUrl(), getSupabaseAnonKey() || '', {
+        auth: { persistSession: false, autoRefreshToken: false },
+        global: { headers: { Authorization: `Bearer ${verifyData.session.access_token}` } },
+      });
+      const { error: updateErr } = await userClient.auth.updateUser({ password: newPass });
+      if (updateErr) {
+        return {
+          success: false,
+          error: `Falha ao gravar nova senha no Supabase: ${updateErr.message}`,
+        };
+      }
     }
 
-    // 4. Also keep local fallback synchronized
+    // 3. Also keep local fallback synchronized
     try {
       const localCreds = getLocalCredentials();
       const newSalt = 'fortimoz_salt_' + Date.now().toString(36);

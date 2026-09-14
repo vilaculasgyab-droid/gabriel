@@ -1,4 +1,5 @@
 import { AdminUser, AdminSession } from '../types';
+import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabase';
 
 const ADMIN_SESSION_KEY = 'fortimoz_admin_session_v2';
 const LEGACY_SESSION_KEY = 'proseguranca_admin_session_v1';
@@ -23,7 +24,9 @@ export const authService = {
   },
 
   /**
-   * Realiza login através da API segura (/api/admin/login) conectada ao Supabase Auth
+   * Realiza login através da API segura (/api/admin/login) conectada ao Supabase Auth,
+   * com fallback transparente para o cliente Supabase oficial caso o endpoint da API
+   * esteja inacessível no ambiente (ex: Vercel sem serverless ou proxy restrito).
    */
   async login(emailInput: string, passwordInput: string): Promise<{ success: boolean; error?: string; user?: AdminUser }> {
     const cleanEmail = (emailInput || '').trim();
@@ -33,6 +36,9 @@ export const authService = {
       return { success: false, error: 'Por favor, introduza o e-mail e a palavra-passe.' };
     }
 
+    let apiConnectionFailed = false;
+
+    // 1. Tentar primeiro o endpoint seguro de API (/api/admin/login)
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
@@ -46,43 +52,105 @@ export const authService = {
         }),
       });
 
-      const data = await res.json();
+      // Leitura resiliente: evita quebrar se a resposta não for JSON
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
 
-      if (!res.ok || !data.success || !data.user) {
+      // Se a API respondeu com sucesso
+      if (res.ok && data?.success && data?.user) {
+        const user: AdminUser = {
+          id: data.user.id,
+          name: data.user.name || 'Administrador FortiMoz',
+          email: data.user.email || cleanEmail,
+          role: data.user.role || 'superadmin',
+          avatar: data.user.avatar || '/proseguranca-logo.png',
+        };
+
+        const session: AdminSession = {
+          token: data.token || 'adm_tok_' + Math.random().toString(36).slice(2),
+          user,
+          expiresAt: Date.now() + 8 * 60 * 60 * 1000, // 8 hours
+        };
+
+        try {
+          localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        } catch (e) {
+          console.error('Failed to persist admin session', e);
+        }
+
+        return { success: true, user };
+      }
+
+      // Se a API respondeu explicitamente que as credenciais são inválidas (HTTP 401 ou erro estruturado)
+      if (data && data.error && res.status !== 404 && res.status < 500) {
         return {
           success: false,
-          error: data.error || 'Credenciais de administrador inválidas. Verifique os dados.',
+          error: data.error,
         };
       }
 
-      const user: AdminUser = {
-        id: data.user.id,
-        name: data.user.name || 'Administrador FortiMoz',
-        email: data.user.email || cleanEmail,
-        role: data.user.role || 'superadmin',
-        avatar: data.user.avatar || '/proseguranca-logo.png',
-      };
-
-      const session: AdminSession = {
-        token: data.token || 'adm_tok_' + Math.random().toString(36).slice(2),
-        user,
-        expiresAt: Date.now() + 8 * 60 * 60 * 1000, // 8 hours
-      };
-
-      try {
-        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
-      } catch (e) {
-        console.error('Failed to persist admin session', e);
-      }
-
-      return { success: true, user };
-    } catch (err: any) {
-      console.error('[authService] Erro de rede ao autenticar:', err);
-      return {
-        success: false,
-        error: 'Erro de comunicação com o servidor de autenticação.',
-      };
+      // Se a rota não foi encontrada (404) ou retornou 500/HTML na Vercel/proxy
+      apiConnectionFailed = true;
+    } catch (netErr) {
+      console.warn('[authService] Falha de rede ao contactar /api/admin/login:', netErr);
+      apiConnectionFailed = true;
     }
+
+    // 2. Se a chamada à API falhou (por exemplo se a rota não existe no ambiente estático ou falha de rede/CORS),
+    // recorrer diretamente ao Supabase Auth através do cliente oficial do frontend (utilizando apenas a chave anónima pública)
+    if (apiConnectionFailed && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseClient();
+        if (supabase) {
+          const authEmail = cleanEmail.toLowerCase() === 'admin@proseguranca.co.mz' ? DEFAULT_EMAIL : cleanEmail;
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: authEmail,
+            password: cleanPassword,
+          });
+
+          if (!error && data?.user) {
+            const user: AdminUser = {
+              id: data.user.id,
+              name: (data.user.user_metadata as any)?.name || 'Administrador FortiMoz',
+              email: data.user.email || cleanEmail,
+              role: ((data.user.user_metadata as any)?.role as any) || 'superadmin',
+              avatar: '/proseguranca-logo.png',
+            };
+
+            const session: AdminSession = {
+              token: data.session?.access_token || 'adm_tok_' + Math.random().toString(36).slice(2),
+              user,
+              expiresAt: Date.now() + 8 * 60 * 60 * 1000,
+            };
+
+            try {
+              localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+            } catch (e) {
+              console.error('Failed to persist admin session', e);
+            }
+
+            return { success: true, user };
+          } else if (error) {
+            return {
+              success: false,
+              error: 'Credenciais de administrador inválidas. Verifique o e-mail e a palavra-passe.',
+            };
+          }
+        }
+      } catch (clientErr) {
+        console.error('[authService] Erro ao autenticar via cliente Supabase:', clientErr);
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Erro de comunicação com o servidor de autenticação. Verifique a sua ligação ou credenciais.',
+    };
   },
 
   getSession(): AdminSession | null {
@@ -138,6 +206,9 @@ export const authService = {
       return { success: false, error: 'A nova palavra-passe deve ter pelo menos 6 caracteres.' };
     }
 
+    let apiConnectionFailed = false;
+
+    // 1. Tentar via API segura
     try {
       const res = await fetch('/api/admin/change-password', {
         method: 'POST',
@@ -152,23 +223,66 @@ export const authService = {
         }),
       });
 
-      const data = await res.json();
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
 
-      if (!res.ok || !data.success) {
+      if (res.ok && data?.success) {
+        return { success: true };
+      }
+
+      if (data && data.error && res.status !== 404 && res.status < 500) {
         return {
           success: false,
-          error: data.error || 'A senha atual não está correta.',
+          error: data.error,
         };
       }
 
-      return { success: true };
+      apiConnectionFailed = true;
     } catch (err: any) {
-      console.error('[authService] Erro ao comunicar alteração de senha:', err);
-      return {
-        success: false,
-        error: 'Erro de comunicação com o servidor ao alterar senha.',
-      };
+      console.warn('[authService] Falha ao contactar /api/admin/change-password:', err);
+      apiConnectionFailed = true;
     }
+
+    // 2. Fallback via cliente Supabase se a API estiver inacessível
+    if (apiConnectionFailed && isSupabaseConfigured()) {
+      try {
+        const supabase = getSupabaseClient();
+        if (supabase) {
+          // Validação estrita da senha atual
+          const authEmail = adminEmail.toLowerCase() === 'admin@proseguranca.co.mz' ? DEFAULT_EMAIL : adminEmail;
+          const { error: signInErr } = await supabase.auth.signInWithPassword({
+            email: authEmail,
+            password: currentPassword,
+          });
+
+          if (signInErr) {
+            return { success: false, error: 'A senha atual não está correta.' };
+          }
+
+          const { error: updateErr } = await supabase.auth.updateUser({
+            password: newPassword,
+          });
+
+          if (updateErr) {
+            return { success: false, error: `Erro ao alterar senha: ${updateErr.message}` };
+          }
+
+          return { success: true };
+        }
+      } catch (supaErr) {
+        console.error('[authService] Erro ao alterar senha via Supabase:', supaErr);
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Erro de comunicação com o servidor ao alterar senha.',
+    };
   },
 
   /**
@@ -195,8 +309,6 @@ export const authService = {
         }),
       });
 
-      const data = await res.json();
-
       const session = this.getSession();
       if (session) {
         session.user.name = cleanName;
@@ -208,8 +320,16 @@ export const authService = {
         }
       }
 
-      if (!res.ok || !data.success) {
-        return { success: false, error: data.error || 'Falha ao atualizar perfil.' };
+      let data: any = null;
+      try {
+        const text = await res.text();
+        data = JSON.parse(text);
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok || !data?.success) {
+        return { success: false, error: data?.error || 'Falha ao atualizar perfil.' };
       }
 
       return { success: true };

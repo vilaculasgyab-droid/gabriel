@@ -86,9 +86,33 @@ async function startServer() {
   app.put('/api/orders/:id/status', handleUpdateOrderStatus);
   app.get('/api/supabase/status', handleSupabaseStatus);
   app.post('/api/supabase/migrate', handleTriggerMigration);
-  app.post('/api/admin/login', handleAdminLogin);
-  app.post('/api/admin/change-password', handleAdminChangePassword);
-  app.post('/api/admin/profile', handleAdminUpdateProfile);
+  app.all('/api/admin/login', (req, res) => {
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
+      return res.status(200).end();
+    }
+    return handleAdminLogin(req, res);
+  });
+  app.all('/api/admin/change-password', (req, res) => {
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
+      return res.status(200).end();
+    }
+    return handleAdminChangePassword(req, res);
+  });
+  app.all('/api/admin/profile', (req, res) => {
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
+      return res.status(200).end();
+    }
+    return handleAdminUpdateProfile(req, res);
+  });
 
   // ----------------------------------------------------
   // 2. STATIC ASSETS SERVING WITH SMART CACHE HEADERS
