@@ -38,7 +38,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 }) => {
   // Profile State
   const [name, setName] = useState(adminUser?.name || 'Administrador FortiMoz');
-  const [email, setEmail] = useState(adminUser?.email || 'admin@fortimoz.co.mz');
+  const [email, setEmail] = useState(adminUser?.email || 'vialnculofelix845@gmail.com');
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Password State

@@ -20,7 +20,7 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNavigateToStore }) => {
-  const [email, setEmail] = useState('admin@fortimoz.co.mz');
+  const [email, setEmail] = useState('vialnculofelix845@gmail.com');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -137,7 +137,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@fortimoz.co.mz"
+                  placeholder="vialnculofelix845@gmail.com"
                   className="w-full text-xs sm:text-sm pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder:text-slate-600 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
                 />
               </div>
@@ -202,7 +202,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                 </span>
               </div>
               <div className="font-mono text-left bg-slate-900 p-2.5 rounded-lg text-[11px] text-slate-300 select-all border border-slate-800/80">
-                <div>E-mail: <strong className="text-amber-400">admin@fortimoz.co.mz</strong></div>
+                <div>E-mail: <strong className="text-amber-400">vialnculofelix845@gmail.com</strong></div>
                 <div className="text-[10px] text-slate-400 mt-0.5">Acesso restrito à equipa autorizada da FortiMoz.</div>
               </div>
             </div>

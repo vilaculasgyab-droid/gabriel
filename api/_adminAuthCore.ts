@@ -34,7 +34,8 @@ export function getSupabaseAnonKey(): string {
   );
 }
 
-export const DEFAULT_ADMIN_EMAIL = 'admin@fortimoz.co.mz';
+export const DEFAULT_ADMIN_EMAIL = 'vialnculofelix845@gmail.com';
+export const FORTIMOZ_ADMIN_EMAIL = 'admin@fortimoz.co.mz';
 export const LEGACY_ADMIN_EMAIL = 'admin@proseguranca.co.mz';
 export const INITIAL_DEFAULT_PASSWORD = 'FortiMoz@2026';
 
@@ -145,7 +146,10 @@ export async function ensureSupabaseAdminUser(): Promise<{ id: string; email: st
     const { data: usersData, error: listErr } = await adminClient.auth.admin.listUsers();
     if (!listErr && usersData?.users) {
       const existing = (usersData.users as any[]).find(
-        (u: any) => u.email?.toLowerCase() === DEFAULT_ADMIN_EMAIL || u.email?.toLowerCase() === LEGACY_ADMIN_EMAIL
+        (u: any) =>
+          u.email?.toLowerCase() === DEFAULT_ADMIN_EMAIL.toLowerCase() ||
+          u.email?.toLowerCase() === FORTIMOZ_ADMIN_EMAIL.toLowerCase() ||
+          u.email?.toLowerCase() === LEGACY_ADMIN_EMAIL.toLowerCase()
       );
       if (existing) {
         return { id: existing.id, email: existing.email || DEFAULT_ADMIN_EMAIL };

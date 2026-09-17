@@ -129,7 +129,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   {adminUser?.name || 'Administrador'}
                 </div>
                 <div className="text-[10px] text-amber-400 font-medium">
-                  {adminUser?.email || 'admin@fortimoz.co.mz'}
+                  {adminUser?.email || 'vialnculofelix845@gmail.com'}
                 </div>
               </div>
             </div>

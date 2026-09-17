@@ -5,7 +5,7 @@ const ADMIN_SESSION_KEY = 'fortimoz_admin_session_v2';
 const LEGACY_SESSION_KEY = 'proseguranca_admin_session_v1';
 const LEGACY_CREDENTIALS_KEY = 'proseguranca_admin_credentials_v1';
 
-const DEFAULT_EMAIL = 'admin@fortimoz.co.mz';
+const DEFAULT_EMAIL = 'vialnculofelix845@gmail.com';
 
 // Purge any legacy plaintext/hash keys from localStorage on startup
 try {
