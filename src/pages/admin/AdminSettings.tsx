@@ -145,7 +145,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      showToast('Palavra-passe alterada com sucesso! Guardada com segurança no Supabase.');
+      showToast('Palavra-passe alterada com sucesso!');
     } else {
       setPasswordError(res.error || 'Erro ao alterar palavra-passe.');
     }
@@ -202,7 +202,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Alterar Palavra-passe Segura</h3>
-              <p className="text-[11px] text-slate-400">Autenticação encriptada e persistida no Supabase Auth</p>
+              <p className="text-[11px] text-slate-400">Proteção encriptada gerida pelo servidor FortiMoz</p>
             </div>
           </div>
 

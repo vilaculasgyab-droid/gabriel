@@ -52,15 +52,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   }, []);
 
   useEffect(() => {
-    // Sincronizar e verificar sessão com o Supabase Auth em background
-    authService.syncSessionWithSupabase().then((user) => {
+    // Verificar e sincronizar sessão ativa com o servidor
+    authService.checkSession().then((user) => {
       if (user) {
         setIsAuthenticated(true);
         setAdminUser(user);
+      } else {
+        setIsAuthenticated(false);
+        setAdminUser(null);
       }
     });
 
-    // Subscrever a eventos de autenticação do Supabase (ex: expiração, logout noutra aba)
+    // Subscrever a eventos de alteração de autenticação (ex: expiração ou logout noutra aba)
     const unsubAuth = authService.subscribeAuthState((user) => {
       if (user) {
         setIsAuthenticated(true);
@@ -89,8 +92,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     showToast('Sessão de administrador iniciada com sucesso.');
   };
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await authService.logout();
     setIsAuthenticated(false);
     setAdminUser(null);
     showToast('Sessão terminada em segurança.');

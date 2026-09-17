@@ -9,7 +9,7 @@ import {
   ArrowLeft, 
   AlertCircle,
   WifiOff,
-  AlertTriangle
+  Clock
 } from 'lucide-react';
 import { authService, AuthErrorCode } from '../../services/authService';
 import { FortiMozLogo } from '../../components/CategoryIcon';
@@ -42,7 +42,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
         setErrorCode(res.errorCode || 'UNEXPECTED_ERROR');
       }
     } catch {
-      setErrorMessage('Ocorreu um erro inesperado ao processar a autenticação.');
+      setErrorMessage('Ocorreu um erro ao contactar o servidor.');
       setErrorCode('UNEXPECTED_ERROR');
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
 
         <div className="flex items-center gap-1 text-[11px] text-amber-400/80 font-medium">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Supabase Auth</span>
+          <span>Sessão Segura</span>
         </div>
       </div>
 
@@ -95,17 +95,15 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
             <div className={`mb-5 p-4 rounded-xl border text-xs flex items-start gap-3 animate-in shake ${
               errorCode === 'CONNECTION_ERROR' 
                 ? 'bg-amber-950/70 border-amber-800/80 text-amber-200' 
-                : errorCode === 'CONFIG_MISSING'
-                ? 'bg-purple-950/70 border-purple-800/80 text-purple-200'
-                : errorCode === 'EMAIL_NOT_CONFIRMED'
-                ? 'bg-blue-950/70 border-blue-800/80 text-blue-200'
+                : errorCode === 'RATE_LIMITED'
+                ? 'bg-red-950/80 border-red-800 text-red-200'
                 : 'bg-red-950/80 border-red-800 text-red-200'
             }`}>
               <div className="flex-shrink-0 mt-0.5">
                 {errorCode === 'CONNECTION_ERROR' ? (
                   <WifiOff className="w-4 h-4 text-amber-400" />
-                ) : errorCode === 'CONFIG_MISSING' ? (
-                  <AlertTriangle className="w-4 h-4 text-purple-400" />
+                ) : errorCode === 'RATE_LIMITED' ? (
+                  <Clock className="w-4 h-4 text-red-400" />
                 ) : (
                   <AlertCircle className="w-4 h-4 text-red-400" />
                 )}
@@ -113,9 +111,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
               <div className="space-y-1">
                 <div className="font-bold text-[13px]">
                   {errorCode === 'INVALID_CREDENTIALS' && 'Credenciais Inválidas'}
-                  {errorCode === 'EMAIL_NOT_CONFIRMED' && 'Confirmação de E-mail Pendente'}
+                  {errorCode === 'RATE_LIMITED' && 'Tentativas Excedidas'}
                   {errorCode === 'CONNECTION_ERROR' && 'Falha de Conexão'}
-                  {errorCode === 'CONFIG_MISSING' && 'Configuração em Falta'}
                   {errorCode === 'UNEXPECTED_ERROR' && 'Erro de Autenticação'}
                 </div>
                 <div className="text-[11px] leading-relaxed text-slate-300">
@@ -148,7 +145,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                 <label className="text-xs font-bold text-slate-300">
                   Palavra-passe
                 </label>
-                <span className="text-[11px] text-slate-500">Supabase Auth</span>
+                <span className="text-[11px] text-slate-500">Credenciais FortiMoz</span>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -178,7 +175,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  <span>A autenticar com o Supabase...</span>
+                  <span>A verificar credenciais...</span>
                 </div>
               ) : (
                 <>
@@ -198,7 +195,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   Conta de Administrador:
                 </span>
                 <span className="text-[10px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-                  Supabase Auth Ativo
+                  Sessão Segura HttpOnly
                 </span>
               </div>
               <div className="font-mono text-left bg-slate-900 p-2.5 rounded-lg text-[11px] text-slate-300 select-all border border-slate-800/80">
@@ -212,7 +209,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
         {/* Security Assurance Footer */}
         <div className="mt-6 text-center text-[11px] text-slate-500 flex items-center justify-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Autenticação real e segura gerida pelo Supabase Auth.</span>
+          <span>Autenticação e sessão protegidas pelo servidor da FortiMoz.</span>
         </div>
       </div>
     </div>

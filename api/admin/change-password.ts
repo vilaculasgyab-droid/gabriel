@@ -1,11 +1,10 @@
-import { handleAdminChangePasswordCore } from '../_adminAuthCore';
+import {
+  handleAdminChangePasswordCore,
+  setCorsAndNoCacheHeaders,
+} from '../_adminAuthCore';
 
 export default async function handler(req: any, res: any) {
-  // CORS & Cache-Control headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  setCorsAndNoCacheHeaders(req, res);
 
   // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
@@ -42,7 +41,6 @@ export default async function handler(req: any, res: any) {
     }
   } catch (err: any) {
     console.error('[API /api/admin/change-password] Erro interno:', err);
-    return res.status(500).json({ success: false, error: 'Erro interno ao alterar senha.' });
+    return res.status(500).json({ success: false, error: 'Erro interno ao alterar palavra-passe.' });
   }
 }
-

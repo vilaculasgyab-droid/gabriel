@@ -1,11 +1,10 @@
-import { handleAdminLoginCore } from '../_adminAuthCore';
+import {
+  handleAdminLoginCore,
+  setCorsAndNoCacheHeaders,
+} from '../_adminAuthCore';
 
 export default async function handler(req: any, res: any) {
-  // CORS & Cache-Control headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  setCorsAndNoCacheHeaders(req, res);
 
   // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
@@ -33,16 +32,24 @@ export default async function handler(req: any, res: any) {
     }
 
     const { email, password } = body || {};
-    const result = await handleAdminLoginCore(email, password);
+    const result = await handleAdminLoginCore(email, password, req);
 
-    if (result.success) {
-      return res.status(200).json(result);
+    if (result.success && result.cookieHeader) {
+      res.setHeader('Set-Cookie', result.cookieHeader);
+      return res.status(200).json({
+        success: true,
+        user: result.user,
+      });
     } else {
-      return res.status(401).json(result);
+      const isRateLimited = result.error?.includes('Demasiadas') || result.error?.includes('bloqueado');
+      const statusCode = isRateLimited ? 429 : 401;
+      return res.status(statusCode).json({
+        success: false,
+        error: result.error || 'Credenciais inválidas.',
+      });
     }
   } catch (err: any) {
     console.error('[API /api/admin/login] Erro interno:', err);
     return res.status(500).json({ success: false, error: 'Erro interno ao autenticar.' });
   }
 }
-

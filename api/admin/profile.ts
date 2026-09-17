@@ -1,11 +1,10 @@
-import { handleAdminUpdateProfileCore } from '../_adminAuthCore';
+import {
+  handleAdminUpdateProfileCore,
+  setCorsAndNoCacheHeaders,
+} from '../_adminAuthCore';
 
 export default async function handler(req: any, res: any) {
-  // CORS & Cache-Control headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  setCorsAndNoCacheHeaders(req, res);
 
   // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
@@ -45,4 +44,3 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ success: false, error: 'Erro ao atualizar perfil.' });
   }
 }
-

@@ -21,6 +21,8 @@ import {
   handleSupabaseStatus,
   handleTriggerMigration,
   handleAdminLogin,
+  handleAdminSession,
+  handleAdminLogout,
   handleAdminChangePassword,
   handleAdminUpdateProfile,
 } from './server/apiHandlers';
@@ -88,12 +90,48 @@ async function startServer() {
   app.post('/api/supabase/migrate', handleTriggerMigration);
   app.all('/api/admin/login', (req, res) => {
     if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      } else {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      }
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control, X-Requested-With');
       return res.status(200).end();
     }
     return handleAdminLogin(req, res);
+  });
+  app.all('/api/admin/session', (req, res) => {
+    if (req.method === 'OPTIONS') {
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      } else {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      }
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control, X-Requested-With');
+      return res.status(200).end();
+    }
+    return handleAdminSession(req, res);
+  });
+  app.all('/api/admin/logout', (req, res) => {
+    if (req.method === 'OPTIONS') {
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+      } else {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+      }
+      res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Pragma, Cache-Control, X-Requested-With');
+      return res.status(200).end();
+    }
+    return handleAdminLogout(req, res);
   });
   app.all('/api/admin/change-password', (req, res) => {
     if (req.method === 'OPTIONS') {
