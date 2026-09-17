@@ -8,9 +8,6 @@ import {
   ArrowRight, 
   ArrowLeft, 
   AlertCircle,
-  KeyRound,
-  CheckCircle2,
-  HardHat,
   WifiOff,
   AlertTriangle
 } from 'lucide-react';
@@ -23,7 +20,7 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNavigateToStore }) => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('admin@fortimoz.co.mz');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,14 +47,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFillDemoCredentials = () => {
-    const hint = authService.getDefaultCredentialsHint();
-    setEmail(hint.email);
-    setPassword(hint.passwordHint);
-    setErrorMessage('');
-    setErrorCode(null);
   };
 
   return (
@@ -200,25 +189,21 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
             </button>
           </form>
 
-          {/* Helper credentials box */}
+          {/* Security Information Footer */}
           <div className="mt-6 pt-5 border-t border-slate-800 text-center">
             <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px] text-slate-400 flex flex-col gap-2">
               <div className="flex items-center justify-between text-slate-300 font-semibold">
-                <span className="flex items-center gap-1">
-                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                   Conta de Administrador:
                 </span>
-                <button
-                  type="button"
-                  onClick={handleFillDemoCredentials}
-                  className="text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer"
-                >
-                  Preencher dados
-                </button>
+                <span className="text-[10px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
+                  Supabase Auth Ativo
+                </span>
               </div>
-              <div className="font-mono text-left bg-slate-900 p-2 rounded-lg text-[10px] text-slate-300 select-all">
-                <div>E-mail: <strong>admin@fortimoz.co.mz</strong></div>
-                <div>Senha: <strong>FortiMoz@2026</strong></div>
+              <div className="font-mono text-left bg-slate-900 p-2.5 rounded-lg text-[11px] text-slate-300 select-all border border-slate-800/80">
+                <div>E-mail: <strong className="text-amber-400">admin@fortimoz.co.mz</strong></div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Acesso restrito à equipa autorizada da FortiMoz.</div>
               </div>
             </div>
           </div>
@@ -227,7 +212,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
         {/* Security Assurance Footer */}
         <div className="mt-6 text-center text-[11px] text-slate-500 flex items-center justify-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Autenticação real gerida pelo Supabase Auth.</span>
+          <span>Autenticação real e segura gerida pelo Supabase Auth.</span>
         </div>
       </div>
     </div>

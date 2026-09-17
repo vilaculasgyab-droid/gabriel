@@ -44,11 +44,8 @@ function mapSupabaseUserToAdmin(user: any): AdminUser {
 }
 
 export const authService = {
-  getDefaultCredentialsHint() {
-    return {
-      email: DEFAULT_EMAIL,
-      passwordHint: 'FortiMoz@2026',
-    };
+  getDefaultAdminEmail() {
+    return DEFAULT_EMAIL;
   },
 
   /**
