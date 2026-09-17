@@ -43,6 +43,18 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 }) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
+  const safeMetrics = metrics || {
+    totalOrders: 0,
+    pendingOrders: 0,
+    paidOrders: 0,
+    totalRevenue: 0,
+    totalProducts: 0,
+    outOfStockCount: 0,
+    lowStockCount: 0,
+    totalCustomers: 0,
+    recentOrders: [],
+  };
+
   const navItems: { id: AdminTab; label: string; icon: React.ElementType; badge?: number; badgeColor?: string }[] = [
     {
       id: 'dashboard',
@@ -53,21 +65,21 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       id: 'products',
       label: 'Gestão de Produtos & Stock',
       icon: Package,
-      badge: metrics.outOfStockCount > 0 ? metrics.outOfStockCount : undefined,
+      badge: (safeMetrics?.outOfStockCount ?? 0) > 0 ? safeMetrics.outOfStockCount : undefined,
       badgeColor: 'bg-red-500/20 text-red-400 border-red-500/30',
     },
     {
       id: 'orders',
       label: 'Gestão de Pedidos',
       icon: ShoppingBag,
-      badge: metrics.pendingOrders > 0 ? metrics.pendingOrders : undefined,
+      badge: (safeMetrics?.pendingOrders ?? 0) > 0 ? safeMetrics.pendingOrders : undefined,
       badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     },
     {
       id: 'customers',
       label: 'Clientes & Empresas',
       icon: Users,
-      badge: metrics.totalCustomers > 0 ? metrics.totalCustomers : undefined,
+      badge: (safeMetrics?.totalCustomers ?? 0) > 0 ? safeMetrics.totalCustomers : undefined,
       badgeColor: 'bg-slate-700 text-slate-300 border-slate-600',
     },
     {

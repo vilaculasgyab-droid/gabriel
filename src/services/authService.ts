@@ -1,6 +1,7 @@
 import { AdminUser, AdminSession } from '../types';
 
 export const ADMIN_USER_CACHE_KEY = 'fortimoz_admin_user_v3';
+export const ADMIN_TOKEN_CACHE_KEY = 'fortimoz_admin_token_v3';
 
 export type AuthErrorCode = 
   | 'INVALID_CREDENTIALS'
@@ -26,6 +27,28 @@ function notifySubscribers(user: AdminUser | null) {
       console.error('[authService] Error notifying subscriber:', e);
     }
   });
+}
+
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(ADMIN_TOKEN_CACHE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function persistToken(token: string | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) {
+      localStorage.setItem(ADMIN_TOKEN_CACHE_KEY, token);
+    } else {
+      localStorage.removeItem(ADMIN_TOKEN_CACHE_KEY);
+    }
+  } catch {
+    // ignore
+  }
 }
 
 // Memory-cached user
@@ -127,6 +150,9 @@ export const authService = {
         avatar: data.user?.avatar || '/proseguranca-logo.png',
       };
 
+      if (data.token) {
+        persistToken(data.token);
+      }
       persistUser(adminUser);
 
       return {
@@ -149,17 +175,30 @@ export const authService = {
    */
   async checkSession(): Promise<AdminUser | null> {
     try {
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      const token = getStoredToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/admin/session', {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers,
         credentials: 'include',
       });
 
-      if (!res.ok) {
+      if (res.status === 401) {
+        // Expirado ou revogado explicitamente pelo servidor
         persistUser(null);
+        persistToken(null);
         return null;
+      }
+
+      if (!res.ok) {
+        // Se houver erro de servidor 5xx ou rede transitória, preserva o utilizador em cache para evitar tela branca
+        return loadCachedUser();
       }
 
       const data = await res.json();
@@ -175,11 +214,12 @@ export const authService = {
         return user;
       } else {
         persistUser(null);
+        persistToken(null);
         return null;
       }
     } catch (err) {
       console.warn('[authService] Aviso ao verificar sessão com o servidor:', err);
-      // On network failure, return current memory/cached user if present
+      // Em falha de rede/offline, mantém utilizador em cache para não deslogar abruptamente
       return loadCachedUser();
     }
   },
@@ -259,14 +299,21 @@ export const authService = {
    */
   async logout(): Promise<void> {
     try {
+      const headers: Record<string, string> = {};
+      const token = getStoredToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       await fetch('/api/admin/logout', {
         method: 'POST',
+        headers,
         credentials: 'include',
       });
     } catch (err) {
       console.warn('[authService] Aviso ao terminar sessão no servidor:', err);
     } finally {
       persistUser(null);
+      persistToken(null);
     }
   },
 
@@ -285,12 +332,18 @@ export const authService = {
 
     try {
       const user = loadCachedUser();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      const token = getStoredToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/admin/change-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           currentPassword,
           newPassword,

@@ -755,88 +755,122 @@ export const storeDb = {
   // CUSTOMERS (Derivado das encomendas reais)
   // ----------------------------------------------------
   getCustomers(): Customer[] {
-    const orders = this.getOrders();
-    if (orders.length === 0) {
+    try {
+      const orders = this.getOrders();
+      if (!Array.isArray(orders) || orders.length === 0) {
+        return [];
+      }
+
+      const customerMap = new Map<string, Customer>();
+
+      orders.forEach((order) => {
+        if (!order) return;
+        const rawPhone = String(order.phone || '').trim();
+        const rawName = String(order.customerName || '').trim();
+        const cleanPhone = rawPhone.replace(/\D/g, '');
+        const key = cleanPhone || rawName.toLowerCase();
+        if (!key) return;
+
+        const totalAmount = typeof order.totalAmount === 'number' && !isNaN(order.totalAmount) ? order.totalAmount : 0;
+        const isPaidOrDelivered = order.paymentStatus === 'paid' || order.orderStatus === 'paid' || order.orderStatus === 'delivered';
+        const createdAt = order.createdAt || new Date().toISOString();
+
+        const existing = customerMap.get(key);
+
+        if (existing) {
+          existing.totalOrders += 1;
+          if (isPaidOrDelivered) {
+            existing.totalSpent += totalAmount;
+          }
+          const orderDate = new Date(createdAt);
+          const lastDate = new Date(existing.lastOrderDate);
+          if (!isNaN(orderDate.getTime()) && !isNaN(lastDate.getTime()) && orderDate > lastDate) {
+            existing.lastOrderDate = createdAt;
+            existing.cityProvince = order.cityProvince || existing.cityProvince;
+            if (order.companyName) existing.companyName = order.companyName;
+            if (order.email) existing.email = order.email;
+          }
+          const firstDate = new Date(existing.firstOrderDate);
+          if (!isNaN(orderDate.getTime()) && !isNaN(firstDate.getTime()) && orderDate < firstDate) {
+            existing.firstOrderDate = createdAt;
+          }
+          if (order.orderNumber && existing.recentOrders && !existing.recentOrders.includes(order.orderNumber)) {
+            existing.recentOrders.push(order.orderNumber);
+          }
+        } else {
+          customerMap.set(key, {
+            id: `cust-${key}`,
+            name: rawName || 'Cliente Sem Nome',
+            phone: rawPhone,
+            whatsapp: rawPhone,
+            email: order.email || undefined,
+            companyName: order.companyName || undefined,
+            cityProvince: order.cityProvince || 'Maputo',
+            totalOrders: 1,
+            totalSpent: isPaidOrDelivered ? totalAmount : 0,
+            firstOrderDate: createdAt,
+            lastOrderDate: createdAt,
+            recentOrders: order.orderNumber ? [order.orderNumber] : [],
+          });
+        }
+      });
+
+      return Array.from(customerMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
+    } catch (err) {
+      console.warn('[storeDb] Erro ao calcular lista de clientes:', err);
       return [];
     }
-
-    const customerMap = new Map<string, Customer>();
-
-    orders.forEach((order) => {
-      const key = order.phone.replace(/\D/g, '') || order.customerName.toLowerCase().trim();
-      if (!key) return;
-
-      const existing = customerMap.get(key);
-
-      if (existing) {
-        existing.totalOrders += 1;
-        if (order.paymentStatus === 'paid' || order.orderStatus === 'delivered') {
-          existing.totalSpent += order.totalAmount;
-        }
-        if (new Date(order.createdAt) > new Date(existing.lastOrderDate)) {
-          existing.lastOrderDate = order.createdAt;
-          existing.cityProvince = order.cityProvince || existing.cityProvince;
-          if (order.companyName) existing.companyName = order.companyName;
-          if (order.email) existing.email = order.email;
-        }
-        if (new Date(order.createdAt) < new Date(existing.firstOrderDate)) {
-          existing.firstOrderDate = order.createdAt;
-        }
-        if (existing.recentOrders && !existing.recentOrders.includes(order.orderNumber)) {
-          existing.recentOrders.push(order.orderNumber);
-        }
-      } else {
-        customerMap.set(key, {
-          id: `cust-${key}`,
-          name: order.customerName,
-          phone: order.phone,
-          whatsapp: order.phone,
-          email: order.email || undefined,
-          companyName: order.companyName || undefined,
-          cityProvince: order.cityProvince,
-          totalOrders: 1,
-          totalSpent: order.paymentStatus === 'paid' || order.orderStatus === 'delivered' ? order.totalAmount : 0,
-          firstOrderDate: order.createdAt,
-          lastOrderDate: order.createdAt,
-          recentOrders: [order.orderNumber],
-        });
-      }
-    });
-
-    return Array.from(customerMap.values()).sort((a, b) => b.totalSpent - a.totalSpent);
   },
 
   // ----------------------------------------------------
   // METRICS & DASHBOARD
   // ----------------------------------------------------
   getDashboardMetrics(): DashboardMetrics {
-    const orders = this.getOrders();
-    const products = this.getProducts();
-    const customers = this.getCustomers();
+    try {
+      const orders = Array.isArray(this.getOrders()) ? this.getOrders().filter(Boolean) : [];
+      const products = Array.isArray(this.getProducts()) ? this.getProducts().filter(Boolean) : [];
+      const customers = this.getCustomers();
 
-    const totalOrders = orders.length;
-    const pendingOrders = orders.filter((o) => o.orderStatus === 'awaiting_payment').length;
-    const paidOrders = orders.filter((o) => o.paymentStatus === 'paid' || o.orderStatus === 'paid' || o.orderStatus === 'delivered').length;
-    
-    const totalRevenue = orders
-      .filter((o) => o.paymentStatus === 'paid' || o.orderStatus === 'delivered' || o.orderStatus === 'in_preparation' || o.orderStatus === 'shipped')
-      .reduce((sum, o) => sum + o.totalAmount, 0);
+      const totalOrders = orders.length;
+      const pendingOrders = orders.filter((o) => o && o.orderStatus === 'awaiting_payment').length;
+      const paidOrders = orders.filter((o) => o && (o.paymentStatus === 'paid' || o.orderStatus === 'paid' || o.orderStatus === 'delivered')).length;
+      
+      const totalRevenue = orders
+        .filter((o) => o && (o.paymentStatus === 'paid' || o.orderStatus === 'delivered' || o.orderStatus === 'in_preparation' || o.orderStatus === 'shipped'))
+        .reduce((sum, o) => {
+          const val = typeof o.totalAmount === 'number' && !isNaN(o.totalAmount) ? o.totalAmount : 0;
+          return sum + val;
+        }, 0);
 
-    const totalProducts = products.length;
-    const outOfStockCount = products.filter((p) => !p.inStock || (p.stockCount !== undefined && p.stockCount <= 0)).length;
-    const lowStockCount = products.filter((p) => p.inStock && p.stockCount !== undefined && p.stockCount > 0 && p.stockCount <= 5).length;
+      const totalProducts = products.length;
+      const outOfStockCount = products.filter((p) => p && (!p.inStock || (p.stockCount !== undefined && p.stockCount <= 0))).length;
+      const lowStockCount = products.filter((p) => p && p.inStock && p.stockCount !== undefined && p.stockCount > 0 && p.stockCount <= 5).length;
 
-    return {
-      totalOrders,
-      pendingOrders,
-      paidOrders,
-      totalRevenue,
-      totalProducts,
-      outOfStockCount,
-      lowStockCount,
-      totalCustomers: customers.length,
-      recentOrders: orders.slice(0, 6),
-    };
+      return {
+        totalOrders,
+        pendingOrders,
+        paidOrders,
+        totalRevenue,
+        totalProducts,
+        outOfStockCount,
+        lowStockCount,
+        totalCustomers: customers.length,
+        recentOrders: orders.slice(0, 6),
+      };
+    } catch (err) {
+      console.error('[storeDb] Erro ao calcular métricas:', err);
+      return {
+        totalOrders: 0,
+        pendingOrders: 0,
+        paidOrders: 0,
+        totalRevenue: 0,
+        totalProducts: 0,
+        outOfStockCount: 0,
+        lowStockCount: 0,
+        totalCustomers: 0,
+        recentOrders: [],
+      };
+    }
   },
 
   // ----------------------------------------------------

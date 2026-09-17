@@ -455,9 +455,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Tabela Produtos</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.productsCount !== undefined
-                      ? `${supabaseStatus.productsCount} no Supabase`
-                      : supabaseStatus?.productCount !== undefined
+                    {supabaseStatus?.productCount !== undefined
                       ? `${supabaseStatus.productCount} no Supabase`
                       : 'Pronto'}
                   </strong>
@@ -465,9 +463,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Tabela Pedidos</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.ordersCount !== undefined
-                      ? `${supabaseStatus.ordersCount} no Supabase`
-                      : supabaseStatus?.orderCount !== undefined
+                    {supabaseStatus?.orderCount !== undefined
                       ? `${supabaseStatus.orderCount} no Supabase`
                       : '0 pedidos'}
                   </strong>
@@ -475,7 +471,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 <div className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block text-[10px]">Bucket Imagens</span>
                   <strong className="text-white font-bold text-xs">
-                    {supabaseStatus?.storageReady || supabaseStatus?.storageBucketReady ? 'product-images (OK)' : 'Configurado'}
+                    {supabaseStatus?.storageBucketReady ? 'product-images (OK)' : 'Configurado'}
                   </strong>
                 </div>
               </div>

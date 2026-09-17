@@ -43,25 +43,45 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(initialSelectedOrder || null);
 
   const reloadOrders = () => {
-    const list = storeDb.getOrders();
-    setOrders(list);
+    try {
+      const list = storeDb.getOrders();
+      setOrders(Array.isArray(list) ? list.filter(Boolean) : []);
+    } catch (err) {
+      console.warn('[AdminOrders] Erro ao obter pedidos:', err);
+      setOrders([]);
+    }
   };
 
   useEffect(() => {
-    storeDb.syncOrdersWithServer().then(() => {
-      reloadOrders();
-    });
+    storeDb
+      .syncOrdersWithServer()
+      .catch((err) => {
+        console.warn('[AdminOrders] Falha ao sincronizar pedidos com o servidor:', err);
+      })
+      .finally(() => {
+        reloadOrders();
+      });
     return storeDb.subscribe(reloadOrders);
   }, []);
 
   const filteredOrders = useMemo(() => {
+    if (!Array.isArray(orders)) return [];
     return orders.filter((order) => {
+      if (!order) return false;
+      const q = (searchQuery || '').toLowerCase().trim();
+      const orderNumber = String(order.orderNumber || '').toLowerCase();
+      const customerName = String(order.customerName || '').toLowerCase();
+      const phone = String(order.phone || '');
+      const companyName = String(order.companyName || '').toLowerCase();
+      const cityProvince = String(order.cityProvince || '').toLowerCase();
+
       const matchSearch =
-        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.phone.includes(searchQuery) ||
-        (order.companyName && order.companyName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        order.cityProvince.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        orderNumber.includes(q) ||
+        customerName.includes(q) ||
+        phone.includes(searchQuery) ||
+        companyName.includes(q) ||
+        cityProvince.includes(q);
 
       const matchStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
 
@@ -94,7 +114,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
     showToast(`Estado de pagamento atualizado.`);
   };
 
-  const getStatusLabel = (status: OrderStatus) => {
+  const getStatusLabel = (status?: OrderStatus | string) => {
     switch (status) {
       case 'awaiting_payment':
         return 'Aguardando Pagamento';
@@ -108,10 +128,12 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
         return 'Entregue';
       case 'cancelled':
         return 'Cancelado';
+      default:
+        return String(status || 'Pendente');
     }
   };
 
-  const getOrderStatusBadge = (status: OrderStatus) => {
+  const getOrderStatusBadge = (status?: OrderStatus | string) => {
     switch (status) {
       case 'awaiting_payment':
         return (
@@ -154,10 +176,16 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
             Cancelado
           </span>
         );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold">
+            {status || 'Pendente'}
+          </span>
+        );
     }
   };
 
-  const getPaymentMethodBadge = (method: PaymentMethod) => {
+  const getPaymentMethodBadge = (method?: PaymentMethod | string) => {
     switch (method) {
       case 'mpesa':
         return <span className="font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 text-[10px]">M-Pesa</span>;
@@ -170,13 +198,15 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
       case 'visa':
         return <span className="font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20 text-[10px]">Visa</span>;
       default:
-        return <span className="text-slate-400 text-[10px]">{method}</span>;
+        return <span className="text-slate-400 text-[10px]">{method || 'Pendente'}</span>;
     }
   };
 
-  const formatDate = (isoString: string) => {
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return '—';
     try {
       const d = new Date(isoString);
+      if (isNaN(d.getTime())) return String(isoString);
       return d.toLocaleDateString('pt-MZ', {
         day: '2-digit',
         month: 'short',
@@ -185,12 +215,13 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({
         minute: '2-digit',
       });
     } catch {
-      return isoString;
+      return String(isoString);
     }
   };
 
   const openWhatsAppNotification = (order: Order) => {
-    const cleanPhone = order.phone.replace(/\D/g, '');
+    const rawPhone = String(order.phone || '');
+    const cleanPhone = rawPhone.replace(/\D/g, '');
     const phoneWithCountry = cleanPhone.startsWith('258') ? cleanPhone : `258${cleanPhone}`;
     const statusText = getStatusLabel(order.orderStatus);
     const msg = encodeURIComponent(

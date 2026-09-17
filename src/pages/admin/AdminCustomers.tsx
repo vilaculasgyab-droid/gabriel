@@ -27,52 +27,76 @@ interface AdminCustomersProps {
 }
 
 export const AdminCustomers: React.FC<AdminCustomersProps> = ({ onViewOrderDetails, showToast }) => {
-  const [customers, setCustomers] = useState<Customer[]>(() => storeDb.getCustomers());
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    try {
+      return storeDb.getCustomers() || [];
+    } catch {
+      return [];
+    }
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   const filteredCustomers = useMemo(() => {
+    if (!Array.isArray(customers)) return [];
     return customers.filter((customer) => {
-      const q = searchQuery.toLowerCase();
+      if (!customer) return false;
+      const q = (searchQuery || '').toLowerCase().trim();
+      const name = String(customer.name || '').toLowerCase();
+      const phone = String(customer.phone || '');
+      const email = String(customer.email || '').toLowerCase();
+      const companyName = String(customer.companyName || '').toLowerCase();
+      const cityProvince = String(customer.cityProvince || '').toLowerCase();
+
       return (
-        customer.name.toLowerCase().includes(q) ||
-        customer.phone.includes(searchQuery) ||
-        (customer.email && customer.email.toLowerCase().includes(q)) ||
-        (customer.companyName && customer.companyName.toLowerCase().includes(q)) ||
-        customer.cityProvince.toLowerCase().includes(q)
+        !q ||
+        name.includes(q) ||
+        phone.includes(searchQuery) ||
+        email.includes(q) ||
+        companyName.includes(q) ||
+        cityProvince.includes(q)
       );
     });
   }, [customers, searchQuery]);
 
   const customerOrders = useMemo(() => {
     if (!selectedCustomer) return [];
-    const allOrders = storeDb.getOrders();
-    const cleanPhone = selectedCustomer.phone.replace(/\D/g, '');
-    return allOrders.filter(
-      (o) =>
-        o.phone.replace(/\D/g, '') === cleanPhone ||
-        o.customerName.toLowerCase().trim() === selectedCustomer.name.toLowerCase().trim()
-    );
+    try {
+      const allOrders = storeDb.getOrders() || [];
+      const cleanPhone = String(selectedCustomer.phone || '').replace(/\D/g, '');
+      const cleanName = String(selectedCustomer.name || '').toLowerCase().trim();
+
+      return allOrders.filter((o) => {
+        if (!o) return false;
+        const oPhone = String(o.phone || '').replace(/\D/g, '');
+        const oName = String(o.customerName || '').toLowerCase().trim();
+        return (cleanPhone && oPhone === cleanPhone) || (cleanName && oName === cleanName);
+      });
+    } catch {
+      return [];
+    }
   }, [selectedCustomer]);
 
-  const formatDate = (isoString: string) => {
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return '—';
     try {
       const d = new Date(isoString);
+      if (isNaN(d.getTime())) return String(isoString);
       return d.toLocaleDateString('pt-MZ', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
       });
     } catch {
-      return isoString;
+      return String(isoString);
     }
   };
 
   const openCustomerWhatsApp = (phone: string, name: string) => {
-    const cleanPhone = phone.replace(/\D/g, '');
+    const cleanPhone = String(phone || '').replace(/\D/g, '');
     const phoneWithCountry = cleanPhone.startsWith('258') ? cleanPhone : `258${cleanPhone}`;
     const msg = encodeURIComponent(
-      `Olá ${name},\nEntramos em contacto a partir da FortiMoz Moçambique. Como podemos ajudar com as suas necessidades de EPIs e equipamentos industriais?`
+      `Olá ${name || 'Estimado(a) Cliente'},\nEntramos em contacto a partir da FortiMoz Moçambique. Como podemos ajudar com as suas necessidades de EPIs e equipamentos industriais?`
     );
     window.open(`https://wa.me/${phoneWithCountry}?text=${msg}`, '_blank');
   };

@@ -39,6 +39,7 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({
         success: true,
         user: result.user,
+        token: result.token,
       });
     } else {
       const isRateLimited = result.error?.includes('Demasiadas') || result.error?.includes('bloqueado');

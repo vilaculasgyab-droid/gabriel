@@ -108,12 +108,25 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
   // Subscrição em tempo real aos dados do Supabase via storeDb
   useEffect(() => {
     // Sincroniza imediatamente com o Supabase ao abrir a aba de produtos
-    storeDb.syncWithServer(true).then(() => {
-      setProducts(storeDb.getProducts());
-    });
+    storeDb
+      .syncWithServer(true)
+      .catch((err) => {
+        console.warn('[AdminProducts] Falha ao sincronizar produtos com o servidor:', err);
+      })
+      .finally(() => {
+        try {
+          setProducts(storeDb.getProducts() || []);
+        } catch {
+          setProducts([]);
+        }
+      });
 
     const unsubscribe = storeDb.subscribe(() => {
-      setProducts(storeDb.getProducts());
+      try {
+        setProducts(storeDb.getProducts() || []);
+      } catch {
+        setProducts([]);
+      }
     });
 
     return () => {
@@ -123,18 +136,27 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
 
   // Filtered products
   const filteredProducts = useMemo(() => {
+    if (!Array.isArray(products)) return [];
     return products.filter((product) => {
+      if (!product) return false;
+      const q = (searchQuery || '').toLowerCase().trim();
+      const pName = String(product.name || '').toLowerCase();
+      const pCatName = String(product.categoryName || '').toLowerCase();
+      const pNorm = String(product.norm || '').toLowerCase();
+      const pSub = String(product.subcategory || '').toLowerCase();
+
       const matchSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (product.norm && product.norm.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (product.subcategory && product.subcategory.toLowerCase().includes(searchQuery.toLowerCase()));
+        !q ||
+        pName.includes(q) ||
+        pCatName.includes(q) ||
+        pNorm.includes(q) ||
+        pSub.includes(q);
 
       const matchCategory = selectedCategory === 'all' || product.categoryId === selectedCategory;
 
       let matchStock = true;
       if (stockFilter === 'in_stock') {
-        matchStock = product.inStock && (product.stockCount === undefined || product.stockCount > 0);
+        matchStock = !!product.inStock && (product.stockCount === undefined || product.stockCount > 0);
       } else if (stockFilter === 'out_of_stock') {
         matchStock = !product.inStock || (product.stockCount !== undefined && product.stockCount <= 0);
       } else if (stockFilter === 'featured') {

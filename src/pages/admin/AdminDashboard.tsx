@@ -33,7 +33,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigateTab,
   onViewOrderDetails,
 }) => {
-  const getOrderStatusBadge = (status: OrderStatus) => {
+  const safeMetrics: DashboardMetrics = {
+    totalOrders: metrics?.totalOrders ?? 0,
+    pendingOrders: metrics?.pendingOrders ?? 0,
+    paidOrders: metrics?.paidOrders ?? 0,
+    totalRevenue: metrics?.totalRevenue ?? 0,
+    totalProducts: metrics?.totalProducts ?? 0,
+    outOfStockCount: metrics?.outOfStockCount ?? 0,
+    lowStockCount: metrics?.lowStockCount ?? 0,
+    totalCustomers: metrics?.totalCustomers ?? 0,
+    recentOrders: Array.isArray(metrics?.recentOrders) ? metrics.recentOrders : [],
+  };
+
+  const getOrderStatusBadge = (status?: OrderStatus | string) => {
     switch (status) {
       case 'awaiting_payment':
         return (
@@ -76,12 +88,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Cancelado
           </span>
         );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold">
+            {status || 'Pendente'}
+          </span>
+        );
     }
   };
 
-  const formatDate = (isoString: string) => {
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return '—';
     try {
       const d = new Date(isoString);
+      if (isNaN(d.getTime())) return String(isoString);
       return d.toLocaleDateString('pt-MZ', {
         day: '2-digit',
         month: 'short',
@@ -90,7 +110,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         minute: '2-digit',
       });
     } catch {
-      return isoString;
+      return String(isoString);
     }
   };
 
@@ -144,7 +164,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-black text-white leading-tight">
-              {formatCurrency(metrics.totalRevenue)}
+              {formatCurrency(safeMetrics.totalRevenue)}
             </div>
             <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold mt-1">
               <TrendingUp className="w-3 h-3" />
@@ -163,7 +183,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <div>
             <div className="text-2xl font-black text-white leading-tight">
-              {metrics.totalOrders}
+              {safeMetrics.totalOrders}
             </div>
             <div className="text-[11px] text-slate-400 font-medium mt-1">
               Registados no sistema
@@ -181,7 +201,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <div>
             <div className="text-2xl font-black text-amber-400 leading-tight">
-              {metrics.pendingOrders}
+              {safeMetrics.pendingOrders}
             </div>
             <div className="text-[11px] text-amber-400/80 font-medium mt-1">
               Aguardando pagamento
@@ -199,7 +219,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <div>
             <div className="text-2xl font-black text-emerald-400 leading-tight">
-              {metrics.paidOrders}
+              {safeMetrics.paidOrders}
             </div>
             <div className="text-[11px] text-slate-400 font-medium mt-1">
               Confirmados / Processados
@@ -217,7 +237,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
           <div>
             <div className="text-2xl font-black text-white leading-tight">
-              {metrics.totalProducts}
+              {safeMetrics.totalProducts}
             </div>
             <div className="text-[11px] text-slate-400 font-medium mt-1">
               No catálogo ativo
@@ -230,19 +250,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-400">Sem Stock / Baixo</span>
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-              metrics.outOfStockCount > 0 ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-slate-800 text-slate-400'
+              safeMetrics.outOfStockCount > 0 ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-slate-800 text-slate-400'
             }`}>
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div>
             <div className={`text-2xl font-black leading-tight ${
-              metrics.outOfStockCount > 0 ? 'text-red-400' : 'text-slate-300'
+              safeMetrics.outOfStockCount > 0 ? 'text-red-400' : 'text-slate-300'
             }`}>
-              {metrics.outOfStockCount}
+              {safeMetrics.outOfStockCount}
             </div>
             <div className="text-[11px] text-slate-400 font-medium mt-1">
-              {metrics.lowStockCount > 0 ? `+ ${metrics.lowStockCount} c/ stock baixo` : 'Necessitam reposição'}
+              {safeMetrics.lowStockCount > 0 ? `+ ${safeMetrics.lowStockCount} c/ stock baixo` : 'Necessitam reposição'}
             </div>
           </div>
         </div>
@@ -287,7 +307,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {metrics.recentOrders.length === 0 ? (
+                {safeMetrics.recentOrders.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-slate-500">
                       <div className="max-w-sm mx-auto flex flex-col items-center gap-2">
@@ -300,44 +320,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </td>
                   </tr>
                 ) : (
-                  metrics.recentOrders.map((order) => (
-                    <tr 
-                      key={order.id} 
-                      className="hover:bg-slate-800/40 transition-colors group cursor-pointer"
-                      onClick={() => onViewOrderDetails(order)}
-                    >
-                      <td className="py-3.5 px-3 font-mono font-bold text-amber-400">
-                        {order.orderNumber}
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <div className="font-bold text-white">{order.customerName}</div>
-                        {order.companyName && (
-                          <div className="text-[10px] text-slate-400">{order.companyName}</div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-400">
-                        {formatDate(order.createdAt)}
-                      </td>
-                      <td className="py-3.5 px-3 font-black text-slate-100">
-                        {formatCurrency(order.totalAmount)}
-                      </td>
-                      <td className="py-3.5 px-3">
-                        {getOrderStatusBadge(order.orderStatus)}
-                      </td>
-                      <td className="py-3.5 px-3 text-right">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onViewOrderDetails(order);
-                          }}
-                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition-colors"
-                          title="Ver Detalhes do Pedido"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  safeMetrics.recentOrders.map((order) => {
+                    if (!order) return null;
+                    const orderNum = order.orderNumber || `PEDIDO-${order.id || 'N/A'}`;
+                    const custName = order.customerName || 'Cliente sem nome';
+                    return (
+                      <tr 
+                        key={order.id || orderNum} 
+                        className="hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                        onClick={() => onViewOrderDetails(order)}
+                      >
+                        <td className="py-3.5 px-3 font-mono font-bold text-amber-400">
+                          {orderNum}
+                        </td>
+                        <td className="py-3.5 px-3">
+                          <div className="font-bold text-white">{custName}</div>
+                          {order.companyName && (
+                            <div className="text-[10px] text-slate-400">{order.companyName}</div>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-3 text-slate-400">
+                          {formatDate(order.createdAt)}
+                        </td>
+                        <td className="py-3.5 px-3 font-black text-slate-100">
+                          {formatCurrency(order.totalAmount)}
+                        </td>
+                        <td className="py-3.5 px-3">
+                          {getOrderStatusBadge(order.orderStatus)}
+                        </td>
+                        <td className="py-3.5 px-3 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewOrderDetails(order);
+                            }}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition-colors"
+                            title="Ver Detalhes do Pedido"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

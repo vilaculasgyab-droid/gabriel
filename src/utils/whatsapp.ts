@@ -12,10 +12,12 @@ export const ADDRESS_DISPLAY = 'Mozal, Boane, Moçambique';
  * Format currency in Mozambican Meticais (MZN)
  * Example: 15000 -> 15.000 MZN
  */
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount?: number | string | null): string {
+  const numeric = typeof amount === 'number' ? amount : Number(amount || 0);
+  const safeAmount = isNaN(numeric) ? 0 : numeric;
   const formatted = new Intl.NumberFormat('de-DE', {
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(safeAmount);
   return `${formatted} MZN`;
 }
 
