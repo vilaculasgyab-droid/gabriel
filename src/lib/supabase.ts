@@ -11,7 +11,7 @@ export {
 /**
  * CLIENT-SIDE SUPABASE CONFIGURATION
  *
- * Utiliza EXCLUSIVAMENTE variáveis com prefixo VITE_ injetadas pelo Vite no navegador.
+ * Utiliza as variáveis públicas injetadas pelo bundler (Vite) no navegador.
  * NUNCA utiliza ou expõe SUPABASE_SERVICE_ROLE no frontend.
  */
 
@@ -24,29 +24,54 @@ function cleanEnvString(val: unknown): string {
   return s;
 }
 
+/**
+ * Obtém a URL pública do Supabase no frontend.
+ * 
+ * Vite substitui estaticamente `import.meta.env.VITE_SUPABASE_URL` em tempo de compilação.
+ * Para garantir máxima compatibilidade com a substituição estática do Vite,
+ * acessamos a propriedade de forma direta, sem encadeamento condicional complexo.
+ */
 export function getClientSupabaseUrl(): string {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) {
-    return cleanEnvString(import.meta.env.VITE_SUPABASE_URL);
+  // Acesso direto estático para que o analisador AST do Vite faça o inline correto
+  const envUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (envUrl) {
+    return cleanEnvString(envUrl);
   }
-  if (typeof process !== 'undefined' && (process.env?.VITE_SUPABASE_URL || process.env?.SUPABASE_URL)) {
-    return cleanEnvString(process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL);
+
+  // Suporte a window.__ENV__ se injetado em runtime
+  if (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_SUPABASE_URL) {
+    return cleanEnvString((window as any).__ENV__.VITE_SUPABASE_URL);
   }
+
   return '';
 }
 
+/**
+ * Obtém a chave pública anónima (anon key) do Supabase no frontend.
+ * 
+ * Acessa diretamente `import.meta.env.VITE_SUPABASE_ANON_KEY` para inline estático do Vite.
+ */
 export function getClientSupabaseAnonKey(): string {
-  if (typeof import.meta !== 'undefined') {
-    const key = import.meta.env?.VITE_SUPABASE_ANON_KEY || import.meta.env?.VITE_SUPABASE_KEY;
-    if (key) {
-      return cleanEnvString(key);
+  // Acesso direto estático para substituição estática do Vite
+  const envAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (envAnonKey) {
+    return cleanEnvString(envAnonKey);
+  }
+
+  // Alternativa comum caso o utilizador tenha nomeado VITE_SUPABASE_KEY
+  const envKey = import.meta.env.VITE_SUPABASE_KEY;
+  if (envKey) {
+    return cleanEnvString(envKey);
+  }
+
+  // Suporte a window.__ENV__ se injetado em runtime
+  if (typeof window !== 'undefined') {
+    const winKey = (window as any).__ENV__?.VITE_SUPABASE_ANON_KEY || (window as any).__ENV__?.VITE_SUPABASE_KEY;
+    if (winKey) {
+      return cleanEnvString(winKey);
     }
   }
-  if (typeof process !== 'undefined') {
-    const key = process.env?.VITE_SUPABASE_ANON_KEY || process.env?.SUPABASE_ANON_KEY;
-    if (key) {
-      return cleanEnvString(key);
-    }
-  }
+
   return '';
 }
 
