@@ -21,6 +21,7 @@ import {
   OptimizedImageResult,
   MAX_FILE_SIZE_BYTES
 } from '../../services/imageStorage';
+import { getSafeErrorMessage } from '../../utils/error';
 
 export interface PresetImage {
   label: string;
@@ -163,7 +164,10 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
     } catch (err: any) {
       console.error('Erro ao processar imagem:', err);
       setErrorMessage(
-        err.message || 'Ocorreu um erro ao processar a imagem. Certifique-se de que é um ficheiro JPG, PNG ou WEBP válido.'
+        getSafeErrorMessage(
+          err,
+          'Ocorreu um erro ao processar a imagem. Certifique-se de que é um ficheiro JPG, PNG ou WEBP válido.'
+        )
       );
       handleCancelNewImage();
     } finally {
@@ -248,7 +252,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
           <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <strong className="font-bold text-red-200 block mb-0.5">Erro na seleção da imagem:</strong>
-            <span>{errorMessage}</span>
+            <span>{getSafeErrorMessage(errorMessage)}</span>
           </div>
           <button
             type="button"

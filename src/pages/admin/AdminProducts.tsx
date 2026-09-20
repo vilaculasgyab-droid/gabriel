@@ -28,6 +28,7 @@ import { storeDb } from '../../services/storeDb';
 import { ProductImageManager } from '../../components/admin/ProductImageManager';
 import { DEFAULT_EPI_PLACEHOLDER, imageStorage } from '../../services/imageStorage';
 import { resolveProductImageUrl } from '../../utils/imageUtils';
+import { getSafeErrorMessage } from '../../utils/error';
 
 // Preset gallery images for quick selection when adding/editing
 const PRESET_IMAGES = [
@@ -359,7 +360,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       onProductChanged?.();
     } catch (err: any) {
       console.error('Falha ao salvar produto:', err);
-      showToast(`Erro no Supabase: ${err.message || 'Falha na gravação.'}`);
+      showToast(`Erro no Supabase: ${getSafeErrorMessage(err, 'Falha na gravação.')}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -377,7 +378,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
-      showToast(`Erro ao eliminar no Supabase: ${err.message || err}`);
+      showToast(`Erro ao eliminar no Supabase: ${getSafeErrorMessage(err)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -390,7 +391,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
-      showToast(`Erro ao atualizar estado no Supabase: ${err.message || err}`);
+      showToast(`Erro ao atualizar estado no Supabase: ${getSafeErrorMessage(err)}`);
     }
   };
 
@@ -401,7 +402,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
-      showToast(`Erro ao atualizar destaque no Supabase: ${err.message || err}`);
+      showToast(`Erro ao atualizar destaque no Supabase: ${getSafeErrorMessage(err)}`);
     }
   };
 
@@ -417,7 +418,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       reloadProducts();
       onProductChanged?.();
     } catch (err: any) {
-      showToast(`Erro ao atualizar estoque no Supabase: ${err.message || err}`);
+      showToast(`Erro ao atualizar estoque no Supabase: ${getSafeErrorMessage(err)}`);
     }
   };
 

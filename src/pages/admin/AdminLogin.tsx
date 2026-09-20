@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { authService, AuthErrorCode } from '../../services/authService';
 import { FortiMozLogo } from '../../components/CategoryIcon';
+import { getSafeErrorMessage } from '../../utils/error';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -38,11 +39,11 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
       if (res.success) {
         onLoginSuccess();
       } else {
-        setErrorMessage(res.error || 'Credenciais inválidas.');
+        setErrorMessage(getSafeErrorMessage(res.error, 'Credenciais inválidas.'));
         setErrorCode(res.errorCode || 'UNEXPECTED_ERROR');
       }
-    } catch {
-      setErrorMessage('Ocorreu um erro ao contactar o servidor.');
+    } catch (err: unknown) {
+      setErrorMessage(getSafeErrorMessage(err, 'Ocorreu um erro ao contactar o servidor.'));
       setErrorCode('UNEXPECTED_ERROR');
     } finally {
       setLoading(false);
@@ -116,7 +117,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   {errorCode === 'UNEXPECTED_ERROR' && 'Erro de Autenticação'}
                 </div>
                 <div className="text-[11px] leading-relaxed text-slate-300">
-                  {errorMessage}
+                  {getSafeErrorMessage(errorMessage)}
                 </div>
               </div>
             </div>

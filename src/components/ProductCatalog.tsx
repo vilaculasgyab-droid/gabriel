@@ -22,6 +22,7 @@ import {
 import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
 import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
 import { resolveProductImageUrl } from '../utils/imageUtils';
+import { getSafeErrorMessage } from '../utils/error';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -480,7 +481,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </div>
             <h3 className="text-lg font-bold text-slate-900 mb-1">Não foi possível carregar os produtos</h3>
             <p className="text-xs sm:text-sm text-slate-500 mb-6">
-              {errorMessage}
+              {getSafeErrorMessage(errorMessage)}
             </p>
             {onRetry && (
               <button

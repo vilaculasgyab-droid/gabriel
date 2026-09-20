@@ -24,6 +24,7 @@ import {
 import { AdminUser } from '../../types';
 import { authService } from '../../services/authService';
 import { storeDb } from '../../services/storeDb';
+import { getSafeErrorMessage } from '../../utils/error';
 
 interface AdminSettingsProps {
   adminUser: AdminUser | null;
@@ -99,10 +100,10 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         fetchSupabaseStatus();
         storeDb.syncWithServer(true);
       } else {
-        showToast(data.error || 'Falha ao migrar para o Supabase');
+        showToast(getSafeErrorMessage(data.error, 'Falha ao migrar para o Supabase'));
       }
     } catch (err: any) {
-      showToast(err.message || 'Erro de rede na migração');
+      showToast(getSafeErrorMessage(err, 'Erro de rede na migração'));
     } finally {
       setMigrating(false);
     }
@@ -117,7 +118,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       showToast('Perfil do administrador atualizado com sucesso!');
       onProfileUpdated();
     } else {
-      showToast(res.error || 'Erro ao atualizar perfil.');
+      showToast(getSafeErrorMessage(res.error, 'Erro ao atualizar perfil.'));
     }
   };
 
@@ -147,7 +148,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       setConfirmPassword('');
       showToast('Palavra-passe alterada com sucesso!');
     } else {
-      setPasswordError(res.error || 'Erro ao alterar palavra-passe.');
+      setPasswordError(getSafeErrorMessage(res.error, 'Erro ao alterar palavra-passe.'));
     }
   };
 
@@ -209,7 +210,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           {passwordError && (
             <div className="p-3 rounded-xl bg-red-950/80 border border-red-800 text-red-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-              <span>{passwordError}</span>
+              <span>{getSafeErrorMessage(passwordError)}</span>
             </div>
           )}
 
@@ -476,12 +477,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </div>
               </div>
 
-              {supabaseStatus?.error && (
+              {Boolean(supabaseStatus?.error) && (
                 <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-2">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-amber-200">Atenção ao Acesso no Supabase:</strong> {supabaseStatus.error}
+                      <strong className="text-amber-200">Atenção ao Acesso no Supabase:</strong> {getSafeErrorMessage(supabaseStatus.error)}
                     </div>
                   </div>
                   <p className="text-[11px] text-amber-200/90 leading-relaxed">
@@ -532,7 +533,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 }`}>
                   <div className="font-bold flex items-center gap-1.5">
                     {migrationResult.success ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <AlertCircle className="w-3.5 h-3.5 text-red-400" />}
-                    <span>{migrationResult.message || (migrationResult.success ? 'Migração concluída!' : 'Erro na migração')}</span>
+                    <span>{getSafeErrorMessage(migrationResult.message, migrationResult.success ? 'Migração concluída!' : 'Erro na migração')}</span>
                   </div>
                   {migrationResult.summary && (
                     <div className="text-[10px] text-slate-300 space-y-0.5 pt-1 border-t border-slate-800/60 font-mono">

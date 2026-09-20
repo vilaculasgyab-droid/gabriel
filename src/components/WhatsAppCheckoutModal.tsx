@@ -27,6 +27,7 @@ import {
   EMAIL_DISPLAY
 } from '../utils/whatsapp';
 import { storeDb } from '../services/storeDb';
+import { getSafeErrorMessage } from '../utils/error';
 
 interface WhatsAppCheckoutModalProps {
   isOpen: boolean;
@@ -173,7 +174,7 @@ export const WhatsAppCheckoutModal: React.FC<WhatsAppCheckoutModalProps> = ({
         <div className="p-5 sm:p-7 max-h-[78vh] overflow-y-auto">
           {errorMsg && (
             <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold animate-in shake">
-              {errorMsg}
+              {getSafeErrorMessage(errorMsg)}
             </div>
           )}
 

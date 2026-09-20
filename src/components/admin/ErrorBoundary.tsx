@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { getSafeErrorMessage } from '../../utils/error';
 
 interface Props {
   children: React.ReactNode;
@@ -11,7 +12,7 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error: unknown;
   errorInfo: React.ErrorInfo | null;
 }
 
@@ -25,11 +26,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
     };
   }
 
-  public static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: unknown): State {
     return { hasError: true, error, errorInfo: null };
   }
 
-  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  public componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
     console.error('[ErrorBoundary] Exceção capturada no painel administrativo:', error, errorInfo);
     this.setState({ errorInfo });
   }
@@ -55,10 +56,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      const title = this.props.fallbackTitle || 'Ocorreu um erro ao carregar esta secção';
+      const title = this.props.fallbackTitle || 'Ocorreu um erro ao carregar o Painel Administrativo.';
       const message =
         this.props.fallbackMessage ||
         'O painel administrativo encontrou uma falha temporária de visualização. Os seus dados, pedidos e produtos continuam em segurança.';
+      const technicalDetails = this.state.error ? getSafeErrorMessage(this.state.error) : '';
 
       return (
         <div
@@ -75,17 +77,17 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{message}</p>
             </div>
 
-            {/* Error detail in collapsible or subtle box */}
-            {this.state.error && (
+            {/* Error detail in collapsible or subtle box - guaranteed safe string */}
+            {technicalDetails ? (
               <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-left">
                 <div className="text-[10px] uppercase font-bold text-amber-400 tracking-wider mb-1">
                   Detalhes Técnicos
                 </div>
-                <div className="text-xs font-mono text-red-400 break-words line-clamp-3">
-                  {this.state.error.message || String(this.state.error)}
+                <div className="text-xs font-mono text-red-400 break-words line-clamp-4 select-text">
+                  {technicalDetails}
                 </div>
               </div>
-            )}
+            ) : null}
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button

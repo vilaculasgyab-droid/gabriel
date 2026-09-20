@@ -12,6 +12,7 @@ import { AdminSettings } from './AdminSettings';
 import { ErrorBoundary } from '../../components/admin/ErrorBoundary';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
+import { getSafeErrorMessage } from '../../utils/error';
 
 interface AdminPortalProps {
   onNavigateToStore: () => void;
@@ -41,10 +42,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = useCallback((msg: string) => {
-    setToastMessage(msg);
+  const showToast = useCallback((msg: unknown) => {
+    const safeMsg = getSafeErrorMessage(msg, 'Notificação');
+    setToastMessage(safeMsg);
     setTimeout(() => {
-      setToastMessage((current) => (current === msg ? null : current));
+      setToastMessage((current) => (current === safeMsg ? null : current));
     }, 4000);
   }, []);
 
