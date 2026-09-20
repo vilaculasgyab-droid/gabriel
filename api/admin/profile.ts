@@ -1,46 +1,12 @@
-import {
-  handleAdminUpdateProfileCore,
-  setCorsAndNoCacheHeaders,
-} from '../_adminAuthCore.ts';
-
-export default async function handler(req: any, res: any) {
-  setCorsAndNoCacheHeaders(req, res);
-
-  // Handle preflight OPTIONS request
+export default function handler(req: any, res: any) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Método não permitido.' });
-  }
-
-  try {
-    let body = req.body;
-    if (typeof body === 'string' && body.trim()) {
-      try {
-        body = JSON.parse(body);
-      } catch {
-        // use raw body
-      }
-    } else if (Buffer.isBuffer(body)) {
-      try {
-        body = JSON.parse(body.toString('utf-8'));
-      } catch {
-        // use raw body
-      }
-    }
-
-    const { name, email } = body || {};
-    const result = await handleAdminUpdateProfileCore(name, email);
-
-    if (result.success) {
-      return res.status(200).json(result);
-    } else {
-      return res.status(400).json(result);
-    }
-  } catch (err: any) {
-    console.error('[API /api/admin/profile] Erro interno:', err);
-    return res.status(500).json({ success: false, error: 'Erro ao atualizar perfil.' });
-  }
+  return res.status(410).json({
+    success: false,
+    error: 'Endpoint descontinuado. A atualização de perfil é realizada exclusivamente via Supabase Auth (supabase.auth.updateUser).',
+  });
 }

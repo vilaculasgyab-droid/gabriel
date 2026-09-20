@@ -96,15 +96,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
             <div className={`mb-5 p-4 rounded-xl border text-xs flex items-start gap-3 animate-in shake ${
               errorCode === 'CONNECTION_ERROR' 
                 ? 'bg-amber-950/70 border-amber-800/80 text-amber-200' 
-                : errorCode === 'RATE_LIMITED'
-                ? 'bg-red-950/80 border-red-800 text-red-200'
+                : errorCode === 'CONFIG_ERROR'
+                ? 'bg-amber-950/70 border-amber-800/80 text-amber-200'
                 : 'bg-red-950/80 border-red-800 text-red-200'
             }`}>
               <div className="flex-shrink-0 mt-0.5">
                 {errorCode === 'CONNECTION_ERROR' ? (
                   <WifiOff className="w-4 h-4 text-amber-400" />
-                ) : errorCode === 'RATE_LIMITED' ? (
-                  <Clock className="w-4 h-4 text-red-400" />
                 ) : (
                   <AlertCircle className="w-4 h-4 text-red-400" />
                 )}
@@ -112,9 +110,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
               <div className="space-y-1">
                 <div className="font-bold text-[13px]">
                   {errorCode === 'INVALID_CREDENTIALS' && 'Credenciais Inválidas'}
-                  {errorCode === 'RATE_LIMITED' && 'Tentativas Excedidas'}
+                  {errorCode === 'CONFIG_ERROR' && 'Configuração de Autenticação Incompleta'}
                   {errorCode === 'CONNECTION_ERROR' && 'Falha de Conexão'}
-                  {errorCode === 'SERVER_ERROR' && 'Erro no Servidor de Autenticação'}
+                  {errorCode === 'SERVER_ERROR' && 'Erro de Autenticação'}
                   {errorCode === 'UNEXPECTED_ERROR' && 'Erro de Autenticação'}
                 </div>
                 <div className="text-[11px] leading-relaxed text-slate-300">
@@ -197,7 +195,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   Conta de Administrador:
                 </span>
                 <span className="text-[10px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-                  Sessão Segura HttpOnly
+                  Supabase Auth Oficial
                 </span>
               </div>
               <div className="font-mono text-left bg-slate-900 p-2.5 rounded-lg text-[11px] text-slate-300 select-all border border-slate-800/80">
@@ -211,7 +209,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
         {/* Security Assurance Footer */}
         <div className="mt-6 text-center text-[11px] text-slate-500 flex items-center justify-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Autenticação e sessão protegidas pelo servidor da FortiMoz.</span>
+          <span>Autenticação e sessão protegidas diretamente pelo Supabase Auth.</span>
         </div>
       </div>
     </div>

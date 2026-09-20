@@ -1,30 +1,12 @@
-import {
-  buildClearCookieHeader,
-  setCorsAndNoCacheHeaders,
-} from '../_adminAuthCore.ts';
-
-export default async function handler(req: any, res: any) {
-  setCorsAndNoCacheHeaders(req, res);
-
-  // Handle preflight OPTIONS request
+export default function handler(req: any, res: any) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Método não permitido.' });
-  }
-
-  try {
-    const clearCookie = buildClearCookieHeader(req);
-    res.setHeader('Set-Cookie', clearCookie);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Sessão administrativa terminada com sucesso.',
-    });
-  } catch (err: any) {
-    console.error('[API /api/admin/logout] Erro interno:', err);
-    return res.status(500).json({ success: false, error: 'Erro ao terminar sessão.' });
-  }
+  return res.status(410).json({
+    success: true,
+    message: 'Endpoint descontinuado. O logout é realizado exclusivamente via Supabase Auth (supabase.auth.signOut).',
+  });
 }

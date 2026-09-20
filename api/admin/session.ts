@@ -1,42 +1,12 @@
-import {
-  verifyAdminSessionFromRequest,
-  setCorsAndNoCacheHeaders,
-} from '../_adminAuthCore.ts';
-
-export default async function handler(req: any, res: any) {
-  setCorsAndNoCacheHeaders(req, res);
-
-  // Handle preflight OPTIONS request
+export default function handler(req: any, res: any) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ success: false, error: 'Método não permitido.' });
-  }
-
-  try {
-    const sessionResult = verifyAdminSessionFromRequest(req);
-
-    if (sessionResult.authenticated && sessionResult.user) {
-      return res.status(200).json({
-        authenticated: true,
-        user: {
-          id: sessionResult.user.id,
-          name: sessionResult.user.name,
-          email: sessionResult.user.email,
-          role: sessionResult.user.role,
-          avatar: '/proseguranca-logo.png',
-        },
-      });
-    }
-
-    return res.status(200).json({
-      authenticated: false,
-      user: null,
-    });
-  } catch (err: any) {
-    console.error('[API /api/admin/session] Erro interno:', err);
-    return res.status(500).json({ authenticated: false, user: null, error: 'Erro ao verificar sessão.' });
-  }
+  return res.status(410).json({
+    authenticated: false,
+    error: 'Endpoint descontinuado. A verificação de sessão é realizada exclusivamente via Supabase Auth (supabase.auth.getSession).',
+  });
 }

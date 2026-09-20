@@ -105,3 +105,17 @@ export function getSupabaseClient(): SupabaseClient | null {
   }
   return supabaseInstance;
 }
+
+/**
+ * Cliente Supabase singleton inicializado com VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.
+ * NUNCA utiliza SUPABASE_SERVICE_ROLE_KEY no frontend.
+ */
+export const supabase = getSupabaseClient();
+
+export function getSupabase(): SupabaseClient {
+  const client = getSupabaseClient();
+  if (!client) {
+    throw new Error('Configuração de autenticação incompleta.');
+  }
+  return client;
+}

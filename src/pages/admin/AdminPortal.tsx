@@ -10,6 +10,7 @@ import { AdminOrders } from './AdminOrders';
 import { AdminCustomers } from './AdminCustomers';
 import { AdminSettings } from './AdminSettings';
 import { ErrorBoundary } from '../../components/admin/ErrorBoundary';
+import { FortiMozLogo } from '../../components/CategoryIcon';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 import { getSafeErrorMessage } from '../../utils/error';
@@ -31,6 +32,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     noindex: true,
   });
 
+  const [isCheckingSession, setIsCheckingSession] = useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => authService.isAuthenticated());
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => authService.getAdminUser());
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -55,7 +57,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   }, []);
 
   useEffect(() => {
-    // Verificar e sincronizar sessão ativa com o servidor
+    // Verificar e sincronizar sessão ativa com Supabase Auth
     authService
       .checkSession()
       .then((user) => {
@@ -63,19 +65,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           setIsAuthenticated(true);
           setAdminUser(user);
         } else {
-          // Se o utilizador já está autenticado no frontend via token/localStorage,
-          // não deslogar se for apenas uma inconsistência temporária de rede
-          if (!authService.isAuthenticated()) {
-            setIsAuthenticated(false);
-            setAdminUser(null);
-          }
+          setIsAuthenticated(false);
+          setAdminUser(null);
         }
       })
       .catch((err) => {
         console.warn('[AdminPortal] Aviso ao sincronizar sessão inicial:', err);
+        setIsAuthenticated(false);
+        setAdminUser(null);
+      })
+      .finally(() => {
+        setIsCheckingSession(false);
       });
 
-    // Subscrever a eventos de alteração de autenticação (ex: expiração ou logout noutra aba)
+    // Subscrever a eventos de alteração de autenticação via onAuthStateChange
     const unsubAuth = authService.subscribeAuthState((user) => {
       if (user) {
         setIsAuthenticated(true);
@@ -119,6 +122,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setSelectedOrderToView(order);
     setActiveTab('orders');
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <FortiMozLogo className="h-10 w-auto animate-pulse" />
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+            <span>A carregar painel de gestão...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

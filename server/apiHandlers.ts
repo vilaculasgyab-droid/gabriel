@@ -426,109 +426,59 @@ export function handleHealthCheck(req: Request, res: Response) {
   });
 }
 
-// POST /api/admin/login
+// POST /api/admin/login (Descontinuado - Autenticação é realizada exclusivamente via Supabase Auth)
 export async function handleAdminLogin(req: Request, res: Response) {
-  try {
-    const { handleAdminLoginCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
-    setCorsAndNoCacheHeaders(req, res);
-    const { email, password } = req.body || {};
-    const result = await handleAdminLoginCore(email, password, req);
-
-    if (result.success && result.cookieHeader) {
-      res.setHeader('Set-Cookie', result.cookieHeader);
-      return res.status(200).json({
-        success: true,
-        user: result.user,
-        token: result.token,
-      });
-    }
-
-    const status = result.statusCode || (result.error?.includes('bloqueado') ? 429 : 401);
-    return res.status(status).json({
-      success: false,
-      error: result.error || 'Credenciais inválidas.',
-    });
-  } catch (err: any) {
-    console.error('[ADMIN LOGIN ERROR]', err?.message || 'Erro inesperado');
-    return res.status(500).json({ success: false, error: 'Erro interno no servidor ao processar autenticação.' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return res.status(410).json({
+    success: false,
+    error: 'Endpoint descontinuado. A autenticação é realizada exclusivamente via Supabase Auth.',
+  });
 }
 
-// GET /api/admin/session
+// GET /api/admin/session (Descontinuado - Sessão gerida pelo Supabase Auth)
 export async function handleAdminSession(req: Request, res: Response) {
-  try {
-    const { verifyAdminSessionFromRequest, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
-    setCorsAndNoCacheHeaders(req, res);
-    const sessionResult = verifyAdminSessionFromRequest(req);
-
-    if (sessionResult.authenticated && sessionResult.user) {
-      return res.status(200).json({
-        authenticated: true,
-        user: {
-          id: sessionResult.user.id,
-          name: sessionResult.user.name,
-          email: sessionResult.user.email,
-          role: sessionResult.user.role,
-          avatar: '/proseguranca-logo.png',
-        },
-      });
-    }
-
-    return res.status(200).json({
-      authenticated: false,
-      user: null,
-    });
-  } catch (err: any) {
-    console.error('[API /api/admin/session] Erro:', err);
-    return res.status(500).json({ authenticated: false, user: null, error: 'Erro ao verificar sessão.' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return res.status(410).json({
+    authenticated: false,
+    error: 'Endpoint descontinuado. A sessão é verificada via Supabase Auth.',
+  });
 }
 
-// POST /api/admin/logout
+// POST /api/admin/logout (Descontinuado - Logout no Supabase Auth)
 export async function handleAdminLogout(req: Request, res: Response) {
-  try {
-    const { buildClearCookieHeader, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
-    setCorsAndNoCacheHeaders(req, res);
-    const clearCookie = buildClearCookieHeader(req);
-    res.setHeader('Set-Cookie', clearCookie);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Sessão administrativa terminada com sucesso.',
-    });
-  } catch (err: any) {
-    console.error('[API /api/admin/logout] Erro:', err);
-    return res.status(500).json({ success: false, error: 'Erro ao terminar sessão.' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return res.status(410).json({
+    success: true,
+    message: 'Endpoint descontinuado. Logout no Supabase Auth.',
+  });
 }
 
-// POST /api/admin/change-password
+// POST /api/admin/change-password (Descontinuado - Supabase Auth)
 export async function handleAdminChangePassword(req: Request, res: Response) {
-  try {
-    const { handleAdminChangePasswordCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
-    setCorsAndNoCacheHeaders(req, res);
-    const { currentPassword, newPassword, email } = req.body || {};
-    const result = await handleAdminChangePasswordCore(currentPassword, newPassword, email);
-    const status = result.success ? 200 : 400;
-    return res.status(status).json(result);
-  } catch (err: any) {
-    console.error('[API /api/admin/change-password] Erro:', err);
-    return res.status(500).json({ success: false, error: 'Erro interno no servidor ao alterar palavra-passe.' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return res.status(410).json({
+    success: false,
+    error: 'Endpoint descontinuado. A alteração de palavra-passe é realizada via Supabase Auth.',
+  });
 }
 
-// POST /api/admin/profile
+// POST /api/admin/profile (Descontinuado - Supabase Auth)
 export async function handleAdminUpdateProfile(req: Request, res: Response) {
-  try {
-    const { handleAdminUpdateProfileCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
-    setCorsAndNoCacheHeaders(req, res);
-    const { name, email } = req.body || {};
-    const result = await handleAdminUpdateProfileCore(name, email);
-    const status = result.success ? 200 : 400;
-    return res.status(status).json(result);
-  } catch (err: any) {
-    console.error('[API /api/admin/profile] Erro:', err);
-    return res.status(500).json({ success: false, error: 'Erro interno ao atualizar perfil.' });
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return res.status(410).json({
+    success: false,
+    error: 'Endpoint descontinuado. A atualização de perfil é realizada via Supabase Auth.',
+  });
 }
+
 
