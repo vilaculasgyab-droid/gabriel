@@ -20,6 +20,7 @@ import { AdvantagesPage } from './pages/AdvantagesPage';
 import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { AdminPortal } from './pages/admin/AdminPortal';
+import { ErrorBoundary } from './components/admin/ErrorBoundary';
 import { useSEO } from './hooks/useSEO';
 
 export default function App() {
@@ -399,12 +400,21 @@ export default function App() {
   // If in Admin Portal route, render the isolated, protected Admin portal
   if (currentPath === '/admin') {
     return (
-      <>
+      <ErrorBoundary
+        fallbackTitle="Ocorreu um erro ao carregar o Painel Administrativo."
+        fallbackMessage="O painel administrativo encontrou uma falha temporária. Os seus dados, pedidos e produtos continuam em segurança."
+        showHomeButton={true}
+        onReset={() => {
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }}
+      >
         <OfflineIndicator />
         <AdminPortal
           onNavigateToStore={() => handleNavigate('/')}
         />
-      </>
+      </ErrorBoundary>
     );
   }
 

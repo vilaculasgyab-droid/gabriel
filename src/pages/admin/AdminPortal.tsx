@@ -9,6 +9,7 @@ import { AdminProducts } from './AdminProducts';
 import { AdminOrders } from './AdminOrders';
 import { AdminCustomers } from './AdminCustomers';
 import { AdminSettings } from './AdminSettings';
+import { ErrorBoundary } from '../../components/admin/ErrorBoundary';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 
@@ -53,15 +54,24 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   useEffect(() => {
     // Verificar e sincronizar sessão ativa com o servidor
-    authService.checkSession().then((user) => {
-      if (user) {
-        setIsAuthenticated(true);
-        setAdminUser(user);
-      } else {
-        setIsAuthenticated(false);
-        setAdminUser(null);
-      }
-    });
+    authService
+      .checkSession()
+      .then((user) => {
+        if (user) {
+          setIsAuthenticated(true);
+          setAdminUser(user);
+        } else {
+          // Se o utilizador já está autenticado no frontend via token/localStorage,
+          // não deslogar se for apenas uma inconsistência temporária de rede
+          if (!authService.isAuthenticated()) {
+            setIsAuthenticated(false);
+            setAdminUser(null);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('[AdminPortal] Aviso ao sincronizar sessão inicial:', err);
+      });
 
     // Subscrever a eventos de alteração de autenticação (ex: expiração ou logout noutra aba)
     const unsubAuth = authService.subscribeAuthState((user) => {
@@ -142,43 +152,50 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         onLogout={handleLogout}
         onNavigateToStore={onNavigateToStore}
       >
-        {activeTab === 'dashboard' && (
-          <AdminDashboard
-            metrics={metrics}
-            onNavigateTab={(tab) => setActiveTab(tab)}
-            onViewOrderDetails={handleViewOrderDetailsFromDashboard}
-          />
-        )}
+        <ErrorBoundary
+          fallbackTitle="Ocorreu um erro ao carregar o Painel Administrativo."
+          fallbackMessage="Não foi possível renderizar este módulo do painel. Clique em Tentar Novamente para restaurar a visualização."
+          onReset={refreshMetrics}
+          showHomeButton={false}
+        >
+          {activeTab === 'dashboard' && (
+            <AdminDashboard
+              metrics={metrics}
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              onViewOrderDetails={handleViewOrderDetailsFromDashboard}
+            />
+          )}
 
-        {activeTab === 'products' && (
-          <AdminProducts
-            onProductChanged={refreshMetrics}
-            showToast={showToast}
-          />
-        )}
+          {activeTab === 'products' && (
+            <AdminProducts
+              onProductChanged={refreshMetrics}
+              showToast={showToast}
+            />
+          )}
 
-        {activeTab === 'orders' && (
-          <AdminOrders
-            initialSelectedOrder={selectedOrderToView}
-            onClearInitialSelectedOrder={() => setSelectedOrderToView(null)}
-            showToast={showToast}
-          />
-        )}
+          {activeTab === 'orders' && (
+            <AdminOrders
+              initialSelectedOrder={selectedOrderToView}
+              onClearInitialSelectedOrder={() => setSelectedOrderToView(null)}
+              showToast={showToast}
+            />
+          )}
 
-        {activeTab === 'customers' && (
-          <AdminCustomers
-            onViewOrderDetails={handleViewOrderDetailsFromDashboard}
-            showToast={showToast}
-          />
-        )}
+          {activeTab === 'customers' && (
+            <AdminCustomers
+              onViewOrderDetails={handleViewOrderDetailsFromDashboard}
+              showToast={showToast}
+            />
+          )}
 
-        {activeTab === 'settings' && (
-          <AdminSettings
-            adminUser={adminUser}
-            onProfileUpdated={handleProfileUpdated}
-            showToast={showToast}
-          />
-        )}
+          {activeTab === 'settings' && (
+            <AdminSettings
+              adminUser={adminUser}
+              onProfileUpdated={handleProfileUpdated}
+              showToast={showToast}
+            />
+          )}
+        </ErrorBoundary>
       </AdminLayout>
     </div>
   );
