@@ -7,6 +7,7 @@ export type AuthErrorCode =
   | 'INVALID_CREDENTIALS'
   | 'RATE_LIMITED'
   | 'CONNECTION_ERROR'
+  | 'SERVER_ERROR'
   | 'UNEXPECTED_ERROR';
 
 export interface LoginResult {
@@ -134,11 +135,29 @@ export const authService = {
         };
       }
 
-      if (!res.ok || !data.success) {
+      if (res.status === 401 || res.status === 403) {
         return {
           success: false,
-          error: data.error || 'E-mail ou palavra-passe incorretos. Por favor, tente novamente.',
+          error: data.error || 'Credenciais inválidas.',
           errorCode: 'INVALID_CREDENTIALS',
+        };
+      }
+
+      if (res.status >= 500) {
+        console.error(`[authService] Erro no endpoint /api/admin/login (HTTP ${res.status}):`, data);
+        return {
+          success: false,
+          error: data.error || 'Erro no servidor de autenticação. O administrador deve verificar a configuração do servidor.',
+          errorCode: 'SERVER_ERROR',
+        };
+      }
+
+      if (!res.ok || !data.success) {
+        console.error(`[authService] Resposta inesperada no endpoint /api/admin/login (HTTP ${res.status}):`, data);
+        return {
+          success: false,
+          error: data.error || 'Erro inesperado durante a autenticação.',
+          errorCode: 'UNEXPECTED_ERROR',
         };
       }
 

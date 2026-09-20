@@ -1,7 +1,7 @@
 import {
   handleAdminLoginCore,
   setCorsAndNoCacheHeaders,
-} from '../_adminAuthCore';
+} from '../_adminAuthCore.ts';
 
 export default async function handler(req: any, res: any) {
   setCorsAndNoCacheHeaders(req, res);
@@ -42,15 +42,14 @@ export default async function handler(req: any, res: any) {
         token: result.token,
       });
     } else {
-      const isRateLimited = result.error?.includes('Demasiadas') || result.error?.includes('bloqueado');
-      const statusCode = isRateLimited ? 429 : 401;
+      const statusCode = result.statusCode || (result.error?.includes('bloqueado') ? 429 : 401);
       return res.status(statusCode).json({
         success: false,
         error: result.error || 'Credenciais inválidas.',
       });
     }
   } catch (err: any) {
-    console.error('[API /api/admin/login] Erro interno:', err);
-    return res.status(500).json({ success: false, error: 'Erro interno ao autenticar.' });
+    console.error('[ADMIN LOGIN ERROR]', err?.message || 'Erro inesperado');
+    return res.status(500).json({ success: false, error: 'Erro interno no servidor ao autenticar.' });
   }
 }

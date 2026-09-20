@@ -429,7 +429,7 @@ export function handleHealthCheck(req: Request, res: Response) {
 // POST /api/admin/login
 export async function handleAdminLogin(req: Request, res: Response) {
   try {
-    const { handleAdminLoginCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore');
+    const { handleAdminLoginCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
     setCorsAndNoCacheHeaders(req, res);
     const { email, password } = req.body || {};
     const result = await handleAdminLoginCore(email, password, req);
@@ -443,14 +443,13 @@ export async function handleAdminLogin(req: Request, res: Response) {
       });
     }
 
-    const isRateLimited = result.error?.includes('Demasiadas') || result.error?.includes('bloqueado');
-    const status = isRateLimited ? 429 : 401;
+    const status = result.statusCode || (result.error?.includes('bloqueado') ? 429 : 401);
     return res.status(status).json({
       success: false,
       error: result.error || 'Credenciais inválidas.',
     });
   } catch (err: any) {
-    console.error('[API /api/admin/login] Erro:', err);
+    console.error('[ADMIN LOGIN ERROR]', err?.message || 'Erro inesperado');
     return res.status(500).json({ success: false, error: 'Erro interno no servidor ao processar autenticação.' });
   }
 }
@@ -458,7 +457,7 @@ export async function handleAdminLogin(req: Request, res: Response) {
 // GET /api/admin/session
 export async function handleAdminSession(req: Request, res: Response) {
   try {
-    const { verifyAdminSessionFromRequest, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore');
+    const { verifyAdminSessionFromRequest, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
     setCorsAndNoCacheHeaders(req, res);
     const sessionResult = verifyAdminSessionFromRequest(req);
 
@@ -488,7 +487,7 @@ export async function handleAdminSession(req: Request, res: Response) {
 // POST /api/admin/logout
 export async function handleAdminLogout(req: Request, res: Response) {
   try {
-    const { buildClearCookieHeader, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore');
+    const { buildClearCookieHeader, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
     setCorsAndNoCacheHeaders(req, res);
     const clearCookie = buildClearCookieHeader(req);
     res.setHeader('Set-Cookie', clearCookie);
@@ -506,7 +505,7 @@ export async function handleAdminLogout(req: Request, res: Response) {
 // POST /api/admin/change-password
 export async function handleAdminChangePassword(req: Request, res: Response) {
   try {
-    const { handleAdminChangePasswordCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore');
+    const { handleAdminChangePasswordCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
     setCorsAndNoCacheHeaders(req, res);
     const { currentPassword, newPassword, email } = req.body || {};
     const result = await handleAdminChangePasswordCore(currentPassword, newPassword, email);
@@ -521,7 +520,7 @@ export async function handleAdminChangePassword(req: Request, res: Response) {
 // POST /api/admin/profile
 export async function handleAdminUpdateProfile(req: Request, res: Response) {
   try {
-    const { handleAdminUpdateProfileCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore');
+    const { handleAdminUpdateProfileCore, setCorsAndNoCacheHeaders } = await import('../api/_adminAuthCore.ts');
     setCorsAndNoCacheHeaders(req, res);
     const { name, email } = req.body || {};
     const result = await handleAdminUpdateProfileCore(name, email);

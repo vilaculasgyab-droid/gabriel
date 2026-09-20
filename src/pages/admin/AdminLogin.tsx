@@ -114,6 +114,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNaviga
                   {errorCode === 'INVALID_CREDENTIALS' && 'Credenciais Inválidas'}
                   {errorCode === 'RATE_LIMITED' && 'Tentativas Excedidas'}
                   {errorCode === 'CONNECTION_ERROR' && 'Falha de Conexão'}
+                  {errorCode === 'SERVER_ERROR' && 'Erro no Servidor de Autenticação'}
                   {errorCode === 'UNEXPECTED_ERROR' && 'Erro de Autenticação'}
                 </div>
                 <div className="text-[11px] leading-relaxed text-slate-300">

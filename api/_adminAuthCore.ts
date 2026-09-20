@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 // Helper to strip accidental quotes from env vars
 function cleanEnv(val: string | undefined): string {
@@ -280,6 +281,7 @@ export function setCorsAndNoCacheHeaders(req: any, res: any) {
 // ---------------------------------------------------------------------------
 export interface AdminAuthResult {
   success: boolean;
+  statusCode?: number;
   error?: string;
   message?: string;
   user?: {
@@ -293,8 +295,20 @@ export interface AdminAuthResult {
   cookieHeader?: string;
 }
 
+function getSupabaseAuthClient() {
+  const url = cleanEnv(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL);
+  const key = cleanEnv(
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE
+  );
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
 /**
- * Validates admin login credentials against ADMIN_EMAIL and ADMIN_PASSWORD
+ * Validates admin login credentials against Supabase Auth and configured ADMIN_PASSWORD
  */
 export async function handleAdminLoginCore(
   emailInput: string,
@@ -315,6 +329,7 @@ export async function handleAdminLoginCore(
   if (!rateLimit.allowed) {
     return {
       success: false,
+      statusCode: 429,
       error: `Demasiadas tentativas falhadas. Por motivos de segurança, tente novamente dentro de ${rateLimit.retryAfterMinutes || 15} minutos.`,
     };
   }
@@ -322,38 +337,94 @@ export async function handleAdminLoginCore(
   if (!cleanEmail || !password) {
     return {
       success: false,
+      statusCode: 400,
       error: 'Por favor, introduza o seu e-mail e a palavra-passe.',
     };
   }
 
   const expectedEmail = getAdminEmail();
-  const expectedPassword = getAdminPassword();
 
-  // Validate email
+  // Validate admin email
   if (cleanEmail !== expectedEmail) {
     recordFailedAttempt(rateLimitKey);
     return {
       success: false,
-      error: 'E-mail ou palavra-passe incorretos. Por favor, verifique as suas credenciais.',
+      statusCode: 401,
+      error: 'Credenciais inválidas.',
     };
   }
 
-  // Constant-time password comparison to prevent timing attacks
-  const passA = Buffer.from(password);
-  const passB = Buffer.from(expectedPassword);
-  const passwordsMatch = passA.length === passB.length && crypto.timingSafeEqual(passA, passB);
+  let authenticated = false;
+  let supabaseAuthFailed = false;
+  let supabaseUserId: string | null = null;
 
-  if (!passwordsMatch) {
+  // A. Authenticate with Supabase Auth if client is available
+  const supabase = getSupabaseAuthClient();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+
+      if (!error && data?.user) {
+        authenticated = true;
+        supabaseUserId = data.user.id;
+      } else if (error) {
+        // Controlled invalid credentials response
+        if (error.status === 400 || (error as any).code === 'invalid_credentials') {
+          // Password did not match in Supabase Auth
+        } else {
+          // Log server-side error securely (no password, token, or keys logged)
+          console.error('[ADMIN LOGIN ERROR]', error.message || 'Falha de comunicação com o serviço Supabase Auth');
+          supabaseAuthFailed = true;
+        }
+      }
+    } catch (err: any) {
+      console.error('[ADMIN LOGIN ERROR]', err?.message || 'Exceção ao autenticar com Supabase Auth');
+      supabaseAuthFailed = true;
+    }
+  }
+
+  // B. Fallback to ADMIN_PASSWORD constant-time check
+  if (!authenticated) {
+    try {
+      const expectedPassword = getAdminPassword();
+      if (expectedPassword) {
+        const passA = Buffer.from(password);
+        const passB = Buffer.from(expectedPassword);
+        if (passA.length === passB.length && crypto.timingSafeEqual(passA, passB)) {
+          authenticated = true;
+        }
+      }
+    } catch (err: any) {
+      console.error('[ADMIN LOGIN ERROR]', err?.message || 'Erro ao validar palavra-passe de administração');
+    }
+  }
+
+  if (!authenticated) {
     const attempt = recordFailedAttempt(rateLimitKey);
     if (attempt.blocked) {
       return {
         success: false,
+        statusCode: 429,
         error: 'Número limite de tentativas excedido. Acesso temporariamente bloqueado por 15 minutos.',
       };
     }
+
+    // If Supabase had a genuine connection/server failure and local password didn't match
+    if (supabaseAuthFailed) {
+      return {
+        success: false,
+        statusCode: 500,
+        error: 'Erro no servidor de autenticação. O administrador deve verificar a configuração do servidor.',
+      };
+    }
+
     return {
       success: false,
-      error: 'E-mail ou palavra-passe incorretos. Por favor, verifique as suas credenciais.',
+      statusCode: 401,
+      error: 'Credenciais inválidas.',
     };
   }
 
@@ -362,7 +433,7 @@ export async function handleAdminLoginCore(
 
   const profile = getAdminProfileData();
   const user = {
-    id: 'fortimoz-admin-01',
+    id: supabaseUserId || 'fortimoz-admin-01',
     name: profile.name,
     email: profile.email,
     role: profile.role,
@@ -374,6 +445,7 @@ export async function handleAdminLoginCore(
 
   return {
     success: true,
+    statusCode: 200,
     user,
     token,
     cookieHeader,

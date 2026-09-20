@@ -1,7 +1,7 @@
 import {
   buildClearCookieHeader,
   setCorsAndNoCacheHeaders,
-} from '../_adminAuthCore';
+} from '../_adminAuthCore.ts';
 
 export default async function handler(req: any, res: any) {
   setCorsAndNoCacheHeaders(req, res);
