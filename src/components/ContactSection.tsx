@@ -44,7 +44,7 @@ export const ContactSection: React.FC = () => {
 
     // Build contact message for WhatsApp
     const messageText =
-      `Olá, FortiMoz! Mensagem enviada pelo website:\n\n` +
+      `Olá, Z FORÇA E PROTEÇÃO! Mensagem enviada pelo website:\n\n` +
       `Nome: ${formData.name}\n` +
       `Telefone: ${formData.phone}\n` +
       `Email: ${formData.email || 'Não informado'}\n\n` +

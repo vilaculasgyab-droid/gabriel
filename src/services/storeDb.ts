@@ -3,10 +3,17 @@ import { PRODUCTS } from '../data/products';
 import { imageStorage } from './imageStorage';
 import { isSupabaseConfigured, getSupabaseClient, mapDbRowToProduct, mapDbRowToOrder } from '../lib/supabase';
 
-const PRODUCTS_KEY = 'fortimoz_db_products_v2';
-const LEGACY_PRODUCTS_KEY = 'proseguranca_db_products_v1';
-const ORDERS_KEY = 'fortimoz_db_orders_v2';
-const LEGACY_ORDERS_KEY = 'proseguranca_db_orders_v2';
+const PRODUCTS_KEY = 'zforca_db_products_v1';
+const LEGACY_PRODUCTS_KEYS = ['fortimoz_db_products_v2', 'proseguranca_db_products_v1'];
+const ORDERS_KEY = 'zforca_db_orders_v1';
+const LEGACY_ORDERS_KEY = 'fortimoz_db_orders_v2';
+
+// Purge obsolete cache from legacy stores immediately
+if (typeof window !== 'undefined') {
+  try {
+    LEGACY_PRODUCTS_KEYS.forEach((k) => localStorage.removeItem(k));
+  } catch {}
+}
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -236,7 +243,7 @@ export const storeDb = {
   // PRODUCTS (Supabase is the sole source of truth)
   // ----------------------------------------------------
   getProducts(): Product[] {
-    if (inMemoryProducts && inMemoryProducts.length > 0) {
+    if (inMemoryProducts !== null) {
       return inMemoryProducts;
     }
 
@@ -244,7 +251,7 @@ export const storeDb = {
       const raw = localStorage.getItem(PRODUCTS_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           inMemoryProducts = parsed;
           // Dispara revalidação em segundo plano para garantir frescor
           if (!isSyncingProducts && Date.now() - lastProductSyncTimestamp > 3000) {

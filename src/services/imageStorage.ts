@@ -1,5 +1,5 @@
 /**
- * FortiMoz - Serviço de Validação, Otimização e Armazenamento de Imagens de EPIs
+ * Z FORÇA E PROTEÇÃO - Serviço de Validação, Otimização e Armazenamento de Imagens
  * 
  * Funcionalidades:
  * - Validação rigorosa de MIME types, extensões e magic bytes (assinaturas binárias).
@@ -53,7 +53,7 @@ export const DEFAULT_EPI_PLACEHOLDER =
   <path d="M290 200V185C290 182 295 180 300 180C305 180 310 182 310 185V200" stroke="#f59e0b" stroke-width="6" stroke-linecap="round"/>
   <path d="M300 320L340 345V390C340 415 320 435 300 445C280 435 260 415 260 390V345L300 320Z" fill="#0284c7" stroke="#38bdf8" stroke-width="4"/>
   <path d="M285 380L295 390L318 365" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="300" y="495" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="22" font-weight="800" letter-spacing="1">FORTIMOZ EPI</text>
+  <text x="300" y="495" text-anchor="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-size="20" font-weight="800" letter-spacing="1">Z FORÇA E PROTEÇÃO</text>
   <text x="300" y="525" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="14" font-weight="600">Sem imagem definida para este produto</text>
 </svg>
 `);
@@ -299,11 +299,11 @@ export async function optimizeAndEncodeImage(
 }
 
 // ----------------------------------------------------------------------
-// Suporte a Armazenamento no IndexedDB (proseguranca_images_db)
+// Suporte a Armazenamento no IndexedDB (zforca_images_db)
 // Permite guardar cópias de segurança de imagens em alta resolução
 // ----------------------------------------------------------------------
 
-const IDB_NAME = 'proseguranca_images_db_v1';
+const IDB_NAME = 'zforca_images_db_v1';
 const IDB_STORE = 'product_images';
 
 function openIndexedDb(): Promise<IDBDatabase> {

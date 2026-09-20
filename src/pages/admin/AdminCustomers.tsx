@@ -96,7 +96,7 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ onViewOrderDetai
     const cleanPhone = String(phone || '').replace(/\D/g, '');
     const phoneWithCountry = cleanPhone.startsWith('258') ? cleanPhone : `258${cleanPhone}`;
     const msg = encodeURIComponent(
-      `Olá ${name || 'Estimado(a) Cliente'},\nEntramos em contacto a partir da FortiMoz Moçambique. Como podemos ajudar com as suas necessidades de EPIs e equipamentos industriais?`
+      `Olá ${name || 'Estimado(a) Cliente'},\nEntramos em contacto a partir da Z FORÇA E PROTEÇÃO. Como podemos ajudar com as suas necessidades de fardamento e equipamentos de segurança?`
     );
     window.open(`https://wa.me/${phoneWithCountry}?text=${msg}`, '_blank');
   };

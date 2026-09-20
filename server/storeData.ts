@@ -46,7 +46,7 @@ export function getStoredProducts(): Product[] {
     if (fs.existsSync(PRODUCTS_FILE)) {
       const raw = fs.readFileSync(PRODUCTS_FILE, 'utf-8');
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         cachedProducts = parsed;
         return parsed;
       }
@@ -55,8 +55,8 @@ export function getStoredProducts(): Product[] {
     console.error('[storeData] Erro ao ler products.json:', err);
   }
 
-  // Seed with initial real products
-  cachedProducts = [...INITIAL_PRODUCTS];
+  // Se não existir, inicializa vazio (conforme instrução da loja sem produtos)
+  cachedProducts = [];
   try {
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(cachedProducts, null, 2), 'utf-8');
   } catch (err) {

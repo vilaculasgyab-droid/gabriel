@@ -1,4 +1,4 @@
-# robots.txt para FortiMoz (https://fortimoz.co.mz)
+# robots.txt para Z FORÇA E PROTEÇÃO (https://zforcaprotecao.co.mz)
 # Rastreamento público liberado para mecanismos de pesquisa
 User-agent: *
 Allow: /
@@ -45,4 +45,4 @@ Disallow: /checkout
 Disallow: /pedidos
 
 # Localização oficial do Sitemap
-Sitemap: https://fortimoz.co.mz/sitemap.xml
+Sitemap: https://zforcaprotecao.co.mz/sitemap.xml

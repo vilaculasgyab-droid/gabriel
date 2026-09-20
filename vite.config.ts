@@ -36,9 +36,9 @@ export default defineConfig(() => {
         ],
         manifest: {
           id: '/',
-          name: 'FortiMoz - EPIs e Segurança no Trabalho',
-          short_name: 'FortiMoz',
-          description: 'Equipamentos de Proteção Individual (EPIs), calçado de segurança, capacetes, proteção respiratória e vestuário profissional em Moçambique.',
+          name: 'Z FORÇA E PROTEÇÃO - Fardamento e Equipamentos de Segurança',
+          short_name: 'Z FORÇA',
+          description: 'Loja oficial Z FORÇA E PROTEÇÃO. Especialistas em fardamento de segurança, acessórios, botas, equipamento antimotim e equipamentos electrónicos em Moçambique.',
           theme_color: '#020617',
           background_color: '#020617',
           display: 'standalone',
@@ -81,7 +81,7 @@ export default defineConfig(() => {
           // Ensure admin, API endpoints, sitemap.xml and robots.txt are never intercepted with SPA index.html fallback
           navigateFallbackDenylist: [/^\/admin/, /^\/api/, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
           cleanupOutdatedCaches: true,
-          cacheId: 'fortimoz-v2',
+          cacheId: 'zforca-v1',
           runtimeCaching: [
             {
               // API routes must ALWAYS be NetworkOnly, never cached by the Service Worker
@@ -98,7 +98,7 @@ export default defineConfig(() => {
               urlPattern: /.*supabase\.co\/storage\/v1\/object\/public\/product-images\/.*/i,
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'fortimoz-supabase-images',
+                cacheName: 'zforca-supabase-images',
                 networkTimeoutSeconds: 2,
                 expiration: {
                   maxEntries: 120,
@@ -113,7 +113,7 @@ export default defineConfig(() => {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'fortimoz-google-fonts-cache',
+                cacheName: 'zforca-google-fonts-cache',
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
@@ -127,7 +127,7 @@ export default defineConfig(() => {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'fortimoz-gstatic-fonts-cache',
+                cacheName: 'zforca-gstatic-fonts-cache',
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
@@ -141,7 +141,7 @@ export default defineConfig(() => {
               urlPattern: /\.(?:png|jpg|jpeg|svg|webp|ico)$/i,
               handler: 'StaleWhileRevalidate',
               options: {
-                cacheName: 'fortimoz-media-cache',
+                cacheName: 'zforca-media-cache',
                 expiration: {
                   maxEntries: 60,
                   maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days

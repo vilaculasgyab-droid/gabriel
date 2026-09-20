@@ -17,7 +17,9 @@ import {
   ChevronRight,
   Sparkles,
   LayoutGrid,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Shield,
+  MessageSquare
 } from 'lucide-react';
 import { formatCurrency, getProductWhatsAppInquiryUrl } from '../utils/whatsapp';
 import { DEFAULT_EPI_PLACEHOLDER } from '../services/imageStorage';
@@ -63,7 +65,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   // Favorites state persisted in localStorage
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('fortimoz_favorites') || localStorage.getItem('proseguranca_favorites');
+      const saved = localStorage.getItem('zforca_favorites_v1') || localStorage.getItem('fortimoz_favorites');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -77,8 +79,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         ? prev.filter((id) => id !== productId)
         : [...prev, productId];
       try {
-        localStorage.setItem('fortimoz_favorites', JSON.stringify(next));
-        localStorage.setItem('proseguranca_favorites', JSON.stringify(next));
+        localStorage.setItem('zforca_favorites_v1', JSON.stringify(next));
       } catch (err) {
         console.error(err);
       }
@@ -225,7 +226,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Vitrine Principal de EPIs</span>
+                <span>VITRINE PRINCIPAL DE SEGURANÇA</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight uppercase">
                 {selectedCategory === 'all' 
@@ -235,7 +236,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
                 {activeCategoryObject
                   ? activeCategoryObject.description
-                  : 'Equipamentos de Proteção Individual certificados para obras, mineração e indústria em Moçambique.'}
+                  : 'Produtos de segurança, proteção e tecnologia para profissionais, empresas e instituições em Moçambique.'}
               </p>
             </div>
 
@@ -368,7 +369,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Pesquisar em produtos em destaque por nome, tipo de EPI, norma..."
+                placeholder="Pesquisar produtos, categorias ou equipamentos..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="w-full bg-slate-50 text-slate-900 text-xs sm:text-sm pl-10 pr-8 py-2 rounded-xl border border-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition-colors"
@@ -494,28 +495,52 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           </div>
         )}
 
-        {/* Empty state when no products match */}
+        {/* Empty state when no products in store or no products match filter */}
         {!isLoading && !errorMessage && filteredProducts.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 max-w-md mx-auto">
-            <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Search className="w-7 h-7" />
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 max-w-lg mx-auto shadow-sm">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md shadow-amber-500/20">
+              <Shield className="w-8 h-8 stroke-[2.2]" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Nenhum EPI encontrado</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mb-6">
-              Não encontramos nenhum produto em destaque que coincida com a sua pesquisa ou filtros aplicados.
-            </p>
-            <button
-              onClick={() => {
-                onSearchChange('');
-                onSelectCategory('all');
-                setAvailability('all');
-                setPriceRange('all');
-              }}
-              className="inline-flex items-center gap-2 bg-slate-900 text-amber-400 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-              <span>Limpar Filtros e Pesquisa</span>
-            </button>
+            {products.length === 0 ? (
+              <>
+                <h3 className="text-xl font-black text-slate-950 mb-2">
+                  Catálogo Z FORÇA E PROTEÇÃO
+                </h3>
+                <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                  A nossa equipa está a preparar o novo catálogo com fardamentos de segurança, botas táticas, acessórios, equipamento antimotim e sistemas eletrónicos. Novos produtos estarão disponíveis em breve.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <a
+                    href="https://wa.me/258846159254?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20cota%C3%A7%C3%A3o%20de%20equipamentos%20de%20seguran%C3%A7a%20na%20Z%20FOR%C3%87A%20E%20PROTE%C3%87%C3%83O."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Solicitar Cotação por WhatsApp</span>
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">Nenhum produto encontrado</h3>
+                <p className="text-xs sm:text-sm text-slate-500 mb-6">
+                  Não encontramos nenhum produto que coincida com a sua pesquisa ou filtros aplicados.
+                </p>
+                <button
+                  onClick={() => {
+                    onSearchChange('');
+                    onSelectCategory('all');
+                    setAvailability('all');
+                    setPriceRange('all');
+                  }}
+                  className="inline-flex items-center gap-2 bg-slate-900 text-amber-400 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Limpar Filtros e Pesquisa</span>
+                </button>
+              </>
+            )}
           </div>
         )}
 

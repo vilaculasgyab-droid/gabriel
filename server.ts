@@ -59,7 +59,7 @@ async function startServer() {
   // 0. Ensure we do not start a duplicate instance if another process already listens on the port
   const canListen = await isPortAvailable(PORT, HOST);
   if (!canListen) {
-    console.warn(`[FortiMoz Server] Porta ${PORT} (${HOST}) já está em uso por outro processo no ambiente. Não iniciando segunda instância duplicada.`);
+    console.warn(`[Z FORÇA Server] Porta ${PORT} (${HOST}) já está em uso por outro processo no ambiente. Não iniciando segunda instância duplicada.`);
     return;
   }
 
@@ -243,19 +243,19 @@ async function startServer() {
   // Gracefully handle EADDRINUSE if another process bound the port simultaneously
   httpServer.on('error', (err: NodeJS.ErrnoException) => {
     if (err.code === 'EADDRINUSE') {
-      console.warn(`[FortiMoz Server] Porta ${PORT} já está em uso (EADDRINUSE). Não iniciando segunda instância.`);
+      console.warn(`[Z FORÇA Server] Porta ${PORT} já está em uso (EADDRINUSE). Não iniciando segunda instância.`);
       return;
     }
-    console.error('[FortiMoz Server] Erro no servidor:', err);
+    console.error('[Z FORÇA Server] Erro no servidor:', err);
     process.exit(1);
   });
 
   httpServer.listen(PORT, HOST, () => {
-    console.log(`[FortiMoz Server] Operacional em http://${HOST}:${PORT}`);
+    console.log(`[Z FORÇA Server] Operacional em http://${HOST}:${PORT}`);
   });
 }
 
 startServer().catch((err) => {
-  console.error('[FortiMoz Server] Erro fatal ao iniciar:', err);
+  console.error('[Z FORÇA Server] Erro fatal ao iniciar:', err);
   process.exit(1);
 });

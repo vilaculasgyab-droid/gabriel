@@ -13,7 +13,7 @@ import {
   Construction,
   CheckCircle2
 } from 'lucide-react';
-import { FortiMozLogo } from './CategoryIcon';
+import { ZForcaEProtecaoLogo } from './CategoryIcon';
 
 export const AboutUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpenQuoteModal }) => {
   const sectors = [
@@ -59,19 +59,19 @@ export const AboutUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpenQuot
             <div>
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full mb-3">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Sobre a FortiMoz</span>
+                <span>Sobre a Z FORÇA E PROTEÇÃO</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight leading-tight">
-                Proteção e Segurança para o seu Trabalho em Moçambique
+                Segurança em Primeiro Lugar • Moçambique
               </h2>
             </div>
 
             <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
-              A <strong>FortiMoz</strong> é uma empresa especializada no fornecimento integral de Equipamentos de Proteção Individual (EPIs) e soluções de segurança do trabalho para trabalhadores individuais, profissionais liberais, construtoras, complexos industriais, minas e instituições públicas e privadas.
+              A <strong>Z FORÇA E PROTEÇÃO</strong> é uma empresa de excelência especializada no fornecimento de fardamento de segurança, acessórios táticos, botas de alta resistência, equipamento antimotim e equipamentos eletrónicos para equipas de segurança, empresas, indústrias e profissionais em Moçambique.
             </p>
 
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Com sede e operações em Moçambique, a nossa missão é assegurar que cada trabalhador regresse a casa com saúde e segurança todos os dias. Fornecemos apenas equipamentos rigorosamente homologados por normas internacionais, aliando alta durabilidade, ergonomia e custo-benefício.
+              Com foco rigoroso na proteção, operacionalidade e durabilidade, equipamos forças de intervenção, equipas patrimoniais e trabalhadores com o que há de mais moderno e seguro no mercado internacional.
             </p>
 
             {/* Value checklist */}
@@ -109,14 +109,14 @@ export const AboutUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpenQuot
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="relative z-10 space-y-6">
-                <FortiMozLogo inverted={true} />
+                <ZForcaEProtecaoLogo inverted={true} />
 
                 <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80">
                   <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">
                     Nosso Lema
                   </div>
                   <div className="text-lg sm:text-xl font-extrabold text-white italic">
-                    “Proteção e Segurança para o seu Trabalho”
+                    “SEGURANÇA EM PRIMEIRO LUGAR”
                   </div>
                 </div>
 

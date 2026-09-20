@@ -91,24 +91,24 @@ const createSvgIcon = (size = 512, isMaskable = false) => {
                stroke-width="2"/>
     </g>
 
-    <!-- Typography "FORTIMOZ" subtle monogram band -->
+    <!-- Typography "Z FORÇA" brand band -->
     <text x="256" y="340" 
           text-anchor="middle" 
           font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" 
-          font-size="34" 
+          font-size="30" 
           font-weight="900" 
-          letter-spacing="5" 
+          letter-spacing="4" 
           fill="#fef3c7">
-      FORTIMOZ
+      Z FORÇA
     </text>
     <text x="256" y="370" 
           text-anchor="middle" 
           font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" 
-          font-size="16" 
+          font-size="15" 
           font-weight="700" 
           letter-spacing="3" 
-          fill="#94a3b8">
-      EPIS • MOÇAMBIQUE
+          fill="#f59e0b">
+      &amp; PROTEÇÃO
     </text>
   </g>
 </svg>
@@ -116,7 +116,7 @@ const createSvgIcon = (size = 512, isMaskable = false) => {
 };
 
 async function generateAllIcons() {
-  console.log('Generating PWA icons for FortiMoz...');
+  console.log('Generating PWA icons for Z FORÇA E PROTEÇÃO...');
 
   const svgStandard = createSvgIcon(512, false);
   const svgMaskable = createSvgIcon(512, true);

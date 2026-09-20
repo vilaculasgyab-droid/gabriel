@@ -5,7 +5,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-const DISMISSED_STORAGE_KEY = 'proseguranca_pwa_prompt_dismissed_v1';
+const DISMISSED_STORAGE_KEY = 'zforca_pwa_prompt_dismissed_v1';
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);

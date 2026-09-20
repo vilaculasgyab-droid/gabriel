@@ -10,7 +10,7 @@ import { AdminOrders } from './AdminOrders';
 import { AdminCustomers } from './AdminCustomers';
 import { AdminSettings } from './AdminSettings';
 import { ErrorBoundary } from '../../components/admin/ErrorBoundary';
-import { FortiMozLogo } from '../../components/CategoryIcon';
+import { ZForcaEProtecaoLogo } from '../../components/CategoryIcon';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useSEO } from '../../hooks/useSEO';
 import { getSafeErrorMessage } from '../../utils/error';
@@ -26,8 +26,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 }) => {
   // Admin route MUST have strict noindex, nofollow to protect administrative areas
   useSEO({
-    title: 'Portal Administrativo | FortiMoz',
-    description: 'Área de administração restrita e gestão de encomendas da FortiMoz.',
+    title: 'Portal Administrativo | Z FORÇA E PROTEÇÃO',
+    description: 'Área de administração restrita e gestão da Z FORÇA E PROTEÇÃO.',
     canonicalPath: '/admin',
     noindex: true,
   });
@@ -127,7 +127,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
-          <FortiMozLogo className="h-10 w-auto animate-pulse" />
+          <ZForcaEProtecaoLogo inverted={true} className="scale-110 animate-pulse" />
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
             <span>A carregar painel de gestão...</span>

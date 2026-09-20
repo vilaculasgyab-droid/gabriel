@@ -1,5 +1,5 @@
 import React from 'react';
-import { FortiMozLogo } from './CategoryIcon';
+import { ZForcaEProtecaoLogo } from './CategoryIcon';
 import { CATEGORIES } from '../data/categories';
 import { 
   Phone, 
@@ -68,15 +68,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
               }}
               className="cursor-pointer inline-block"
             >
-              <FortiMozLogo inverted={true} />
+              <ZForcaEProtecaoLogo inverted={true} />
             </a>
 
             <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-amber-400 font-semibold italic">
-              “Proteção e Segurança para o seu Trabalho”
+              “SEGURANÇA EM PRIMEIRO LUGAR”
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Loja e distribuidora especializada no fornecimento de Equipamentos de Proteção Individual (EPIs) e segurança industrial em Moçambique. Atendimento a trabalhadores, empresas, construção civil e indústrias.
+              Z FORÇA E PROTEÇÃO: Especialistas em fardamento de segurança, acessórios operacionais, botas reforçadas, equipamento antimotim e equipamentos eletrónicos de alta precisão em Moçambique.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-2.5">
@@ -306,7 +306,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © {new Date().getFullYear()} <strong>FORTIMOZ</strong>. Todos os direitos reservados.
+            © {new Date().getFullYear()} <strong>Z FORÇA E PROTEÇÃO</strong>. Todos os direitos reservados.
             <span className="hidden sm:inline"> | Moçambique</span>
           </div>
 

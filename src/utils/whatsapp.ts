@@ -24,7 +24,7 @@ export function formatCurrency(amount?: number | string | null): string {
 /**
  * Format order into the exact WhatsApp message template requested:
  *
- * Olá, FortiMoz!
+ * Olá, Z FORÇA E PROTEÇÃO!
  * 
  * Gostaria de fazer um pedido:
  * 
@@ -61,7 +61,7 @@ export function buildWhatsAppOrderMessage(
     : formData.deliveryLocation;
 
   return (
-    `Olá, FortiMoz!\n\n` +
+    `Olá, Z FORÇA E PROTEÇÃO!\n\n` +
     `Gostaria de fazer um pedido:\n\n` +
     `${itemsText}\n\n` +
     `TOTAL: ${formatCurrency(totalAmount)}\n\n` +
@@ -92,7 +92,7 @@ export function getProductWhatsAppInquiryUrl(product: Product, quantity = 1, sel
   const sizeStr = selectedSize ? ` (Tamanho: ${selectedSize})` : '';
   const total = product.price * quantity;
   const message =
-    `Olá, FortiMoz!\n\n` +
+    `Olá, Z FORÇA E PROTEÇÃO!\n\n` +
     `Gostaria de comprar o seguinte produto do catálogo:\n\n` +
     `Produto: ${product.name}${sizeStr}\n` +
     `Quantidade: ${quantity}\n` +
@@ -119,7 +119,7 @@ export function getProductWhatsAppInquiryUrl(product: Product, quantity = 1, sel
  */
 export function getQuoteWhatsAppUrl(quoteData: QuoteFormData): string {
   const message =
-    `Olá, FortiMoz!\n\n` +
+    `Olá, Z FORÇA E PROTEÇÃO!\n\n` +
     `Gostaria de solicitar uma Cotação para Obras / Empresa:\n\n` +
     `Nome da empresa: ${quoteData.companyName}\n` +
     `Nome do responsável: ${quoteData.contactName}\n` +
@@ -141,15 +141,15 @@ export function getQuoteWhatsAppUrl(quoteData: QuoteFormData): string {
 export const WHATSAPP_QUICK_ACTIONS = {
   buyProduct: () =>
     `https://wa.me/${WHATSAPP_PHONE_RAW}?text=${encodeURIComponent(
-      'Olá, FortiMoz! Gostaria de consultar a disponibilidade e comprar equipamentos de segurança do catálogo.'
+      'Olá, Z FORÇA E PROTEÇÃO! Gostaria de consultar a disponibilidade e comprar equipamentos de segurança do catálogo.'
     )}`,
   requestQuote: () =>
     `https://wa.me/${WHATSAPP_PHONE_RAW}?text=${encodeURIComponent(
-      'Olá, FortiMoz! Gostaria de solicitar uma Cotação para Obras e Empresas com NUIT.'
+      'Olá, Z FORÇA E PROTEÇÃO! Gostaria de solicitar uma Cotação para Obras e Empresas com NUIT.'
     )}`,
   askQuestions: () =>
     `https://wa.me/${WHATSAPP_PHONE_RAW}?text=${encodeURIComponent(
-      'Olá, FortiMoz! Tenho dúvidas técnicas sobre os equipamentos de proteção individual (EPIs) e normas de segurança.'
+      'Olá, Z FORÇA E PROTEÇÃO! Tenho dúvidas técnicas sobre o fardamento e equipamentos de segurança.'
     )}`,
 };
 
@@ -159,7 +159,7 @@ export const WHATSAPP_QUICK_ACTIONS = {
 export function getGeneralWhatsAppChatUrl(customText?: string): string {
   const message =
     customText ||
-    `Olá, FortiMoz! Gostaria de obter informações sobre o catálogo de Equipamentos de Proteção Individual (EPIs) e fazer um pedido.`;
+    `Olá, Z FORÇA E PROTEÇÃO! Gostaria de obter informações sobre o catálogo de Fardamento e Equipamentos de Segurança e fazer um pedido.`;
   return `https://wa.me/${WHATSAPP_PHONE_RAW}?text=${encodeURIComponent(message)}`;
 }
 
@@ -184,10 +184,10 @@ export function buildOrderEmailDetails(
     ? `${formData.deliveryLocation}, ${formData.cityProvince}`
     : formData.deliveryLocation;
 
-  const subject = `Novo Pedido FortiMoz - ${formData.customerName} (${formatCurrency(totalAmount)})`;
+  const subject = `Novo Pedido Z FORÇA E PROTEÇÃO - ${formData.customerName} (${formatCurrency(totalAmount)})`;
 
   const body =
-    `Olá, Equipa Comercial FortiMoz!\n\n` +
+    `Olá, Equipa Comercial Z FORÇA E PROTEÇÃO!\n\n` +
     `Gostaria de realizar o seguinte pedido através da loja online:\n\n` +
     `=== ITENS DO PEDIDO ===\n\n` +
     `${itemsText}\n\n` +
@@ -224,7 +224,7 @@ export function getOrderEmailUrl(
 export function getQuoteEmailUrl(quoteData: QuoteFormData): string {
   const subject = `Solicitação de Cotação B2B / Obras - ${quoteData.companyName}`;
   const body =
-    `Olá, Equipa Comercial FortiMoz!\n\n` +
+    `Olá, Equipa Comercial Z FORÇA E PROTEÇÃO!\n\n` +
     `Gostaria de solicitar uma Cotação Formal para Obras e Empresas:\n\n` +
     `=== DADOS DA EMPRESA / PROJETO ===\n` +
     `• Nome da Empresa: ${quoteData.companyName}\n` +
@@ -256,7 +256,7 @@ export function getContactEmailUrl(formData: {
 }): string {
   const subject = `Mensagem de Contacto Website - ${formData.subject || 'Dúvida Geral'} (${formData.name})`;
   const body =
-    `Olá, Equipa FortiMoz!\n\n` +
+    `Olá, Equipa Z FORÇA E PROTEÇÃO!\n\n` +
     `Mensagem enviada através do formulário de contacto do website:\n\n` +
     `• Nome: ${formData.name}\n` +
     `• Telefone / WhatsApp: ${formData.phone}\n` +
@@ -281,7 +281,7 @@ export function getProductEmailInquiryUrl(
   const total = product.price * quantity;
   const subject = `Interesse no Produto: ${product.name}`;
   const body =
-    `Olá, Equipa FortiMoz!\n\n` +
+    `Olá, Equipa Z FORÇA E PROTEÇÃO!\n\n` +
     `Tenho interesse em adquirir o seguinte equipamento do vosso catálogo:\n\n` +
     `• Produto: ${product.name}${sizeStr}\n` +
     `• Código / SKU: ${product.id}\n` +

@@ -31,8 +31,8 @@ interface AdvantagesPageProps {
 
 export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOpenQuoteModal }) => {
   useSEO({
-    title: 'Vantagens FortiMoz | Qualidade e Segurança Garantida',
-    description: 'Descubra porque as principais empresas e profissionais em Moçambique confiam na FortiMoz para fornecimento de EPIs certificados e suporte especializado.',
+    title: 'Vantagens Z FORÇA E PROTEÇÃO | Segurança em Primeiro Lugar',
+    description: 'Descubra porque as principais empresas e profissionais em Moçambique confiam na Z FORÇA E PROTEÇÃO para fardamentos, equipamentos antimotim, botas e acessórios.',
     canonicalPath: '/vantagens',
     breadcrumbs: [
       { name: 'Início', path: '/' },
@@ -161,10 +161,10 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
               <span>Diferenciais & Vantagens</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
-              Por Que Escolher a FortiMoz?
+              Por Que Escolher a Z FORÇA E PROTEÇÃO?
             </h1>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-6">
-              Descubra os motivos pelos quais dezenas de empresas e milhares de profissionais confiam na FortiMoz para proteger o seu recurso mais valioso: a vida dos trabalhadores.
+              Descubra os motivos pelos quais empresas e profissionais de segurança em Moçambique confiam na Z FORÇA E PROTEÇÃO para proteger as suas equipas e operações.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -226,7 +226,7 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
 
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-bold text-amber-600">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Garantia de Satisfação FortiMoz</span>
+                  <span>Garantia de Satisfação Z FORÇA</span>
                 </div>
               </div>
             );

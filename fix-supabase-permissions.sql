@@ -1,5 +1,5 @@
 -- =============================================================================
--- FORTIMOZ - SCRIPT DEFINITIVO DE PERMISSÕES E RLS (TABELAS PRODUCTS E ORDERS)
+-- Z FORÇA E PROTEÇÃO - SCRIPT DEFINITIVO DE PERMISSÕES E RLS (TABELAS PRODUCTS E ORDERS)
 -- =============================================================================
 -- Execute este script no SQL Editor do Supabase:
 -- https://supabase.com/dashboard/project/ixubqdyqjxqpmnbwfhhi/sql/new

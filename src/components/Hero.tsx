@@ -42,22 +42,22 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             {/* Slogan pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-amber-400/40 text-amber-400 text-xs sm:text-sm font-bold tracking-wide mb-5 shadow-lg">
               <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              <span>FORTIMOZ</span>
+              <span>Z FORÇA E PROTEÇÃO</span>
               <span className="text-slate-500">•</span>
-              <span className="text-slate-200">“Proteção e Segurança para o seu Trabalho”</span>
+              <span className="text-slate-200">“Força, Disciplina e Proteção Profissional”</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-4 sm:mb-5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-              PROTEJA O QUE <br />
+              SEGURANÇA, PROTEÇÃO <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500">
-                MAIS IMPORTA
+                E CONFIANÇA
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-sm sm:text-base md:text-lg text-slate-100 max-w-2xl leading-relaxed mb-6 sm:mb-8 font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-              Equipamentos de Proteção Individual de qualidade para profissionais, empresas, construção civil, indústrias e instituições em Moçambique.
+              Produtos e soluções de segurança para profissionais, empresas, instituições e diferentes setores em Moçambique.
             </p>
 
             {/* CTA Buttons */}
@@ -130,10 +130,10 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenQuoteModal }) 
             <div className="p-3.5 rounded-2xl bg-slate-950/75 backdrop-blur-md border border-white/10 shadow-2xl text-left max-w-xs animate-in fade-in duration-500">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-xs mb-1">
                 <ShieldCheck className="w-4 h-4" />
-                <span>Equipamento Certificado</span>
+                <span>Segurança e Proteção Profissional</span>
               </div>
               <p className="text-[11px] text-slate-300 leading-snug">
-                Proteção para cabeça, olhos, ouvidos, vias respiratórias, mãos e pés em conformidade com as normas internacionais.
+                Fardamentos, acessórios, botas, equipamentos antimotim e soluções electrónicas para segurança e proteção profissional.
               </p>
             </div>
 

@@ -15,7 +15,7 @@ export default function handler(req: any, res: any) {
 
   return res.status(200).json({
     status: 'ok',
-    store: 'FortiMoz EPIs Moçambique',
+    store: 'Z FORÇA E PROTEÇÃO Moçambique',
     supabaseConfigured,
     timestamp: new Date().toISOString(),
   });

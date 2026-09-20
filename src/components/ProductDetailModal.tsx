@@ -41,7 +41,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   if (!product) return null;
 
   useSEO({
-    title: `${product.name} | FortiMoz`,
+    title: `${product.name} | Z FORÇA E PROTEÇÃO`,
     description: `${product.shortDescription || product.description} Preço: ${product.price} MZN. Disponibilidade: ${product.inStock ? 'Em Stock' : 'Sob Encomenda'}. Encomende via WhatsApp com entrega em Moçambique.`,
     canonicalPath: `/produto/${product.id}`,
     ogType: 'product',

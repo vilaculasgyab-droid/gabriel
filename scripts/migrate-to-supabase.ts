@@ -64,7 +64,7 @@ function findLocalImageFile(rawImagePath: string): string | null {
 
 export async function runMigration() {
   console.log('====================================================');
-  console.log('🚀 FORTIMOZ - MIGRAÇÃO DE DADOS PARA SUPABASE');
+  console.log('🚀 Z FORÇA E PROTEÇÃO - MIGRAÇÃO DE DADOS PARA SUPABASE');
   console.log('====================================================\n');
 
   // 1. Validar Credenciais

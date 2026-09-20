@@ -38,7 +38,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   showToast,
 }) => {
   // Profile State
-  const [name, setName] = useState(adminUser?.name || 'Administrador FortiMoz');
+  const [name, setName] = useState(adminUser?.name || 'Administrador Z FORÇA');
   const [email, setEmail] = useState(adminUser?.email || 'vialnculofelix845@gmail.com');
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -53,7 +53,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   // Payment Gateway Settings (Mock/Config state for M-Pesa, e-Mola, Visa)
   const [mpesaShortcode, setMpesaShortcode] = useState('171717');
   const [mpesaEnv, setMpesaEnv] = useState<'sandbox' | 'production'>('sandbox');
-  const [emolaMerchantId, setEmolaMerchantId] = useState('EMOLA-FORTIMOZ-001');
+  const [emolaMerchantId, setEmolaMerchantId] = useState('EMOLA-ZFORCA-001');
   const [visaEnabled, setVisaEnabled] = useState(true);
 
   // Supabase State & Migration
@@ -158,7 +158,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `fortimoz_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `zforca_backup_${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -203,7 +203,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Alterar Palavra-passe Segura</h3>
-              <p className="text-[11px] text-slate-400">Proteção encriptada gerida pelo servidor FortiMoz</p>
+              <p className="text-[11px] text-slate-400">Proteção encriptada gerida pelo sistema Z FORÇA</p>
             </div>
           </div>
 

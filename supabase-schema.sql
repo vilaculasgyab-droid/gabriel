@@ -1,5 +1,5 @@
 -- =============================================================================
--- FORTIMOZ - ESQUEMA OFICIAL SUPABASE (DATABASE & STORAGE)
+-- Z FORÇA E PROTEÇÃO - ESQUEMA OFICIAL SUPABASE (DATABASE & STORAGE)
 -- =============================================================================
 -- Execute este script no SQL Editor do seu projeto Supabase se ainda não tiver
 -- criado as tabelas e políticas de segurança (RLS).

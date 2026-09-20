@@ -22,11 +22,11 @@ let cachedAdminUser: AdminUser | null = null;
 
 function mapSupabaseUserToAdmin(user: any): AdminUser {
   return {
-    id: user.id || 'fortimoz-admin-01',
-    name: user.user_metadata?.name || user.user_metadata?.full_name || 'Administrador FortiMoz',
+    id: user.id || 'zforca-admin-01',
+    name: user.user_metadata?.name || user.user_metadata?.full_name || 'Administrador Z FORÇA',
     email: user.email || ADMIN_EMAIL,
     role: 'superadmin',
-    avatar: '/proseguranca-logo.png',
+    avatar: '/favicon.svg',
   };
 }
 

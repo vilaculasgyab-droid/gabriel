@@ -419,7 +419,7 @@ export function handleHealthCheck(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   return res.json({
     status: 'ok',
-    store: 'FortiMoz EPIs Moçambique',
+    store: 'Z FORÇA E PROTEÇÃO Moçambique',
     supabaseConfigured: isSupabaseServerConfigured(),
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),

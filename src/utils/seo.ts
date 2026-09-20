@@ -3,11 +3,11 @@ import { ADDRESS_DISPLAY, EMAIL_DISPLAY, WHATSAPP_PHONE_DISPLAY } from './whatsa
 
 /**
  * Production Site URL configuration
- * Defaults to the official FortiMoz domain or can be customized via VITE_SITE_URL.
+ * Defaults to the official Z FORÇA E PROTEÇÃO domain or can be customized via VITE_SITE_URL.
  * In browser environments, if VITE_SITE_URL is not provided and the app is running on a live host,
  * it can adapt to window.location.origin while avoiding localhost in production.
  */
-export const DEFAULT_PRODUCTION_URL = 'https://fortimoz.co.mz';
+export const DEFAULT_PRODUCTION_URL = 'https://zforcaprotecao.co.mz';
 
 export function getSiteUrl(): string {
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SITE_URL) {
@@ -70,13 +70,13 @@ export function buildStoreSchema(baseUrl: string) {
     '@context': 'https://schema.org',
     '@type': 'Store',
     '@id': `${baseUrl}/#store`,
-    name: 'FortiMoz',
-    alternateName: 'FortiMoz Moçambique - EPIs e Segurança no Trabalho',
+    name: 'Z FORÇA E PROTEÇÃO',
+    alternateName: 'Z FORÇA E PROTEÇÃO Moçambique - Fardamento e Equipamentos de Segurança',
     url: baseUrl,
     logo: `${baseUrl}/pwa-512x512.png`,
     image: `${baseUrl}/pwa-512x512.png`,
     description:
-      'Loja especializada em Equipamentos de Proteção Individual (EPI) e segurança profissional em Moçambique. Fornecimento de capacetes, luvas, calçado de segurança, óculos e proteção respiratória.',
+      'Loja especializada em Fardamento de Segurança, Acessórios, Botas, Equipamento Antimotim e Equipamentos Electrónicos em Moçambique.',
     telephone: '+258846159254',
     email: EMAIL_DISPLAY,
     address: {
@@ -131,8 +131,8 @@ export function buildWebSiteSchema(baseUrl: string) {
     '@type': 'WebSite',
     '@id': `${baseUrl}/#website`,
     url: baseUrl,
-    name: 'FortiMoz',
-    description: 'Equipamentos de Proteção Individual e Segurança no Trabalho em Moçambique',
+    name: 'Z FORÇA E PROTEÇÃO',
+    description: 'Fardamento e Equipamentos de Segurança Profissional em Moçambique',
     potentialAction: {
       '@type': 'SearchAction',
       target: `${baseUrl}/produtos?q={search_term_string}`,
@@ -161,7 +161,7 @@ export function buildProductSchema(product: Product, baseUrl: string) {
     mpn: product.id,
     brand: {
       '@type': 'Brand',
-      name: 'FortiMoz',
+      name: 'Z FORÇA E PROTEÇÃO',
     },
     category: product.categoryName,
     offers: {
@@ -175,7 +175,7 @@ export function buildProductSchema(product: Product, baseUrl: string) {
         product.inStock !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Store',
-        name: 'FortiMoz',
+        name: 'Z FORÇA E PROTEÇÃO',
       },
       areaServed: 'Moçambique',
     },
@@ -271,13 +271,13 @@ export function updateDocumentSEO(props: SEOProps) {
   const canonicalUrl = getCanonicalUrl(canonicalPath);
 
   // 1. Title
-  const title = props.title || 'FortiMoz | Equipamentos de Segurança e EPI em Moçambique';
+  const title = props.title || 'Z FORÇA E PROTEÇÃO | Fardamento e Equipamentos de Segurança em Moçambique';
   document.title = title;
 
   // 2. Meta Description
   const description =
     props.description ||
-    'Loja especializada em Equipamentos de Proteção Individual (EPIs) em Moçambique. Capacetes, luvas anticorte, calçado de segurança, óculos e proteção respiratória com pedidos via WhatsApp.';
+    'Loja oficial Z FORÇA E PROTEÇÃO em Moçambique. Fardamento de segurança, acessórios táticos, botas de proteção, equipamento antimotim e equipamentos electrónicos com pedidos via WhatsApp.';
   setMetaTag('name', 'description', description);
 
   // 3. Robots meta tag
@@ -296,7 +296,7 @@ export function updateDocumentSEO(props: SEOProps) {
   setMetaTag('property', 'og:description', description);
   setMetaTag('property', 'og:url', canonicalUrl);
   setMetaTag('property', 'og:type', ogType);
-  setMetaTag('property', 'og:site_name', 'FortiMoz');
+  setMetaTag('property', 'og:site_name', 'Z FORÇA E PROTEÇÃO');
   setMetaTag('property', 'og:locale', 'pt_MZ');
   setMetaTag('property', 'og:image', ogImage);
 
@@ -406,7 +406,7 @@ export function generateSitemapXml(
  * Generates Robots.txt content
  */
 export function generateRobotsTxt(baseUrl = DEFAULT_PRODUCTION_URL): string {
-  return `# robots.txt para FortiMoz (${baseUrl})
+  return `# robots.txt para Z FORÇA E PROTEÇÃO (${baseUrl})
 # Permitir rastreamento das páginas e produtos públicos
 User-agent: *
 Allow: /

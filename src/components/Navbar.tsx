@@ -13,7 +13,7 @@ import {
   ExternalLink,
   Mail
 } from 'lucide-react';
-import { FortiMozLogo } from './CategoryIcon';
+import { ZForcaEProtecaoLogo } from './CategoryIcon';
 import { PWAInstallButton } from './PWAInstallButton';
 import { CATEGORIES } from '../data/categories';
 import { 
@@ -102,12 +102,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-4 flex-wrap justify-center sm:justify-start">
             <span className="flex items-center gap-1.5 text-amber-400 font-medium">
               <ShieldCheck className="w-3.5 h-3.5" />
-              EPIs Certificados (EN / OSHA)
+              Equipamentos de Segurança e Proteção
             </span>
             <span className="hidden md:inline-block text-slate-600">•</span>
             <span className="hidden md:inline-flex items-center gap-1 text-slate-300">
               <Building2 className="w-3.5 h-3.5 text-slate-400" />
-              Fornecimento para Empresas, Obras e Indústrias
+              Soluções de Segurança para Empresas e Profissionais
             </span>
             <span className="hidden lg:inline-block text-slate-600">•</span>
             <span className="hidden lg:inline text-slate-300">
@@ -172,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="cursor-pointer flex-shrink-0"
               id="nav-logo"
             >
-              <FortiMozLogo inverted={true} />
+              <ZForcaEProtecaoLogo inverted={true} />
             </a>
 
             {/* Desktop Navigation Links */}
@@ -486,7 +486,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 id="mobile-nav-sobre"
               >
-                Sobre a FortiMoz
+                Sobre a Z FORÇA E PROTEÇÃO
               </a>
               <a
                 href="/vantagens"
