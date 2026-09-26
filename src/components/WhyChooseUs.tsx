@@ -19,7 +19,7 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
       icon: Award,
       title: 'Produtos de Qualidade',
       description:
-        'Todos os nossos EPIs são testados e em rigorosa conformidade com as normas internacionais de segurança do trabalho (EN, ISO, ANSI e OSHA).',
+        'Todos os nossos produtos e equipamentos cumprem rigorosas normas de qualidade e segurança para proteção profissional e operacional.',
       tag: 'Certificação Garantida',
       color: 'amber',
     },
@@ -27,7 +27,7 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
       icon: Users,
       title: 'Atendimento Profissional',
       description:
-        'Consultoria técnica especializada para ajudar a sua empresa a selecionar o equipamento adequado para cada risco e função.',
+        'Consultoria técnica especializada para ajudar a sua empresa a selecionar o equipamento adequado para cada necessidade e função.',
       tag: 'Consultoria Especializada',
       color: 'blue',
     },
@@ -35,7 +35,7 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
       icon: ShieldCheck,
       title: 'Segurança em Primeiro Lugar',
       description:
-        'Compromisso absoluto com a vida e integridade física de cada trabalhador, em pequenas obras ou em grandes complexos industriais.',
+        'Compromisso absoluto com a segurança, proteção e integridade de cada profissional e operação em Moçambique.',
       tag: 'Missão Central',
       color: 'emerald',
     },
@@ -52,14 +52,14 @@ export const WhyChooseUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpen
       title: 'Atendimento para Empresas',
       description:
         'Cotações formais detalhadas, faturação com NUIT, condições especiais de fornecimento contínuo e descontos progressivos por atacado.',
-      tag: 'B2B & Construtoras',
+      tag: 'Empresas & Instituições',
       color: 'blue',
     },
     {
       icon: MessageSquare,
       title: 'Compra Fácil pelo WhatsApp',
       description:
-        `Sem burocracias: monte o seu carrinho, envie a sua lista de EPIs e receba atendimento imediato no telemóvel (${WHATSAPP_PHONE_DISPLAY}).`,
+        `Sem burocracias: monte o seu carrinho, envie a sua lista de produtos e receba atendimento imediato no telemóvel (${WHATSAPP_PHONE_DISPLAY}).`,
       tag: 'Sem Burocracia',
       color: 'emerald',
     },

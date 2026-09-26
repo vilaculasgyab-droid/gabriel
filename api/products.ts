@@ -89,6 +89,39 @@ function mapDbRowToProduct(row: any) {
   };
 }
 
+function mapProductToDbRow(product: any): Record<string, any> {
+  const stock = Number(product.stockCount ?? product.stock ?? 25);
+  const inStock = product.inStock !== undefined ? Boolean(product.inStock) : stock > 0;
+
+  return {
+    id: String(product.id),
+    name: String(product.name || ''),
+    category_id: String(product.categoryId || product.category_id || 'fardamento-seguranca'),
+    category_name: String(product.categoryName || product.category_name || 'Fardamento de Segurança'),
+    subcategory: String(product.subcategory || 'Geral'),
+    price: Number(product.price || 0),
+    original_price: product.originalPrice != null ? Number(product.originalPrice) : (product.original_price != null ? Number(product.original_price) : null),
+    image: String(product.image || ''),
+    additional_images: Array.isArray(product.additionalImages) ? product.additionalImages : (Array.isArray(product.additional_images) ? product.additional_images : []),
+    badge: product.badge ? String(product.badge) : null,
+    norm: product.norm ? String(product.norm) : null,
+    short_description: String(product.shortDescription || product.short_description || product.name || ''),
+    description: String(product.description || product.shortDescription || product.short_description || product.name || ''),
+    specifications: Array.isArray(product.specifications) ? product.specifications : [],
+    applications: Array.isArray(product.applications) ? product.applications : [],
+    in_stock: inStock,
+    stock_count: stock,
+    stock: stock,
+    featured: Boolean(product.featured),
+    available_sizes: Array.isArray(product.availableSizes) ? product.availableSizes : (Array.isArray(product.available_sizes) ? product.available_sizes : []),
+    available_colors: Array.isArray(product.availableColors) ? product.availableColors : (Array.isArray(product.available_colors) ? product.available_colors : []),
+    rating: Number(product.rating ?? 5.0),
+    reviews_count: Number(product.reviewsCount ?? product.reviews_count ?? 1),
+    created_at: product.createdAt || product.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
 function extractProductId(req: any, body: any): string | undefined {
   if (req.query?.id && typeof req.query.id === 'string' && req.query.id.trim()) {
     return req.query.id.trim();
@@ -254,8 +287,145 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    // Método não suportado no GET
-    res.setHeader('Allow', ['GET', 'OPTIONS']);
+    // ----------------------------------------------------
+    // POST /api/products (Criação de Produto)
+    // ----------------------------------------------------
+    if (req.method === 'POST') {
+      const productData = body;
+      const price = Number(productData?.price);
+      if (!productData || !productData.name || isNaN(price) || price <= 0) {
+        return sendResponse(res, 400, {
+          success: false,
+          error: 'Nome e preço válido superior a zero são obrigatórios.',
+        });
+      }
+
+      const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+      const stock = Number(productData.stockCount ?? productData.stock ?? 25);
+      const inStock = productData.inStock !== undefined ? Boolean(productData.inStock) : stock > 0;
+      const now = new Date().toISOString();
+
+      const newProduct = {
+        ...productData,
+        id,
+        price,
+        inStock,
+        stockCount: stock,
+        stock,
+        rating: Number(productData.rating || 5.0),
+        reviewsCount: Number(productData.reviewsCount || 1),
+        createdAt: productData.createdAt || now,
+        updatedAt: now,
+      };
+
+      const row = mapProductToDbRow(newProduct);
+      const { data, error } = await supabase
+        .from('products')
+        .upsert(row, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[API PRODUCTS] Erro ao gravar produto no Supabase:', error.message);
+        return sendResponse(res, 500, {
+          success: false,
+          error: error.message,
+          code: error.code,
+        });
+      }
+
+      return sendResponse(res, 201, {
+        success: true,
+        source: 'supabase',
+        product: data ? mapDbRowToProduct(data) : newProduct,
+        message: 'Produto criado com sucesso no Supabase.',
+      });
+    }
+
+    // ----------------------------------------------------
+    // PUT / PATCH /api/products/:id (Atualização de Produto)
+    // ----------------------------------------------------
+    if (req.method === 'PUT' || req.method === 'PATCH') {
+      const updateId = targetId || body?.id;
+      if (!updateId) {
+        return sendResponse(res, 400, {
+          success: false,
+          error: 'ID do produto não informado.',
+        });
+      }
+
+      const { data: existing } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', updateId)
+        .maybeSingle();
+
+      const base = existing ? mapDbRowToProduct(existing) : {};
+      const updatedProduct = {
+        ...base,
+        ...body,
+        id: updateId,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const row = mapProductToDbRow(updatedProduct);
+      const { data, error } = await supabase
+        .from('products')
+        .upsert(row, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[API PRODUCTS] Erro ao atualizar produto no Supabase:', error.message);
+        return sendResponse(res, 500, {
+          success: false,
+          error: error.message,
+          code: error.code,
+        });
+      }
+
+      return sendResponse(res, 200, {
+        success: true,
+        source: 'supabase',
+        product: data ? mapDbRowToProduct(data) : updatedProduct,
+        message: 'Produto atualizado com sucesso no Supabase.',
+      });
+    }
+
+    // ----------------------------------------------------
+    // DELETE /api/products/:id (Eliminação de Produto)
+    // ----------------------------------------------------
+    if (req.method === 'DELETE') {
+      const deleteId = targetId || body?.id;
+      if (!deleteId) {
+        return sendResponse(res, 400, {
+          success: false,
+          error: 'ID do produto não informado.',
+        });
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', deleteId);
+
+      if (error) {
+        console.error('[API PRODUCTS] Erro ao eliminar produto no Supabase:', error.message);
+        return sendResponse(res, 500, {
+          success: false,
+          error: error.message,
+          code: error.code,
+        });
+      }
+
+      return sendResponse(res, 200, {
+        success: true,
+        message: 'Produto eliminado com sucesso do Supabase.',
+      });
+    }
+
+    // Método não suportado
+    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
     return sendResponse(res, 405, {
       success: false,
       error: `Método ${req.method} não suportado neste endpoint.`,

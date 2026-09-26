@@ -32,6 +32,7 @@ function notifyListeners() {
 let inMemoryProducts: Product[] | null = null;
 let inMemoryOrders: Order[] | null = null;
 let isSyncingProducts = false;
+let activeProductSyncPromise: Promise<boolean> | null = null;
 let isSyncingOrders = false;
 let hasLoadedFromSupabase = false;
 let lastProductSyncTimestamp = 0;
@@ -72,102 +73,111 @@ export const storeDb = {
    */
   async syncWithServer(force = false): Promise<boolean> {
     const now = Date.now();
-    if (isSyncingProducts || (!force && now - lastProductSyncTimestamp < 1500)) {
-      return false;
+    if (activeProductSyncPromise) {
+      return activeProductSyncPromise;
+    }
+    if (!force && now - lastProductSyncTimestamp < 1500) {
+      return true;
     }
 
-    isSyncingProducts = true;
-    try {
-      // 1. Consulta direta ao Supabase Client se configurado no frontend
-      if (isSupabaseConfigured()) {
-        const client = getSupabaseClient();
-        if (client) {
-          try {
-            const { data, error } = await client
-              .from('products')
-              .select('*')
-              .order('id', { ascending: true });
+    const runSync = async (): Promise<boolean> => {
+      isSyncingProducts = true;
+      try {
+        // 1. Consulta direta ao Supabase Client se configurado no frontend
+        if (isSupabaseConfigured()) {
+          const client = getSupabaseClient();
+          if (client) {
+            try {
+              const { data, error } = await client
+                .from('products')
+                .select('*')
+                .order('id', { ascending: true });
 
-            if (error) {
-              lastSupabaseError = error.message;
-              console.warn('[storeDb] Supabase DB retornou erro na consulta direta:', error.message);
-            } else if (Array.isArray(data)) {
-              const mapped = data.map(mapDbRowToProduct);
-              inMemoryProducts = mapped;
-              hasLoadedFromSupabase = true;
-              lastProductSyncSource = 'supabase_direct';
-              lastSupabaseError = null;
-              try {
-                localStorage.setItem(PRODUCTS_KEY, JSON.stringify(mapped));
-              } catch {}
-              notifyListeners();
-              lastProductSyncTimestamp = Date.now();
-              return true;
+              if (error) {
+                lastSupabaseError = error.message;
+                console.warn('[storeDb] Supabase DB retornou erro na consulta direta:', error.message);
+              } else if (Array.isArray(data)) {
+                const mapped = data.map(mapDbRowToProduct);
+                inMemoryProducts = mapped;
+                hasLoadedFromSupabase = true;
+                lastProductSyncSource = 'supabase_direct';
+                lastSupabaseError = null;
+                try {
+                  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(mapped));
+                } catch {}
+                notifyListeners();
+                lastProductSyncTimestamp = Date.now();
+                return true;
+              }
+            } catch (supaErr: any) {
+              lastSupabaseError = supaErr?.message || String(supaErr);
+              console.warn('[storeDb] Consulta direta falhou, tentando API do servidor:', supaErr);
             }
-          } catch (supaErr: any) {
-            lastSupabaseError = supaErr?.message || String(supaErr);
-            console.warn('[storeDb] Consulta direta falhou, tentando API do servidor:', supaErr);
           }
         }
-      }
 
-      // 2. Consulta via API do servidor (/api/products com cabeçalhos no-cache estritos)
-      const res = await fetch(`/api/products?_t=${now}`, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
-      });
+        // 2. Consulta via API do servidor (/api/products com cabeçalhos no-cache estritos)
+        const res = await fetch(`/api/products?_t=${now}`, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        const remoteProducts: Product[] | null = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.products)
-          ? data.products
-          : null;
+        if (res.ok) {
+          const data = await res.json();
+          const remoteProducts: Product[] | null = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.products)
+            ? data.products
+            : null;
 
-        if (remoteProducts !== null) {
-          inMemoryProducts = remoteProducts;
-          hasLoadedFromSupabase = true;
-          lastProductSyncSource = 'server_api';
-          lastSupabaseError = null;
-          try {
-            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
-          } catch (e) {
-            console.warn('Falha ao guardar cache temporário:', e);
+          if (remoteProducts !== null) {
+            inMemoryProducts = remoteProducts;
+            hasLoadedFromSupabase = true;
+            lastProductSyncSource = 'server_api';
+            lastSupabaseError = null;
+            try {
+              localStorage.setItem(PRODUCTS_KEY, JSON.stringify(remoteProducts));
+            } catch (e) {
+              console.warn('Falha ao guardar cache temporário:', e);
+            }
+            notifyListeners();
+            lastProductSyncTimestamp = Date.now();
+            return true;
+          } else {
+            lastSupabaseError = data?.error || 'Formato de resposta inesperado da API.';
           }
-          notifyListeners();
-          lastProductSyncTimestamp = Date.now();
-          return true;
         } else {
-          lastSupabaseError = data?.error || 'Formato de resposta inesperado da API.';
-        }
-      } else {
-        try {
-          const errData = await res.json();
-          const mainError = typeof errData?.error === 'string' ? errData.error : (errData?.error?.message || errData?.message);
-          const hint = errData?.hint || errData?.error?.hint;
-          const details = errData?.details || errData?.error?.details;
-          const code = errData?.code || errData?.error?.code;
+          try {
+            const errData = await res.json();
+            const mainError = typeof errData?.error === 'string' ? errData.error : (errData?.error?.message || errData?.message);
+            const hint = errData?.hint || errData?.error?.hint;
+            const details = errData?.details || errData?.error?.details;
+            const code = errData?.code || errData?.error?.code;
 
-          let formatted = mainError || `Erro HTTP ${res.status} ao consultar Supabase.`;
-          if (code) formatted += ` [Código: ${code}]`;
-          if (details && details !== mainError) formatted += ` - ${details}`;
-          if (hint) formatted += ` (${hint})`;
+            let formatted = mainError || `Erro HTTP ${res.status} ao consultar Supabase.`;
+            if (code) formatted += ` [Código: ${code}]`;
+            if (details && details !== mainError) formatted += ` - ${details}`;
+            if (hint) formatted += ` (${hint})`;
 
-          lastSupabaseError = formatted;
-        } catch {
-          lastSupabaseError = `Erro HTTP ${res.status} ao consultar Supabase.`;
+            lastSupabaseError = formatted;
+          } catch {
+            lastSupabaseError = `Erro HTTP ${res.status} ao consultar Supabase.`;
+          }
         }
+      } catch (err: any) {
+        lastSupabaseError = err?.message || 'Servidor remoto não alcançado.';
+        console.warn('[storeDb] Erro ao sincronizar com Supabase:', err);
+      } finally {
+        isSyncingProducts = false;
+        activeProductSyncPromise = null;
       }
-    } catch (err: any) {
-      lastSupabaseError = err?.message || 'Servidor remoto não alcançado.';
-      console.warn('[storeDb] Erro ao sincronizar com Supabase:', err);
-    } finally {
-      isSyncingProducts = false;
-    }
-    return false;
+      return false;
+    };
+
+    activeProductSyncPromise = runSync();
+    return activeProductSyncPromise;
   },
 
   /**

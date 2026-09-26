@@ -64,7 +64,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
     {
       icon: Pickaxe,
       name: 'Mineração & Pedreiras',
-      desc: 'EPIs para ambiente de trabalho severo, botas impermeabilizadas S3, proteção facial e filtros especiais de respiração.',
+      desc: 'Equipamentos de alta resistência mecânica, botas impermeabilizadas S3, proteção facial e filtros especiais de respiração.',
     },
     {
       icon: Fuel,
@@ -154,7 +154,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
             </div>
             <h2 className="text-lg font-bold text-slate-900 mb-2">Nossa Missão</h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Proteger a vida e a integridade física dos trabalhadores em Moçambique, fornecendo EPIs de padrão internacional, com durabilidade, conforto e pontualidade na entrega.
+              Proteger a vida e a segurança dos profissionais em Moçambique, fornecendo produtos e soluções de segurança de padrão internacional, com durabilidade, qualidade e pontualidade na entrega.
             </p>
           </div>
 
@@ -235,7 +235,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenQuoteMod
                   <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
                     <div className="text-3xl font-black text-amber-400">100%</div>
                     <div className="text-[11px] text-slate-300 font-semibold mt-1">
-                      EPIs Homologados
+                      Produtos Certificados
                     </div>
                   </div>
                   <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700">

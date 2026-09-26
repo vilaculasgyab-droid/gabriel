@@ -158,7 +158,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
                   }}
                   className="hover:text-amber-400 transition-colors text-left cursor-pointer block"
                 >
-                  Categorias de EPIs
+                  Categorias de Produtos
                 </a>
               </li>
               <li>
@@ -217,7 +217,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCategory, onOpenQuoteMod
           {/* Col 3: Categories Links (3 cols) */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-extrabold uppercase tracking-wider text-white">
-              Categorias de EPI
+              Categorias de Segurança
             </h4>
             <ul className="grid grid-cols-1 gap-1.5 text-xs">
               {CATEGORIES.map((cat) => (

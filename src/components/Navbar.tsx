@@ -228,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {categoriesDropdownOpen && (
                   <div className="absolute top-full left-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider px-3 py-1.5 border-b border-slate-800">
-                      Categorias de EPIs
+                      Categorias de Produtos
                     </div>
                     <div className="max-h-80 overflow-y-auto py-1 space-y-0.5">
                       <a
@@ -332,7 +332,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Pesquisar capacetes, luvas, botas..."
+                  placeholder="Pesquisar produtos, categorias ou equipamentos..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
@@ -400,7 +400,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 id="navbar-quote-button"
               >
                 <Building2 className="w-3.5 h-3.5" />
-                <span>Cotação para Obras</span>
+                <span>Cotação para Empresas</span>
               </button>
 
               {/* Mobile menu toggle */}
@@ -421,7 +421,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Pesquisar capacetes, luvas, botas..."
+                placeholder="Pesquisar produtos, categorias ou equipamentos..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="w-full bg-slate-800 text-slate-100 text-xs pl-10 pr-8 py-2.5 rounded-xl border border-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-amber-400"

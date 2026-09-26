@@ -90,27 +90,33 @@ export async function handleCreateProduct(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   try {
     const productData: Product = req.body;
-    if (!productData || !productData.name || !productData.price) {
-      return res.status(400).json({ success: false, error: 'Nome e preço são obrigatórios.' });
+    const price = Number(productData?.price);
+    if (!productData || !productData.name || isNaN(price) || price <= 0) {
+      return res.status(400).json({ success: false, error: 'Nome e preço válido superior a zero são obrigatórios.' });
     }
 
-    const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
+    const id = productData.id || 'prod-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+    const stock = Number(productData.stockCount ?? productData.stock ?? 25);
+    const inStock = productData.inStock !== undefined ? Boolean(productData.inStock) : stock > 0;
     const now = new Date().toISOString();
+
     const newProduct: Product = {
       ...productData,
       id,
-      inStock: productData.inStock ?? (productData.stockCount !== undefined ? productData.stockCount > 0 : true),
-      stockCount: productData.stockCount ?? 25,
-      stock: productData.stockCount ?? 25,
-      rating: productData.rating || 5.0,
-      reviewsCount: productData.reviewsCount || 1,
-      createdAt: now,
+      price,
+      inStock,
+      stockCount: stock,
+      stock,
+      rating: Number(productData.rating || 5.0),
+      reviewsCount: Number(productData.reviewsCount || 1),
+      createdAt: productData.createdAt || now,
       updatedAt: now,
     };
 
     if (isSupabaseServerConfigured()) {
       const supaResult = await upsertProductInSupabaseDetailed(newProduct);
       if (!supaResult.success) {
+        console.error('[API /api/products POST] Erro ao gravar produto no Supabase:', supaResult.error);
         return res.status(500).json({
           success: false,
           error: `Erro ao gravar produto no Supabase: ${supaResult.error}`,
@@ -139,7 +145,7 @@ export async function handleCreateProduct(req: Request, res: Response) {
 export async function handleGetProductById(req: Request, res: Response) {
   setApiNoCacheHeaders(res);
   try {
-    const id = (req.params?.id || (req.query?.id as string)) as string;
+    const id = (req.params?.id || (req.query?.id as string) || req.body?.id) as string;
     if (!id) {
       return res.status(400).json({ success: false, error: 'ID do produto não informado.' });
     }
@@ -177,14 +183,30 @@ export async function handleUpdateProduct(req: Request, res: Response) {
       // Obter dados base existentes para merge seguro
       const currentSupabase = await fetchProductByIdFromSupabase(id);
       const baseProduct = currentSupabase || getStoredProducts().find((p) => p.id === id);
-      if (!baseProduct) {
-        return res.status(404).json({ success: false, error: `Produto com ID ${id} não encontrado.` });
-      }
 
-      const mergedProduct: Product = {
+      const mergedProduct: Product = baseProduct ? {
         ...baseProduct,
         ...updates,
         id,
+        updatedAt: new Date().toISOString(),
+      } : {
+        id,
+        name: updates?.name || 'Produto',
+        categoryId: updates?.categoryId || 'fardamento-seguranca',
+        categoryName: updates?.categoryName || 'Fardamento de Segurança',
+        subcategory: updates?.subcategory || 'Geral',
+        price: Number(updates?.price || 0),
+        shortDescription: updates?.shortDescription || updates?.name || '',
+        description: updates?.description || updates?.shortDescription || updates?.name || '',
+        image: updates?.image || '',
+        inStock: updates?.inStock !== undefined ? Boolean(updates.inStock) : true,
+        stockCount: Number(updates?.stockCount || updates?.stock || 25),
+        stock: Number(updates?.stockCount || updates?.stock || 25),
+        rating: Number(updates?.rating || 5.0),
+        reviewsCount: Number(updates?.reviewsCount || 1),
+        specifications: updates?.specifications || [],
+        applications: updates?.applications || [],
+        ...updates,
         updatedAt: new Date().toISOString(),
       };
 

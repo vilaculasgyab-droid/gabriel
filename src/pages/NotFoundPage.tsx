@@ -75,7 +75,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
 
         <p className="text-base sm:text-lg text-slate-600 max-w-xl mx-auto mb-8 leading-relaxed">
           O endereço que procurou não existe, foi movido ou está temporariamente indisponível. 
-          Use a pesquisa abaixo ou navegue pelo nosso catálogo de EPIs para encontrar o equipamento de segurança ideal.
+          Use a pesquisa abaixo ou navegue pelo nosso catálogo para encontrar o produto ou equipamento de segurança ideal.
         </p>
 
         {/* Search Bar */}
@@ -86,7 +86,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Pesquisar capacetes, luvas, botas, óculos..."
+              placeholder="Pesquisar produtos, categorias ou equipamentos..."
               className="w-full pl-12 pr-28 py-3.5 bg-white border border-slate-300 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm font-medium transition-shadow"
             />
             <button

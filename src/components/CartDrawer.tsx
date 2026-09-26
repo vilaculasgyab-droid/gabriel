@@ -82,7 +82,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <h4 className="text-base font-bold text-slate-800 mb-1">O seu carrinho está vazio</h4>
                 <p className="text-xs text-slate-500 max-w-xs mb-6">
-                  Navegue pelo nosso catálogo de EPIs e adicione os equipamentos de segurança que você precisa.
+                  Navegue pelo nosso catálogo e adicione os produtos e soluções de segurança que você precisa.
                 </p>
                 <button
                   onClick={onClose}

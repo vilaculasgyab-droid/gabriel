@@ -25,6 +25,11 @@ import {
   handleAdminLogout,
   handleAdminChangePassword,
   handleAdminUpdateProfile,
+  handleGetProducts,
+  handleCreateProduct,
+  handleGetProductById,
+  handleUpdateProduct,
+  handleDeleteProduct,
 } from './server/apiHandlers';
 import productsHandler from './api/products';
 
@@ -74,14 +79,14 @@ async function startServer() {
   // 1. API ROUTES (FIRST)
   // ----------------------------------------------------
   app.get('/api/health', handleHealthCheck);
-  app.all('/api/products', (req, res) => productsHandler(req, res));
-  app.all('/api/products/:id', (req, res) => {
-    if (!req.query) req.query = {};
-    if (!req.query.id && req.params?.id) {
-      req.query.id = req.params.id;
-    }
-    return productsHandler(req, res);
-  });
+  app.get('/api/products', handleGetProducts);
+  app.post('/api/products', handleCreateProduct);
+  app.get('/api/products/:id', handleGetProductById);
+  app.put('/api/products/:id', handleUpdateProduct);
+  app.patch('/api/products/:id', handleUpdateProduct);
+  app.delete('/api/products/:id', handleDeleteProduct);
+  app.put('/api/products', handleUpdateProduct);
+  app.delete('/api/products', handleDeleteProduct);
   app.post('/api/upload-image', handleUploadImage);
   app.get('/api/orders', handleGetOrders);
   app.post('/api/orders', handleCreateOrder);

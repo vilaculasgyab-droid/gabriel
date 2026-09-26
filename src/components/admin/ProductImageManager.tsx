@@ -238,7 +238,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         <div className="flex items-center gap-2">
           <ImageIcon className="w-4 h-4 text-amber-400" />
           <label className="text-xs sm:text-sm font-bold text-slate-200">
-            Fotografia / Imagem do EPI
+            Fotografia / Imagem do Produto
           </label>
         </div>
         <span className="text-[11px] text-slate-400">
@@ -303,7 +303,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
             <div className="relative w-full h-44 rounded-xl bg-white p-2 border border-slate-700 flex items-center justify-center overflow-hidden shadow-inner group">
               <img
                 src={previewError ? DEFAULT_EPI_PLACEHOLDER : displayImage}
-                alt={productName || 'EPI'}
+                alt={productName || 'Produto'}
                 className={`max-h-full max-w-full object-contain transition-transform duration-300 ${
                   isRemoved ? 'opacity-40 grayscale' : 'group-hover:scale-105'
                 }`}
@@ -534,7 +534,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
             {/* Presets Gallery */}
             <div>
               <div className="text-[11px] font-bold text-slate-400 mb-1.5">
-                Ou selecionar uma imagem da galeria padrão de EPIs:
+                Ou selecionar uma imagem da galeria padrão:
               </div>
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
                 {presetImages.map((img, idx) => (

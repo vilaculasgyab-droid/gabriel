@@ -187,10 +187,12 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         if (searchQuery.trim()) {
           const query = searchQuery.toLowerCase();
           const matchesName = product.name.toLowerCase().includes(query);
-          const matchesDesc = product.shortDescription.toLowerCase().includes(query);
-          const matchesSub = product.subcategory.toLowerCase().includes(query);
+          const matchesDesc = (product.shortDescription || '').toLowerCase().includes(query);
+          const matchesLongDesc = (product.description || '').toLowerCase().includes(query);
+          const matchesSub = (product.subcategory || '').toLowerCase().includes(query);
+          const matchesCat = (product.categoryName || '').toLowerCase().includes(query) || (product.categoryId || '').toLowerCase().includes(query);
           const matchesNorm = product.norm?.toLowerCase().includes(query);
-          return matchesName || matchesDesc || matchesSub || matchesNorm;
+          return matchesName || matchesDesc || matchesLongDesc || matchesSub || matchesCat || matchesNorm;
         }
 
         return true;

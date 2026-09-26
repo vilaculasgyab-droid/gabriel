@@ -63,7 +63,7 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
       badge: 'Conformidade Legal',
       title: 'Equipamentos Certificados',
       description:
-        'Todos os nossos EPIs cumprem integralmente as exigências regulatórias internacionais (EN, ANSI, ISO e OSHA), garantindo a proteção jurídica e a segurança operacional da sua empresa.',
+        'Todos os nossos produtos e equipamentos cumprem integralmente as exigências regulatórias internacionais (EN, ANSI, ISO e OSHA), garantindo a proteção jurídica e a segurança operacional da sua empresa.',
       highlights: [
         'Homologação segundo normas EN e ANSI',
         'Fichas técnicas e certificados disponíveis',
@@ -76,7 +76,7 @@ export const AdvantagesPage: React.FC<AdvantagesPageProps> = ({ onNavigate, onOp
       badge: 'Consultoria Especializada',
       title: 'Atendimento Profissional',
       description:
-        'Nossa equipa conta com profissionais experientes prontos para orientar a escolha do EPI ideal para cada função, evitando compras inadequadas e otimizando o orçamento de proteção da sua equipa.',
+        'Nossa equipa conta com profissionais experientes prontos para orientar a escolha do equipamento ideal para cada função, evitando compras inadequadas e otimizando o orçamento de proteção da sua equipa.',
       highlights: [
         'Apoio técnico para gestores de HST',
         'Recomendação por matriz de riscos',

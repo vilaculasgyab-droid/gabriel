@@ -30,7 +30,7 @@ export const AboutUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpenQuot
     {
       icon: Pickaxe,
       name: 'Mineração & Pedreiras',
-      desc: 'EPIs de alta resistência mecânica, botas hidrofugadas S3, proteção ocular e respiradores especiais.',
+      desc: 'Equipamentos de alta resistência mecânica, botas hidrofugadas S3, proteção ocular e respiradores especiais.',
     },
     {
       icon: Fuel,
@@ -150,7 +150,7 @@ export const AboutUs: React.FC<{ onOpenQuoteModal: () => void }> = ({ onOpenQuot
               Setores e Áreas que Atendemos
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              Soluções personalizadas de EPI para as exigências específicas de cada segmento económico.
+              Soluções completas e personalizadas de segurança e proteção para as exigências específicas de cada segmento.
             </p>
           </div>
 

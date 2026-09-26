@@ -28,13 +28,13 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full mb-2">
               <Layers className="w-3.5 h-3.5" />
-              <span>Gama Completa de EPIs</span>
+              <span>Gama Completa de Segurança</span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
               Categorias em Destaque
             </h2>
             <p className="text-sm sm:text-base text-slate-600 mt-2 max-w-2xl">
-              Equipamentos certificados para todas as áreas de risco ocupacional. Selecione uma categoria para visualizar os produtos disponíveis.
+              Fardamentos, acessórios, botas, equipamentos antimotim e soluções electrónicas para segurança e proteção profissional.
             </p>
           </div>
 

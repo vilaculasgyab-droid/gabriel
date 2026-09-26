@@ -229,7 +229,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
 
     try {
       const catObj = CATEGORIES.find((c) => c.id === formData.categoryId);
-      const categoryName = catObj ? catObj.name : 'Equipamento EPI';
+      const categoryName = catObj ? catObj.name : 'Equipamento de Segurança';
 
       const sizesArr = formData.sizes.split(',').map((s) => s.trim()).filter(Boolean);
       const colorsArr = formData.colors.split(',').map((c) => c.trim()).filter(Boolean);
@@ -315,9 +315,9 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
         });
 
         if (imageChanged) {
-          showToast('Imagem e dados do produto atualizados com sucesso no Supabase!');
+          showToast('Imagem e dados do produto atualizados com sucesso!');
         } else {
-          showToast(`Produto "${formData.name}" atualizado com sucesso no Supabase!`);
+          showToast(`Produto "${formData.name}" atualizado com sucesso!`);
         }
         setEditingProduct(null);
       } else {
@@ -326,7 +326,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
           name: formData.name.trim(),
           categoryId: formData.categoryId,
           categoryName,
-          subcategory: formData.subcategory.trim() || 'Equipamento de Proteção',
+          subcategory: formData.subcategory.trim() || 'Equipamentos de Segurança',
           price: Number(formData.price),
           originalPrice: origPriceNum,
           image: finalImage || PRESET_IMAGES[0].url,
@@ -345,11 +345,32 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
             { label: 'Material', value: 'Industrial de Alta Resistência' },
             { label: 'Garantia', value: 'Certificado de Origem' },
           ],
-          applications: ['Construção Civil', 'Indústria', 'Mineração', 'Logística'],
+          applications: ['Empresas de Segurança', 'Vigilância Privada', 'Operações Táticas', 'Instituições e Indústria'],
           rating: 5.0,
           reviewsCount: 1,
         });
-        showToast(`Produto "${formData.name}" adicionado e salvo com sucesso no Supabase!`);
+
+        // 6. Limpar o formulário
+        setFormData({
+          name: '',
+          categoryId: CATEGORIES[0].id,
+          subcategory: 'Equipamentos de Segurança',
+          price: 500,
+          originalPrice: '',
+          image: PRESET_IMAGES[0].url,
+          norm: 'EN 397 / ISO',
+          badge: 'Novo',
+          shortDescription: '',
+          description: '',
+          stockCount: 25,
+          inStock: true,
+          featured: false,
+          sizes: 'M, L, XL',
+          colors: '',
+        });
+
+        // 7. Mostrar mensagem clara: "Produto criado com sucesso."
+        showToast('Produto criado com sucesso.');
         setIsAddModalOpen(false);
       }
 
@@ -360,7 +381,12 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
       onProductChanged?.();
     } catch (err: any) {
       console.error('Falha ao salvar produto:', err);
-      showToast(`Erro no Supabase: ${getSafeErrorMessage(err, 'Falha na gravação.')}`);
+      const isCreating = !editingProduct;
+      if (isCreating) {
+        showToast('Não foi possível criar o produto. Verifique os dados e tente novamente.');
+      } else {
+        showToast(`Não foi possível atualizar o produto. ${getSafeErrorMessage(err, 'Verifique os dados e tente novamente.')}`);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -436,7 +462,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
             Gestão de Produtos & Stock
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Adicione novos EPIs, edite especificações, altere preços em Meticais e controle a quantidade em stock.
+            Adicione novos produtos, edite especificações, altere preços em Meticais e controle a quantidade em stock.
           </p>
         </div>
 
@@ -745,7 +771,7 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({ onProductChanged, 
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">
-                    {editingProduct ? 'Editar Produto de EPI' : 'Adicionar Novo Produto de EPI'}
+                    {editingProduct ? 'Editar Produto' : 'Adicionar Novo Produto'}
                   </h3>
                   <p className="text-xs text-slate-400">
                     Preencha os dados e especificações para exibição no catálogo

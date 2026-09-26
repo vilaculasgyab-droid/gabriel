@@ -298,7 +298,7 @@ export const AdminCustomers: React.FC<AdminCustomersProps> = ({ onViewOrderDetai
               {/* Stats Bar */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                  <div className="text-[11px] text-slate-400 font-bold uppercase">Total Investido em EPIs</div>
+                  <div className="text-[11px] text-slate-400 font-bold uppercase">Total em Compras</div>
                   <div className="text-xl font-black text-white mt-1">
                     {formatCurrency(selectedCustomer.totalSpent)}
                   </div>

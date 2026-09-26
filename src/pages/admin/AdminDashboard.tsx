@@ -128,7 +128,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             Resumo Geral das Operações
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Acompanhe pedidos em tempo real, fluxo de receita, disponibilidade de stock e encomendas de EPIs.
+            Acompanhe pedidos em tempo real, fluxo de receita, disponibilidade de stock e encomendas.
           </p>
         </div>
 
@@ -390,7 +390,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                   <div>
                     <div className="text-xs font-bold text-white group-hover:text-amber-400">
-                      Atualizar Stock de EPIs
+                      Atualizar Stock de Produtos
                     </div>
                     <div className="text-[11px] text-slate-400">
                       Modificar quantidades e preços

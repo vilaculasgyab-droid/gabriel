@@ -228,7 +228,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
               <span>Z FORÇA v1.0</span>
             </div>
-            <div>Gestão de EPIs e Cotações</div>
+            <div>Gestão de Produtos e Cotações</div>
           </div>
         </aside>
 
